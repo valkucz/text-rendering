@@ -1,10 +1,10 @@
 # Bezier curves
-## Build project
+## Installation
 ```sh
-  cd bezier-curves
-  npm install
+cd bezier-curves
+npm install
 ```
 ## Run project
 ```sh
-  npm run dev
+npm run dev
 ```
