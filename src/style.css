@@ -1,0 +1,44 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Open Sans', sans-serif;
+}
+.canvas-container{
+  display: flex;
+  justify-content: space-evenly;
+}
+.canvas-controller{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.canvas-controller div {
+  width: 200px;
+}
+button { 
+  display: inline;
+  height: 50px;
+  width: 200px;
+  background-color: white;
+  
+}
+button:enabled{
+  cursor: pointer;
+}
+button:enabled:hover{
+  background-color: rgb(226, 225, 225);
+
+}
+button:enabled:active{
+  transform: translateY(4px);
+}
+#canvas {
+  margin: 0;
+  width: 1000px;
+  height: 550px;
+  border: solid 1px black;
+  background-color: #ffffff;
+  cursor: crosshair;
+}

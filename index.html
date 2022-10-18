@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+  </head>
+  <body>
+    <script type="module" src="/src/main.ts"></script>
+    <h1 style="text-align: center; position: auto; margin: 20px 10px 10px 20px;">Bezier curves</h1>
+    <div class="canvas-container">
+        <div class="canvas-controller" >
+            <div>
+                <h2>Line segments</h2>
+                <input type="range" min="1" max="17" value="17" class="slider" id="slider">
+                <p>Value: <span id="sliderValue"></span></p>
+            </div>
+            <div>
+                <h2>Points: <span id="pointsValue"></span></h2>
+            </div>
+            <button id="drawBtn">Draw curve</button>
+            <button id="deleteBtn"> Delete </button>
+        </div>
+        <div>
+
+            <canvas id="canvas">
+            </canvas>
+        </div> 
+    </div>
+  </body>
+</html>
