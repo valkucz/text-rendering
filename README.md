@@ -2,6 +2,8 @@
 ## Installation
 ```sh
 cd bezier-curves
+```
+```sh
 npm install
 ```
 ## Run project
