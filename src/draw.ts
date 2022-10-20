@@ -1,3 +1,5 @@
+import { solveDeCasteljau } from './decasteljau'
+
 export class Point {
     x: number;
     y: number;
@@ -28,4 +30,15 @@ export function drawLines(points: Point[], ctx: CanvasRenderingContext2D){
     for (let i = 0; i < points.length - 1; i++) {
         drawLine(points[i], points[i + 1], 'red', ctx);
     }
+}
+export function drawBezier(points: Point[], segments: number, ctx: CanvasRenderingContext2D){
+  let res = solveDeCasteljau(points, Number(segments) + 1);
+
+  drawLines(res, ctx);
+  
+  // FIX: define new function:
+  ctx.strokeStyle = 'black';
+
+  // drawBtn.disabled = true;
+  // canvas.style.cursor = 'not-allowed';
 }

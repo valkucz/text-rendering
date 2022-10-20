@@ -1,133 +1,166 @@
 import './style.css'
-import { Point, drawLines, getCanvasPoint } from './draw'
-import { solveDeCasteljau } from './decasteljau'
-import { Typr } from './Typr';
-// canvas & context setup
-const canvas = <HTMLCanvasElement>document.getElementById('canvas');
+import { Point, drawBezier, getCanvasPoint } from './draw'
+import { parseText } from './fonts'
+
+class PointsController{
+  points: Point[] = [];
+  pointsDisplay: HTMLElement;
+  constructor(pointsDisplay: HTMLElement){
+    this.pointsDisplay = pointsDisplay;
+  }
+
+  addPoint(point: Point){
+    this.points.push(point);
+    this.updateDisplayedPoints();
+  }
+  updateDisplayedPoints(){
+    this.pointsDisplay.innerHTML = this.points.length.toString();
+  }
+  clear(){
+    this.points = [];
+    this.updateDisplayedPoints();
+  }
+  isEmpty(){
+    return this.points.length == 0;
+  }
+}
+
+class SliderController{
+  slider: HTMLElement;
+  sliderValueDisplay: HTMLElement;
+  constructor(slider: HTMLElement, sliderValueDisplay: HTMLElement){
+    this.slider = slider;
+    this.sliderValueDisplay = sliderValueDisplay;
+
+    this.updateDisplayValue();
+  }
+  updateDisplayValue(){
+    // FIX: ts error
+    this.sliderValueDisplay.innerHTML = this.slider.value;
+  }
+  getSegments(){
+    return Number(this.sliderValueDisplay.innerHTML);
+  }
+  addEventListener(){
+    this.slider.addEventListener("input", () => this.updateDisplayValue());
+  }
+  }
+
+
+class ButtonController{
+  draw: HTMLButtonElement;
+  delete: HTMLButtonElement;
+
+  constructor(draw: HTMLButtonElement, deleteBtn: HTMLButtonElement){
+    this.draw = draw;
+    this.delete = deleteBtn;
+
+    this.changeDisability();
+  }
+  changeDisability(){
+    this.draw.disabled = !this.draw.disabled;
+  }
+  addEventListener(pointsController: PointsController, canvasController: CanvasController, sliderController: SliderController){
+    drawBtn.addEventListener("click", () => drawBezier(pointsController.points, sliderController.getSegments(), canvasController.ctx));
+    deleteBtn.addEventListener("click", () => canvasController.clear(pointsController, this))
+  }
+}
+
+class CanvasController{
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D){
+    this.canvas = canvas;
+    this.ctx = ctx;
+
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+
+    this.ctx.strokeStyle = 'black';
+    this.canvas.style.cursor = 'crosshair';
+  }
+  clear(pointsController: PointsController, buttonController: ButtonController){
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    pointsController.clear();
+    buttonController.changeDisability();
+  
+  }
+
+  addEventListener(pointsController: PointsController){
+    this.canvas.addEventListener('mousedown', (e) => {
+      if (canvas.style.cursor !== 'not-allowed'){
+        let point = getCanvasPoint(e, canvas);
+        if (pointsController.isEmpty()){
+            this.ctx.beginPath();
+            this.ctx.moveTo(point.x, point.y);
+            buttonController.changeDisability();
+        }
+        else{
+            this.ctx.lineTo(point.x, point.y);
+            this.ctx.stroke();
+        }
+        this.ctx.fillRect(point.x, point.y, 5,5);
+        pointsController.addPoint(point);
+    }});
+  }
+}
+
+// create canvas controller
+var canvas = <HTMLCanvasElement>document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 if (!ctx){
+  throw new Error('Context is null or undefined');
+}
+let canvasController = new CanvasController(canvas, ctx);
+
+// create points controller
+let pointsDisplay = document.getElementById('pointsValue');
+if (!pointsDisplay){
+  throw new Error('pointsDisplay is null or undefined');
+}
+let pointsController = new PointsController(pointsDisplay);
+
+// create slider controller
+let slider = document.getElementById('slider');
+if (!slider){
+  throw new Error('Slider is null or undefined');
+}
+
+let sliderValue = document.getElementById('sliderValue');
+if (!sliderValue){
+  throw new Error('sliderValue is null or undefined');
+}
+
+let sliderController = new SliderController(slider, sliderValue);
+
+// create button controller
+let drawBtn = <HTMLButtonElement>document.getElementById("drawBtn");
+let deleteBtn = <HTMLButtonElement>document.getElementById("deleteBtn");
+if (!drawBtn || !deleteBtn){
   throw new Error('');
 }
 
-function clearCanvas(){
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+let buttonController = new ButtonController(drawBtn, deleteBtn);
 
-  points = [];
-  pointsValue.innerHTML = '0';
+// event listeners here
+sliderController.addEventListener();
+buttonController.addEventListener(pointsController, canvasController, sliderController);
+canvasController.addEventListener(pointsController);
 
-  ctx.strokeStyle = 'black';
-  canvas.style.cursor = 'crosshair';
-}
-
-
-function drawBezier(points: Point[]){
-  let segments = slider.value;
-  let res = solveDeCasteljau(points, Number(segments) + 1);
-
-  drawLines(res, ctx);
-  
-  // drawBtn.disabled = true;
-  // canvas.style.cursor = 'not-allowed';
-}
-
-function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2D){
-  let pos: number = 0;
-  let points: Point[] = [];
-  cmds.forEach(cmd => {
-    console.log(pos, crds[pos]);
-    switch(cmd){
-      case 'M':
-        ctx.moveTo(crds[pos], crds[pos + 1]);
-        pos += 2;
-        break;
-      case 'L':
-        ctx.lineTo(crds[pos], crds[pos + 1]);
-        ctx.stroke();
-        pos += 2;
-        break;
-      case 'C':
-        for(let i = pos; i < pos + 6; i +=2){
-          points.push(new Point(crds[i], crds[i + 1]));
-        }
-        drawBezier(points);
-        points = [];
-        pos += 6;
-        break;
-      case 'Q':
-        for(let i = pos; i < pos + 4; i +=2){
-          points.push(new Point(crds[i], crds[i + 1]));
-        }
-        drawBezier(points);
-        points = [];
-        pos += 4;
-        break;
-      case 'Z':
-        ctx.lineTo(crds[0], crds[1]);
-        ctx.stroke();
-        break;
-
-      default: break;
-    }
-  }
-  )
-}
-
-ctx.strokeStyle = 'black';
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// parse text here
+parseText(canvasController.ctx);
 
 
-let checkedPoints: Point[] = [];
-let pointsValue = document.getElementById('pointsValue');
-pointsValue!.innerHTML = '0';
 
-let slider = document.getElementById('slider');
-let sliderValue = document.getElementById('sliderValue');
 
-sliderValue.innerHTML = slider.value;
-slider.oninput = function(){
-  sliderValue.innerHTML = this.value;
-}
 
-let drawBtn: any = document.getElementById("drawBtn");
-drawBtn.disabled = true;
-drawBtn.addEventListener("click", () => drawBezier(checkedPoints));
-document.getElementById("deleteBtn")?.addEventListener("click",  () => clearCanvas());
 
-canvas.addEventListener('mousedown', function(e){
 
-  if (canvas.style.cursor !== 'not-allowed'){
-      let point = getCanvasPoint(e, canvas);
-      if (checkedPoints.length === 0){
-          ctx.beginPath();
-          ctx.moveTo(point.x, point.y);
-          drawBtn.disabled = false;
-      }
-      else{
-          ctx.lineTo(point.x, point.y);
-          ctx.stroke();
-      }
-      ctx.fillRect(point.x, point.y, 5,5);
-      checkedPoints.push(point);
-      pointsValue.innerHTML = checkedPoints.length.toString();
-  }
-})
 
-// parsing text
 
-const response: Response = await fetch('/MontserratAlternates-Medium.otf');
-const blob = await response.blob();
-const arrayBuffer = await blob.arrayBuffer();
-const tables = Typr.parse(arrayBuffer);
-const font = tables[0];
 
-console.log(font);
-let shape = Typr.U.shape(font, 'o', true);
-console.log(shape);
 
-let val = Typr.U.shapeToPath(font, shape);
 
-console.log(val);
-parseShape(val.cmds, val.crds, ctx);
+
 
