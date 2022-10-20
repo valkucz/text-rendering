@@ -150,17 +150,3 @@ canvasController.addEventListener(pointsController);
 
 // parse text here
 parseText(canvasController.ctx);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
