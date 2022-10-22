@@ -28,7 +28,7 @@ export function drawLine (from: Point, to: Point, color: string, ctx: CanvasRend
   
 export function drawLines(points: Point[], ctx: CanvasRenderingContext2D){
     for (let i = 0; i < points.length - 1; i++) {
-        drawLine(points[i], points[i + 1], 'red', ctx);
+        drawLine(points[i], points[i + 1], 'black', ctx);
     }
 }
 export function drawBezier(points: Point[], segments: number, ctx: CanvasRenderingContext2D){
@@ -37,7 +37,7 @@ export function drawBezier(points: Point[], segments: number, ctx: CanvasRenderi
   drawLines(res, ctx);
   
   // FIX: define new function:
-  ctx.strokeStyle = 'black';
+  // ctx.strokeStyle = 'black';
 
   // drawBtn.disabled = true;
   // canvas.style.cursor = 'not-allowed';

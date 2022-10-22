@@ -73,8 +73,17 @@ class CanvasController{
     this.canvas = canvas;
     this.ctx = ctx;
 
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+  // Get the device pixel ratio, falling back to 1.
+    var dpr = window.devicePixelRatio || 1;
+    console.log(dpr);
+    // Get the size of the canvas in CSS pixels.
+    var rect = this.canvas.getBoundingClientRect();
+    // Give the canvas pixel dimensions of their CSS
+    // size * the device pixel ratio.
+    this.canvas.width = rect.width * dpr * 3;
+    this.canvas.height = rect.height * dpr * 3;
+
+    // this.ctx.scale(1, -1);
 
     this.ctx.strokeStyle = 'black';
     this.canvas.style.cursor = 'crosshair';

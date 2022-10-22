@@ -6,12 +6,12 @@ html, body {
 }
 .canvas-container{
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-around;
 }
 .canvas-controller{
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
 }
 .canvas-controller div {
@@ -29,16 +29,19 @@ button:enabled{
 }
 button:enabled:hover{
   background-color: rgb(226, 225, 225);
-
 }
 button:enabled:active{
   transform: translateY(4px);
 }
 #canvas {
   margin: 0;
-  width: 1000px;
-  height: 550px;
+  /* width: 1000px;
+  height: 550px; */
   border: solid 1px black;
   background-color: #ffffff;
   cursor: crosshair;
+}
+div{
+  /* height: inherit; */
+  /* width: inherit; */
 }
