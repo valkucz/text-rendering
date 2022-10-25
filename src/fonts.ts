@@ -20,16 +20,16 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
     let point;
     const koef: number = 4;
 
-    let point1 = getPosition(0, crds, koef);
-    ctx.fillRect(point1.x, point1.y, 5,5);
+    let firstPoint = getPosition(0, crds, koef);
+    // ctx.fillRect(point1.x, point1.y, 5,5);
 
     // first point on curve
-
+    console.log(cmds);
     cmds.forEach(cmd => {
       switch(cmd){
         case 'M':
-            point = getPosition(pos, crds, koef);
-            ctx.moveTo(point.x, point.y);
+            firstPoint = getPosition(pos, crds, koef);
+            ctx.moveTo(firstPoint.x, firstPoint.y);
             pos += 2;
             break;
         case 'L':
@@ -57,8 +57,7 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
           pos += 4;
           break;
         case 'Z':
-            point = getPosition(0, crds, koef);
-            ctx.lineTo(point.x, point.y);
+            ctx.lineTo(firstPoint.x, firstPoint.y);
             ctx.stroke();
           break;
   
@@ -71,7 +70,7 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
 
   export async function parseText(ctx: CanvasRenderingContext2D){
     const font = await loadFont('/Blogger_Sans.otf');
-    let shape = Typr.U.shape(font, 'b', true);
+    let shape = Typr.U.shape(font, 'd', true);
     let val = Typr.U.shapeToPath(font, shape);
     console.log(val);
 
