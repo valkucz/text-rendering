@@ -1,4 +1,4 @@
-import { solveDeCasteljau } from './decasteljau'
+import { solveDeCasteljau, cubicToQuadratic } from './decasteljau'
 
 export class Point {
     x: number;
@@ -6,6 +6,18 @@ export class Point {
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
+    }
+    multiply(c: number): Point {
+      return new Point(this.x * c, this.y * c);
+    }
+    add(point: Point): Point {
+      return new Point(this.x + point.x, this.y + point.y);
+    }
+    substract(point: Point): Point {
+      return new Point(this.x - point.x, this.y - point.y);
+    }
+    multiplyPoint(point: Point): Point {
+      return new Point(this.x * point.x, this.y * point.y);
     }
   }
   

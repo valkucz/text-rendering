@@ -1,6 +1,7 @@
 // parsing text
 import { Typr } from './Typr';
 import { Point, drawBezier } from './draw'
+import { cubicToQuadratic } from './decasteljau';
 
 async function loadFont(url: string){
     const response: Response = await fetch(url);
@@ -34,33 +35,37 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
             break;
         case 'L':
             point = getPosition(pos, crds, koef);
-          ctx.lineTo(point.x, point.y);
-          ctx.stroke();
-          pos += 2;
-          break;
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            pos += 2;
+            break;
         case 'C':
             points.push(getPosition(pos - 2, crds, koef));
-          for(let i = pos; i < pos + 6; i +=2){
-            points.push(getPosition(i, crds, koef));
-          }
-          drawBezier(points, segments, ctx);
-          points = [];
-          pos += 6;
-          break;
+            for(let i = pos; i < pos + 6; i +=2){
+              points.push(getPosition(i, crds, koef));
+            }
+
+            // approximation
+            cubicToQuadratic(points)
+              .forEach(qpoints => drawBezier(qpoints, segments, ctx));
+
+            // drawBezier(points, segments, ctx);
+            points = [];
+            pos += 6;
+            break;
         case 'Q':
             points.push(getPosition(pos - 2, crds, koef));
-          for(let i = pos; i < pos + 4; i +=2){
-            points.push(getPosition(i, crds, koef));
-          }
-          drawBezier(points, segments, ctx);
-          points = [];
-          pos += 4;
-          break;
+            for(let i = pos; i < pos + 4; i +=2){
+              points.push(getPosition(i, crds, koef));
+            }
+            drawBezier(points, segments, ctx);
+            points = [];
+            pos += 4;
+            break;
         case 'Z':
             ctx.lineTo(firstPoint.x, firstPoint.y);
             ctx.stroke();
-          break;
-  
+            break;
         default: break;
       }
     }
@@ -69,8 +74,9 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
   }
 
   export async function parseText(ctx: CanvasRenderingContext2D){
-    const font = await loadFont('/Blogger_Sans.otf');
-    let shape = Typr.U.shape(font, 'd', true);
+
+    const font = await loadFont('./MontserratAlternates-Medium.otf');
+    let shape = Typr.U.shape(font, 'A', true);
     let val = Typr.U.shapeToPath(font, shape);
     console.log(val);
 

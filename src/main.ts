@@ -55,13 +55,13 @@ class ButtonController{
     this.draw = draw;
     this.delete = deleteBtn;
 
-    this.changeDisability();
+    // this.changeDisability();
   }
   changeDisability(){
     this.draw.disabled = !this.draw.disabled;
   }
   addEventListener(pointsController: PointsController, canvasController: CanvasController, sliderController: SliderController){
-    drawBtn.addEventListener("click", () => drawBezier(pointsController.points, sliderController.getSegments(), canvasController.ctx));
+    drawBtn.addEventListener("click", () => {drawBezier(pointsController.points, sliderController.getSegments(), canvasController.ctx); pointsController.clear()});
     deleteBtn.addEventListener("click", () => canvasController.clear(pointsController, this))
   }
 }
@@ -103,7 +103,7 @@ class CanvasController{
         if (pointsController.isEmpty()){
             this.ctx.beginPath();
             this.ctx.moveTo(point.x, point.y);
-            buttonController.changeDisability();
+            // buttonController.changeDisability();
         }
         else{
             this.ctx.lineTo(point.x, point.y);
