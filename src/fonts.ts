@@ -12,14 +12,14 @@ async function loadFont(url: string){
   }
 
 function getPosition(pos: number, crds: number[], koef: number = 1){
-    return new Point(crds[pos] / koef, (crds[pos + 1])/ koef - 500);
+    return new Point(crds[pos] / koef + 200, (crds[pos + 1])/ koef - 450);
 }
 function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2D, segments: number = 17){
     ctx.scale(1, -1);
     let pos: number = 0;
     let points: Point[] = [];
     let point;
-    const koef: number = 4;
+    const koef: number = 2;
 
     let firstPoint = getPosition(0, crds, koef);
     // ctx.fillRect(point1.x, point1.y, 5,5);
@@ -46,6 +46,8 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
             }
 
             // approximation
+
+            // FIX: middle point 2times rendered
             cubicToQuadratic(points)
               .forEach(qpoints => drawBezier(qpoints, segments, ctx));
 
@@ -76,7 +78,7 @@ function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2
   export async function parseText(ctx: CanvasRenderingContext2D){
 
     const font = await loadFont('./MontserratAlternates-Medium.otf');
-    let shape = Typr.U.shape(font, 'A', true);
+    let shape = Typr.U.shape(font, 'a', true);
     let val = Typr.U.shapeToPath(font, shape);
     console.log(val);
 

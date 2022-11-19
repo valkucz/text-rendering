@@ -1,6 +1,7 @@
 import './style.css'
-import { Point, drawBezier, getCanvasPoint } from './draw'
+import { Point, drawBezier, getCanvasPoint, drawLines } from './draw'
 import { parseText } from './fonts'
+import { cubicToQuadratic } from './decasteljau'
 
 class PointsController{
   points: Point[] = [];
@@ -92,7 +93,7 @@ class CanvasController{
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     pointsController.clear();
-    buttonController.changeDisability();
+    // buttonController.changeDisability();
   
   }
 
@@ -100,6 +101,7 @@ class CanvasController{
     this.canvas.addEventListener('mousedown', (e) => {
       if (canvas.style.cursor !== 'not-allowed'){
         let point = getCanvasPoint(e, canvas);
+        console.log(point);
         if (pointsController.isEmpty()){
             this.ctx.beginPath();
             this.ctx.moveTo(point.x, point.y);

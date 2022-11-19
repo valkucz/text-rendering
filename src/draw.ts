@@ -1,4 +1,5 @@
-import { solveDeCasteljau, cubicToQuadratic } from './decasteljau'
+import { abs, pow, sign } from 'mathjs';
+import { solveDeCasteljau, cubicToQuadratic, clamp } from './decasteljau'
 
 export class Point {
     x: number;
@@ -10,6 +11,9 @@ export class Point {
     multiply(c: number): Point {
       return new Point(this.x * c, this.y * c);
     }
+    divide(c: number) : Point {
+      return new Point(this.x / c, this.y / c);
+    }
     add(point: Point): Point {
       return new Point(this.x + point.x, this.y + point.y);
     }
@@ -19,8 +23,26 @@ export class Point {
     multiplyPoint(point: Point): Point {
       return new Point(this.x * point.x, this.y * point.y);
     }
+    dot(point: Point):number{
+      return this.x * point.x + this.y * point.y;
+    }
+    dot2():number{
+      return this.dot(this);
+    }
+    sign() {
+      return new Point(sign(this.x), sign(this.y));
+    }
+    abs() {
+      return new Point(abs(this.x), abs(this.y));
+    }
+    pow(point: Point) {
+      return new Point (this.x ** point.x, this.y ** point.y);
+    }
+    clamp(minimum: number, maximum: number) {
+      return new Point(clamp(this.x, minimum, maximum), clamp(this.y, minimum, maximum));
+    }
   }
-  
+
 export function getCanvasPoint(e: MouseEvent, canvas: HTMLCanvasElement){
     let rect = canvas.getBoundingClientRect();
     return new Point( 
@@ -38,15 +60,15 @@ export function drawLine (from: Point, to: Point, color: string, ctx: CanvasRend
     ctx.closePath();
   }
   
-export function drawLines(points: Point[], ctx: CanvasRenderingContext2D){
+export function drawLines(points: Point[], ctx: CanvasRenderingContext2D, color: string = 'black'){
     for (let i = 0; i < points.length - 1; i++) {
-        drawLine(points[i], points[i + 1], 'black', ctx);
+        drawLine(points[i], points[i + 1], color, ctx);
     }
 }
-export function drawBezier(points: Point[], segments: number, ctx: CanvasRenderingContext2D){
+export function drawBezier(points: Point[], segments: number, ctx: CanvasRenderingContext2D, color: string = 'black'){
   let res = solveDeCasteljau(points, Number(segments) + 1);
 
-  drawLines(res, ctx);
+  drawLines(res, ctx, color);
   
   // FIX: define new function:
   // ctx.strokeStyle = 'black';
