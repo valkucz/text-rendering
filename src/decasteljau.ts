@@ -43,7 +43,7 @@ export function cubicToQuadratic(cubicPoints: Point[]){
    return [quadraticPoints1, quadraticPoints2];
 }
 
-function sdBezier(pos: Point, points: Point[]){
+export function sdBezier(pos: Point, points: Point[]){
     if (points.length !== 3){
         throw new Error(" quadratic bezier line needs to have 3 control points, now it has: "
          + points.length.toString());
@@ -83,4 +83,10 @@ function sdBezier(pos: Point, points: Point[]){
 }
 export function clamp(value: number, minimum: number, maximum: number) {
     return max(min(value, maximum), minimum);
+}
+
+function intersection(points: Point[]) : Point[] {
+
+    return [];
+
 }
