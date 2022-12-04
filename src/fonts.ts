@@ -16,38 +16,41 @@ async function loadFont(url: string){
 function getPosition(pos: number, crds: number[], koef: number = 1){
     return new Point(crds[pos] / koef, (crds[pos + 1])/ koef);
 }
-function parseShape(cmds: string[], crds: number[], canvasController: CanvasController, segments: number = 17){
+function parseShape(cmds: string[], crds: number[], canvasController: CanvasController, segments: number = 50){
     const ctx = canvasController.ctx;
     // ctx.scale(1, -1);
     let pos: number = 0;
     let points: Point[] = [];
     let point;
-    const koef: number = 5;
+    const koef: number = 2;
+    const scale: number = 350 / 1000;
+    const x = 0;
+    const y = 350;
+    ctx.translate(x,y);
+    ctx.scale(scale,-scale);
 
     let firstPoint = getPosition(0, crds, koef);
-    // ctx.fillRect(point1.x, point1.y, 5,5);
 
     let minmax = findMinMax(canvasController.canvas, crds);
-    console.log(minmax);
+
     // first point on curve
-    console.log(cmds);
     cmds.forEach(cmd => {
       switch(cmd){
         case 'M':
-            firstPoint = getPosition(pos, crds, koef);
+            firstPoint = getPosition(pos, crds);
             ctx.moveTo(firstPoint.x, firstPoint.y);
             pos += 2;
             break;
         case 'L':
-            point = getPosition(pos, crds, koef);
+            point = getPosition(pos, crds);
             ctx.lineTo(point.x, point.y);
             ctx.stroke();
             pos += 2;
             break;
         case 'C':
-            points.push(getPosition(pos - 2, crds, koef));
+            points.push(getPosition(pos - 2, crds));
             for(let i = pos; i < pos + 6; i +=2){
-              points.push(getPosition(i, crds, koef));
+              points.push(getPosition(i, crds));
             }
 
             // approximation
@@ -57,7 +60,6 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
               .forEach(qpoints =>
                 {
                   drawBezier(qpoints, segments, ctx);
-                  fill(minmax[0], minmax[1], qpoints, ctx);
                 }
                 );
 
@@ -66,9 +68,9 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
             pos += 6;
             break;
         case 'Q':
-            points.push(getPosition(pos - 2, crds, koef));
+            points.push(getPosition(pos - 2, crds));
             for(let i = pos; i < pos + 4; i +=2){
-              points.push(getPosition(i, crds, koef));
+              points.push(getPosition(i, crds));
             }
 
             drawBezier(points, segments, ctx);
@@ -85,58 +87,48 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
       }
     }
     )
-    // ctx.scale(1, -1);
+    ctx.scale(1/scale,-1/scale);
+    ctx.translate(-x,-y);
   }
 
   export async function parseText(canvasController: CanvasController){
 
     const font = await loadFont('./MontserratAlternates-Medium.otf');
-    let shape = Typr.U.shape(font, '8', true);
-    let val = Typr.U.shapeToPath(font, shape);
-
-    console.log(Typr.T.head);
-    // console.log('units', Typr.T.head.parseTab(font._data, 0, 1).unitsPerEm);
-    
-    console.log(val);
+    let shape = Typr.U.shape(font, 'abcdefgh', true);
+    let path = Typr.U.shapeToPath(font, shape);
 
     // test case
     // parseShape(["M", "Q", "Q"], [100,100, 250,100, 350,200, 450, 300, 500, 500], ctx);
 
-    parseShape(val.cmds, val.crds, canvasController);
+    parseShape(path.cmds, path.crds, canvasController);
   }
 
-  function findMinMax(canvas: HTMLCanvasElement, crds: number[]): Point[] {
-    let min = new Point(canvas.width, canvas.height);
-    let max = new Point(0, 0);
-    let koef = 5;
+  export function findMinMax(canvas: HTMLCanvasElement, crds: number[], koef: number = 1): Point[] {
+    let min = new Point(1589, 1053);
+    let max = new Point(-840, -263);
+    let x, y;
     for (let i = 0; i < crds.length - 1; i = i + 2) {
-      if (crds[i] / koef < min.x && crds[i + 1] / koef < min.y) {
-        min = new Point(crds[i] / koef, crds[i + 1] / koef);
+      x = crds[i] / koef;
+      y = crds[i + 1] / koef;
+      if (x  < min.x && y < min.y) {
+        min = new Point(x, y);
       }
-      if (crds[i] / koef > max.x && crds[i + 1] / koef > max.y) {
-        max = new Point(crds[i] / koef, crds[i + 1] / koef);
+      if (x > max.x && y > max.y) {
+        max = new Point(x, y);
       }
     }
-    console.log(min, max);
+    // console.log(min, max);
     return [min, max];
   }
   
   export function fill(min: Point, max: Point, points: Point[], ctx) {
-    // ctx.fillStyle = 'rgb(255, 165, 130)';
-    // ctx.fillRect(0,0, 5,5);
     for (let y = min.y; y <= max.y; y++) {
       for (let x = min.x; x <= max.x; x++) {
         let pos = new Point(x, y);
         let res = Math.round(sdBezier(pos, points));
-        // console.log(pos, res);
-        // res *= 10;
         ctx.fillStyle = 'rgb(255,' + (res * 2 % 256).toString() + ',' + (res * 5 % 256).toString() + ' )';
-        // ctx.strokeStyle = 'rgb(255, 165, 130)';
+
         ctx.fillRect(pos.x, pos.y, 1,1);
-
-        // console.log(res, pos);
-
       }
-
     }
   }

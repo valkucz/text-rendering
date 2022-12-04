@@ -1,6 +1,6 @@
 import './style.css'
 import { Point, drawBezier, getCanvasPoint, drawLines } from './draw'
-import { parseText, fill } from './fonts'
+import { parseText, fill, findMinMax } from './fonts'
 import { cubicToQuadratic, sdBezier } from './decasteljau'
 
 class PointsController{
@@ -160,17 +160,12 @@ buttonController.addEventListener(pointsController, canvasController, sliderCont
 canvasController.addEventListener(pointsController);
 
 // parse text here
-parseText(canvasController);
-let min = new Point(37, 68);
-let max = new Point(510, 445);
+// parseText(canvasController);
+let min = new Point(176, 276);
+let max = new Point(647, 401);
 // fill(min, max, []);
 
 // control points of quadratic bezier
-// let points = [new Point(197, 395), new Point(399, 174), new Point(635, 388)];
-
-// for (let y = 0; y < canvasController.canvas.height; y++){
-//   for (let x = 0; x < canvasController.canvas.width; x++){
-//     let pos = new Point(x, y);
-//     // console.log(sdBezier(pos, points));
-//   }
-// }
+let points = [new Point(197, 395), new Point(399, 380), new Point(635, 388)];
+fill(min, max, points, ctx);
+drawBezier(points, 17, ctx);
