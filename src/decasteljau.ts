@@ -55,21 +55,21 @@ export function sdBezier(pos: Point, points: Point[]){
 
     let kk = 1.0 / b.dot(b);
     let kx = kk * a.dot(b);
-    let ky = kk * (2.0 * a.dot(a) + b.dot(b)) / 3.0;
+    let ky = kk * (2.0 * a.dot(a) + d.dot(b)) / 3.0;
     let kz = kk * d.dot(a);
 
     let res = 0.0;
-    let p = ky - kx ** 2.0;
-    let p3 = p**3.0;
-    let q = kx * (2.0 * kx ** 2.0 - 3.0 * ky) + kz;
-    let h = q ** 2.0 + 4.0 * p3;
+    let p = ky - kx * kx;
+    let p3 = p * p * p;
+    let q = kx * (2.0 * kx * kx - 3.0 * ky) + kz;
+    let h = q * q + 4.0 * p3;
 
-    if (h >= 0){
+    if (h >= 0.0){
         h = Math.sqrt(h);
-        let x = new Point(h, -h).divide(2.0);
-        let uv = x.sign().multiplyPoint(x.abs().pow(new Point(1.0/3, 1.0/3)));
+        let x = new Point(h, -h).substract(new Point(q, q)).divide(2.0);
+        let uv = x.sign().multiplyPoint(x.abs().pow(new Point(1.0 / 3.0, 1.0 / 3.0)));
         let t = clamp(uv.x + uv.y-kx, 0.0, 1.0);
-        res = d.add(c.add(b.multiply(t).multiply(t))).dot2();
+        res = d.add(c.add(b.multiply(t)).multiply(t)).dot2();
     }
     else { 
         let z = sqrt(-p);

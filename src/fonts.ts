@@ -93,7 +93,7 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
 
   export async function parseText(canvasController: CanvasController){
 
-    const font = await loadFont('./MontserratAlternates-Medium.otf');
+    const font = await loadFont('./Blogger_Sans.otf');
     let shape = Typr.U.shape(font, 'abcdefgh', true);
     let path = Typr.U.shapeToPath(font, shape);
 

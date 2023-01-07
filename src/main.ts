@@ -166,6 +166,7 @@ let max = new Point(647, 401);
 // fill(min, max, []);
 
 // control points of quadratic bezier
-let points = [new Point(197, 395), new Point(399, 380), new Point(635, 388)];
+let points = [new Point(197, 395), new Point(399, 460), new Point(635, 388)];
 fill(min, max, points, ctx);
 drawBezier(points, 17, ctx);
+// parseText(canvasController);
