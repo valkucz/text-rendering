@@ -41,6 +41,9 @@ export class Point {
     clamp(minimum: number, maximum: number) {
       return new Point(clamp(this.x, minimum, maximum), clamp(this.y, minimum, maximum));
     }
+    length(): number {
+      return Math.sqrt(this.x ** 2 + this.y ** 2);
+    }
   }
 
 export function getCanvasPoint(e: MouseEvent, canvas: HTMLCanvasElement){
@@ -65,6 +68,7 @@ export function drawLines(points: Point[], ctx: CanvasRenderingContext2D, color:
         drawLine(points[i], points[i + 1], color, ctx);
     }
 }
+
 export function drawBezier(points: Point[], segments: number, ctx: CanvasRenderingContext2D, color: string = 'black'){
   let res = solveDeCasteljau(points, Number(segments) + 1);
 

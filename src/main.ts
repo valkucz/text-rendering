@@ -161,12 +161,20 @@ canvasController.addEventListener(pointsController);
 
 // parse text here
 // parseText(canvasController);
-let min = new Point(176, 276);
-let max = new Point(647, 401);
-// fill(min, max, []);
 
-// control points of quadratic bezier
-let points = [new Point(197, 395), new Point(399, 460), new Point(635, 388)];
-fill(min, max, points, ctx);
-drawBezier(points, 17, ctx);
-// parseText(canvasController);
+function testSdBezierLine(ctx: CanvasRenderingContext2D) {
+  let min = new Point(176, 276);
+  let max = new Point(647, 401);
+  // control points of quadratic bezier
+  let points = [new Point(197, 395), new Point(399, 120), new Point(635, 388)];
+
+  fill(min, max, points, ctx);
+  drawBezier(points, 17, ctx);
+}
+
+function testSdBezierLetter(ctx: CanvasRenderingContext2D) {
+  parseText(canvasController);
+
+}
+// testSdBezierLine(canvasController.ctx);
+testSdBezierLetter(canvasController.ctx);
