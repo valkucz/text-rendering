@@ -173,7 +173,7 @@ function testSdBezierLine(ctx: CanvasRenderingContext2D) {
 }
 
 function testSdBezierLetter(ctx: CanvasRenderingContext2D) {
-  parseText(canvasController);
+  parseText(canvasController, 'o');
 
 }
 // testSdBezierLine(canvasController.ctx);

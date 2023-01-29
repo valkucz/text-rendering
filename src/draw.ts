@@ -44,6 +44,15 @@ export class Point {
     length(): number {
       return Math.sqrt(this.x ** 2 + this.y ** 2);
     }
+    not() {
+      return new Point(~this.x, ~this.y);
+    }
+    and(point: Point) {
+      return new Point(this.x & point.x, this.y & point.y);
+    }
+    or(point: Point) {
+      return new Point(this.x | point.x, this.y | point.y);
+    }
   }
 
 export function getCanvasPoint(e: MouseEvent, canvas: HTMLCanvasElement){

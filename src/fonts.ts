@@ -24,7 +24,7 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
     let points: Point[] = [];
     let point;
     // const koef: number = 4;
-    const scale: number = 1000 / 1000;
+    const scale: number = 350 / 1000;
     const x = 0;
     const y = 350;
     // ctx.translate(x,y);
@@ -106,7 +106,6 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
     }
     )
 
-
     let minmax = findMinMax(crds);
 
     fillGlyph(minmax[0], minmax[1], quadraticCurves, ctx);
@@ -116,10 +115,10 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
     // ctx.translate(-x,-y);
   }
 
-  export async function parseText(canvasController: CanvasController){
+  export async function parseText(canvasController: CanvasController, letter: string){
     
     const font = await loadFont('./MontserratAlternates-Medium.otf');
-    let shape = Typr.U.shape(font, 'o', true);
+    let shape = Typr.U.shape(font, letter, true);
     let path = Typr.U.shapeToPath(font, shape);
     
     // const ctx = canvasController.ctx;
@@ -144,9 +143,6 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
   }
 
   export function findMinMax(crds: number[], koef: number = 1): Point[] {
-    // let min = new Point(1589, 1053);
-    // let max = new Point(-840, -263);
-    // console.log('crds:'+ crds);
     let x, y;
 
     let xmin = Infinity;
@@ -195,7 +191,7 @@ function fillCurve(points: Point[], ctx: CanvasRenderingContext2D) {
   fill(minmax[0], minmax[1], points, ctx);
 }
 
-  export function fill(min: Point, max: Point, points: Point[], ctx) {
+  export function fill(min: Point, max: Point, points: Point[], ctx: CanvasRenderingContext2D) {
     for (let y = min.y; y <= max.y; y++) {
       for (let x = min.x; x <= max.x; x++) {
         let pos = new Point(x, y);
