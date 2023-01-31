@@ -22,7 +22,6 @@ button {
   height: 50px;
   width: 200px;
   background-color: white;
-  
 }
 button:enabled{
   cursor: pointer;
@@ -40,8 +39,4 @@ button:enabled:active{
   border: solid 1px black;
   background-color: #ffffff;
   cursor: crosshair;
-}
-div{
-  /* height: inherit; */
-  /* width: inherit; */
 }
