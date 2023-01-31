@@ -1,8 +1,7 @@
 import './style.css'
 import { Point, drawBezier, getCanvasPoint, drawLines } from './draw'
-import { parseText } from './fonts'
-import { cubicToQuadratic } from './decasteljau'
-
+import shader from "./shaders.wgsl";
+// import wgsl from 'vite-plugin-glsl';
 class PointsController{
   points: Point[] = [];
   pointsDisplay: HTMLElement;
@@ -69,8 +68,8 @@ class ButtonController{
 
 class CanvasController{
   canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D){
+  ctx: CanvasRenderingContext2D | GPUCanvasContext;
+  constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D | GPUCanvasContext){
     this.canvas = canvas;
     this.ctx = ctx;
 
@@ -86,16 +85,16 @@ class CanvasController{
 
     // this.ctx.scale(1, -1);
 
-    this.ctx.strokeStyle = 'black';
-    this.canvas.style.cursor = 'crosshair';
+    // this.ctx.strokeStyle = 'black';
+    // this.canvas.style.cursor = 'crosshair';
   }
-  clear(pointsController: PointsController, buttonController: ButtonController){
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // clear(pointsController: PointsController, buttonController: ButtonController){
+  //   this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    pointsController.clear();
-    // buttonController.changeDisability();
+  //   pointsController.clear();
+  //   // buttonController.changeDisability();
   
-  }
+  // }
 
   addEventListener(pointsController: PointsController){
     this.canvas.addEventListener('mousedown', (e) => {
@@ -118,8 +117,8 @@ class CanvasController{
 }
 
 // create canvas controller
-var canvas = <HTMLCanvasElement>document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
+const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
+var ctx: GPUCanvasContext = <GPUCanvasContext> canvas.getContext('webgpu');
 if (!ctx){
   throw new Error('Context is null or undefined');
 }
@@ -155,9 +154,63 @@ if (!drawBtn || !deleteBtn){
 let buttonController = new ButtonController(drawBtn, deleteBtn);
 
 // event listeners here
-sliderController.addEventListener();
-buttonController.addEventListener(pointsController, canvasController, sliderController);
-canvasController.addEventListener(pointsController);
+// sliderController.addEventListener();
+// buttonController.addEventListener(pointsController, canvasController, sliderController);
+// canvasController.addEventListener(pointsController);
 
 // parse text here
-parseText(canvasController.ctx);
+// parseText(canvasController.ctx);
+
+console.log(navigator.gpu);
+
+const Initialize = async() => {
+  const adapter : GPUAdapter = <GPUAdapter> await navigator.gpu?.requestAdapter();
+  const device : GPUDevice = <GPUDevice> await adapter?.requestDevice();
+  const format : GPUTextureFormat = <GPUTextureFormat> "bgra8unorm";
+
+  ctx.configure({
+    device: device,
+    format: format,
+    alphaMode: "premultiplied"
+  });
+
+  const pipeline: GPURenderPipeline = device.createRenderPipeline({
+    vertex: {
+      module: device.createShaderModule({
+        code: shader
+      }),
+      entryPoint: "vs_main"
+    },
+    fragment: {
+      module: device.createShaderModule({
+        code: shader
+      }),
+      entryPoint: "fs_main",
+      targets: [{
+        format: format
+      }]
+    },
+    primitive: {
+      topology: "triangle-list"
+    },
+    layout: "auto"
+  });
+
+  const commandEncoder: GPUCommandEncoder = device.createCommandEncoder();
+  const textureView: GPUTextureView = ctx.getCurrentTexture().createView();
+  const renderpass: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+    colorAttachments: [{
+      view: textureView,
+      clearValue: {r: 0.5, g: 0.0, b: 0.25, a: 1.0},
+      loadOp: "clear",
+      storeOp: "store"
+    }]
+  })
+  renderpass.setPipeline(pipeline);
+  renderpass.draw(3, 1, 0, 0);
+  renderpass.end();
+
+  device.queue.submit([commandEncoder.finish()]);
+}
+
+Initialize();
