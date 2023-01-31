@@ -1,3 +1,8 @@
+import './style.css'
+import { Point, drawBezier, getCanvasPoint, drawLines } from './draw'
+import shader from "./shaders.wgsl";
+// import wgsl from 'vite-plugin-glsl';
+class PointsController{
 import "./style.css";
 import { Point, drawBezier, getCanvasPoint, fill } from "./draw";
 import { parseText } from "./fonts";
@@ -172,6 +177,60 @@ buttonController.addEventListener(
 );
 canvasController.addEventListener(pointsController);
 
+// parse text here
+// parseText(canvasController.ctx);
+
+console.log(navigator.gpu);
+
+const Initialize = async() => {
+  const adapter : GPUAdapter = <GPUAdapter> await navigator.gpu?.requestAdapter();
+  const device : GPUDevice = <GPUDevice> await adapter?.requestDevice();
+  const format : GPUTextureFormat = <GPUTextureFormat> "bgra8unorm";
+
+  ctx.configure({
+    device: device,
+    format: format,
+    alphaMode: "premultiplied"
+  });
+
+  const pipeline: GPURenderPipeline = device.createRenderPipeline({
+    vertex: {
+      module: device.createShaderModule({
+        code: shader
+      }),
+      entryPoint: "vs_main"
+    },
+    fragment: {
+      module: device.createShaderModule({
+        code: shader
+      }),
+      entryPoint: "fs_main",
+      targets: [{
+        format: format
+      }]
+    },
+    primitive: {
+      topology: "triangle-list"
+    },
+    layout: "auto"
+  });
+
+  const commandEncoder: GPUCommandEncoder = device.createCommandEncoder();
+  const textureView: GPUTextureView = ctx.getCurrentTexture().createView();
+  const renderpass: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+    colorAttachments: [{
+      view: textureView,
+      clearValue: {r: 0.5, g: 0.0, b: 0.25, a: 1.0},
+      loadOp: "clear",
+      storeOp: "store"
+    }]
+  })
+  renderpass.setPipeline(pipeline);
+  renderpass.draw(3, 1, 0, 0);
+  renderpass.end();
+
+  device.queue.submit([commandEncoder.finish()]);
+}
 function testSdBezierLine(ctx: CanvasRenderingContext2D) {
   let min = new Point(176, 276);
   let max = new Point(647, 401);
@@ -187,3 +246,5 @@ function testSdBezierLetter() {
 }
 // testSdBezierLine(canvasController.ctx);
 testSdBezierLetter();
+
+Initialize();
