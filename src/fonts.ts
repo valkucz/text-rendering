@@ -2,7 +2,6 @@
 import { Typr } from './Typr';
 import { Point, drawBezier } from './draw'
 import { cubicToQuadratic, sdBezier, sdLine, isInsideGlyph } from './decasteljau';
-import { min } from 'mathjs';
 
 async function loadFont(url: string){
     const response: Response = await fetch(url);
@@ -16,24 +15,21 @@ async function loadFont(url: string){
 function getPosition(pos: number, crds: number[], koef: number = 1){
     return new Point(crds[pos] / koef, (crds[pos + 1])/ koef);
 }
-function parseShape(cmds: string[], crds: number[], canvasController: CanvasController, segments: number = 50): Point[][]{
+function parseShape(cmds: string[], crds: number[], ctx: CanvasRenderingContext2D, segments: number = 50) {
     console.log(crds, cmds);
-    const ctx = canvasController.ctx;
-    // ctx.scale(1, -1);
-    let pos: number = 0;
-    let points: Point[] = [];
-    let point;
-    // const koef: number = 4;
     const scale: number = 350 / 1000;
     const x = 0;
     const y = 350;
+
     // ctx.translate(x,y);
     // ctx.scale(scale,-scale);
+    // ctx.scale(1, -1);
+  
+    let pos: number = 0;
+    let points: Point[] = [];
+    let point: Point, lastPoint: Point, firstPoint: Point;
 
-    let firstPoint = getPosition(0, crds);
-    let lastPoint = firstPoint;
 
-    // first point on curve
     let quadraticCurves: Point[][] = [];
 
     cmds.forEach(cmd => {
@@ -41,18 +37,16 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
         case 'M':
             firstPoint = getPosition(pos, crds);
             // fillLine(lastPoint, firstPoint, ctx);
+            lastPoint = firstPoint;
             ctx.moveTo(firstPoint.x, firstPoint.y);
             pos += 2;
             break;
         case 'L':
             point = getPosition(pos, crds);
             // fillLine(lastPoint, point, ctx);
-
             ctx.lineTo(point.x, point.y);
             ctx.stroke();
-
-            quadraticCurves.push([lastPoint,  getMiddle(lastPoint, point), firstPoint]);
-
+            quadraticCurves.push([lastPoint,  getMiddle(lastPoint, point), point]);
             lastPoint = point;
             pos += 2;
             break;
@@ -62,9 +56,7 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
               points.push(getPosition(i, crds));
             }
             lastPoint = points[3];
-
             // approximation
-
             // FIX: middle point 2times rendered
             cubicToQuadratic(points)
               .forEach(qpoints =>
@@ -74,23 +66,20 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
                   quadraticCurves.push(qpoints);
                 }
                 );
-
             // drawBezier(points, segments, ctx);
             points = [];
             pos += 6;
             break;
         case 'Q':
             points.push(getPosition(pos - 2, crds));
-            for(let i = pos; i < pos + 4; i +=2){
+            for(let i = pos; i < pos + 4; i += 2){
               points.push(getPosition(i, crds));
             }
 
             // fillCurve(points, ctx);
             drawBezier(points, segments, ctx);
             quadraticCurves.push(points);
-
             lastPoint = points[2];
-
             points = [];
             pos += 4;
             break;
@@ -98,6 +87,7 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
             // fillLine(lastPoint, firstPoint, ctx);
             ctx.lineTo(firstPoint.x, firstPoint.y);
             ctx.stroke();
+            ctx.closePath();
 
             quadraticCurves.push([lastPoint, getMiddle(lastPoint, firstPoint), firstPoint]);
             break;
@@ -107,39 +97,20 @@ function parseShape(cmds: string[], crds: number[], canvasController: CanvasCont
     )
 
     let minmax = findMinMax(crds);
-
     fillGlyph(minmax[0], minmax[1], quadraticCurves, ctx);
+    
 
-    console.log(quadraticCurves);
     // ctx.scale(1/scale,-1/scale);
     // ctx.translate(-x,-y);
   }
 
-  export async function parseText(canvasController: CanvasController, letter: string){
+  export async function parseText(ctx: CanvasRenderingContext2D, text: string){
     
     const font = await loadFont('./MontserratAlternates-Medium.otf');
-    let shape = Typr.U.shape(font, letter, true);
-    let path = Typr.U.shapeToPath(font, shape);
-    
-    // const ctx = canvasController.ctx;
-    // var scale = 2 / font.head.unitsPerEm;
-    // const scale: number = 350 / 1000;
-    // const x = 200;
-    // const y = 200;
+    const shape = Typr.U.shape(font, text, true);
+    const path = Typr.U.shapeToPath(font, shape);
 
-    // ctx.translate(x,y);
-    // ctx.scale(scale,-scale);
-    // ctx.translate(3500,500);  ctx.rotate(0.25);  ctx.scale(1,-1);
-    // ctx.fillStyle = 'black';
-
-    // Typr.U.pathToContext(path, ctx);
-
-    // ctx.scale(1/scale,-1/scale);
-    // ctx.translate(-x,-y);
-    // test case
-    // parseShape(["M", "Q", "Q"], [100,100, 250,100, 350,200, 450, 300, 500, 500], ctx);
-
-    parseShape(path.cmds, path.crds, canvasController);
+    parseShape(path.cmds, path.crds, ctx);
   }
 
   export function findMinMax(crds: number[], koef: number = 1): Point[] {
@@ -216,9 +187,6 @@ function fillGlyph(min: Point, max: Point, quadraticCurves: Point[][], ctx: Canv
       if (isInsideGlyph(pos, quadraticCurves)) {
         ctx.fillRect(pos.x, pos.y, 1,1);
       }
-      // sdf
-      // if inside: fill;
-
     }
   }
 }

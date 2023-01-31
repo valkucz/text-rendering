@@ -45,8 +45,7 @@ class SliderController{
   addEventListener(){
     this.slider.addEventListener("input", () => this.updateDisplayValue());
   }
-  }
-
+}
 
 class ButtonController{
   draw: HTMLButtonElement;
@@ -172,9 +171,9 @@ function testSdBezierLine(ctx: CanvasRenderingContext2D) {
   drawBezier(points, 17, ctx);
 }
 
-function testSdBezierLetter(ctx: CanvasRenderingContext2D) {
-  parseText(canvasController, 'o');
+function testSdBezierLetter() {
+  parseText(canvasController.ctx, 'ab');
 
 }
 // testSdBezierLine(canvasController.ctx);
-testSdBezierLetter(canvasController.ctx);
+testSdBezierLetter();

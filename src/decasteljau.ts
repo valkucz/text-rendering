@@ -105,9 +105,8 @@ function windingNumberCalculation(points: Point[]): number {
     let t1 = (b.y - d) * ra;
     let t2 = (b.y + d) * ra;
 
-    const epsilon = 0.0;
 
-    if (Math.abs(a.y) < epsilon) {
+    if (a.y == 0) {
         t1 = points[0].y * rb;
         t2 = t1;
     }
@@ -135,7 +134,9 @@ function windingNumberCalculation(points: Point[]): number {
 
 export function isInsideGlyph(pos: Point, quadraticCurves: Point[][]): boolean {
     let windingNumber = 0;
+    // console.log(quadraticCurves);
     quadraticCurves.forEach(controlPoints => {
+        // console.log(controlPoints);
         // for ray in direction of +x axis
         windingNumber += windingNumberCalculation(controlPoints.map(point =>
             point.substract(pos).multiplyPoint(new Point(1, -1))))
