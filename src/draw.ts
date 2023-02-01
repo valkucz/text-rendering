@@ -1,11 +1,8 @@
 import { abs, sign } from "mathjs";
-import {
-  solveDeCasteljau,
-  clamp,
-  isInsideGlyph,
-  sdBezier,
-  sdLine,
-} from "./decasteljau";
+import { solveDeCasteljau } from "./bezier";
+import { sdBezier, sdLine } from "./distanceFunctions";
+import { clamp } from "./math";
+import { isInsideGlyph } from "./winding";
 
 export class Point {
   x: number;

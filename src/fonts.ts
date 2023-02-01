@@ -1,7 +1,7 @@
 // parsing text
 import { Typr } from "./Typr";
 import { Point, drawBezier, fillGlyph } from "./draw";
-import { cubicToQuadratic } from "./decasteljau";
+import { cubicToQuadratic } from "./bezier";
 
 async function loadFont(url: string) {
   const response: Response = await fetch(url);
