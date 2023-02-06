@@ -1,94 +1,36 @@
-import { abs, sign } from "mathjs";
+import { vec2 } from "gl-matrix";
 import { solveDeCasteljau } from "./bezier";
-import { sdBezier, sdLine } from "./distanceFunctions";
-import { clamp } from "./math";
+import { sdBezier } from "./distanceFunctions";
 import { isInsideGlyph } from "./winding";
 
-export class Point {
-  x: number;
-  y: number;
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-  multiply(c: number): Point {
-    return new Point(this.x * c, this.y * c);
-  }
-  divide(c: number): Point {
-    return new Point(this.x / c, this.y / c);
-  }
-  add(point: Point): Point {
-    return new Point(this.x + point.x, this.y + point.y);
-  }
-  substract(point: Point): Point {
-    return new Point(this.x - point.x, this.y - point.y);
-  }
-  multiplyPoint(point: Point): Point {
-    return new Point(this.x * point.x, this.y * point.y);
-  }
-  dot(point: Point): number {
-    return this.x * point.x + this.y * point.y;
-  }
-  dot2(): number {
-    return this.dot(this);
-  }
-  sign() {
-    return new Point(sign(this.x), sign(this.y));
-  }
-  abs() {
-    return new Point(abs(this.x), abs(this.y));
-  }
-  pow(point: Point) {
-    return new Point(this.x ** point.x, this.y ** point.y);
-  }
-  clamp(minimum: number, maximum: number) {
-    return new Point(
-      clamp(this.x, minimum, maximum),
-      clamp(this.y, minimum, maximum)
-    );
-  }
-  length(): number {
-    return Math.sqrt(this.x ** 2 + this.y ** 2);
-  }
-  not() {
-    return new Point(~this.x, ~this.y);
-  }
-  and(point: Point) {
-    return new Point(this.x & point.x, this.y & point.y);
-  }
-  or(point: Point) {
-    return new Point(this.x | point.x, this.y | point.y);
-  }
-}
 
 export function getCanvasPoint(e: MouseEvent, canvas: HTMLCanvasElement) {
   let rect = canvas.getBoundingClientRect();
-  return new Point(
-    Math.ceil(
-      ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
-    ),
-    Math.ceil(
-      ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
-    )
-  );
+  const res = vec2.fromValues(Math.ceil(
+    ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
+  ),
+  Math.ceil(
+    ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
+  ));
+  return res;
 }
 
 export function drawLine(
-  from: Point,
-  to: Point,
+  from: vec2,
+  to: vec2,
   color: string,
   ctx: CanvasRenderingContext2D
 ) {
   ctx.beginPath();
   ctx.strokeStyle = color;
-  ctx.moveTo(from.x, from.y);
-  ctx.lineTo(to.x, to.y);
+  ctx.moveTo(from[0], from[1]);
+  ctx.lineTo(to[0], to[1]);
   ctx.stroke();
   ctx.closePath();
 }
 
 export function drawLines(
-  points: Point[],
+  points: vec2[],
   ctx: CanvasRenderingContext2D,
   color: string = "black"
 ) {
@@ -98,7 +40,7 @@ export function drawLines(
 }
 
 export function drawBezier(
-  points: Point[],
+  points: vec2[],
   segments: number,
   ctx: CanvasRenderingContext2D,
   color: string = "black"
@@ -115,58 +57,38 @@ export function drawBezier(
 }
 
 export function fillCurve(
-  points: Point[],
+  points: vec2[],
   ctx: CanvasRenderingContext2D,
-  min: Point,
-  max: Point
+  min: vec2,
+  max: vec2
 ) {
   fill(min, max, points, ctx);
 }
 export function fillGlyph(
-  min: Point,
-  max: Point,
-  quadraticCurves: Point[][],
+  min: vec2,
+  max: vec2,
+  quadraticCurves: vec2[][],
   ctx: CanvasRenderingContext2D
 ) {
-  for (let y = min.y; y <= max.y; y++) {
-    for (let x = min.x; x <= max.x; x++) {
-      let pos = new Point(x, y);
+  for (let y = min[1]; y <= max[1]; y++) {
+    for (let x = min[0]; x <= max[0]; x++) {
+      let pos = vec2.fromValues(x, y);
       if (isInsideGlyph(pos, quadraticCurves)) {
-        ctx.fillRect(pos.x, pos.y, 1, 1);
+        ctx.fillRect(x, y, 1, 1);
       }
-    }
-  }
-}
-export function fillLine(a: Point, b: Point, ctx: CanvasRenderingContext2D) {
-  const koef = 40;
-  let min = new Point(Math.min(a.x, b.x) - koef, Math.min(a.y, b.y) - koef);
-  let max = new Point(Math.max(a.x, b.x) + koef, Math.max(a.y, b.y) + koef);
-
-  for (let y = min.y; y <= max.y; y++) {
-    for (let x = min.x; x <= max.x; x++) {
-      let pos = new Point(x, y);
-      let res = Math.round(sdLine(pos, a, b));
-
-      ctx.fillStyle =
-        "rgb(255," +
-        ((res * 2) % 256).toString() +
-        "," +
-        ((res * 5) % 256).toString() +
-        " )";
-      ctx.fillRect(pos.x, pos.y, 1, 1);
     }
   }
 }
 
 export function fill(
-  min: Point,
-  max: Point,
-  points: Point[],
+  min: vec2,
+  max: vec2,
+  points: vec2[],
   ctx: CanvasRenderingContext2D
 ) {
-  for (let y = min.y; y <= max.y; y++) {
-    for (let x = min.x; x <= max.x; x++) {
-      let pos = new Point(x, y);
+  for (let y = min[1]; y <= max[1]; y++) {
+    for (let x = min[0]; x <= max[0]; x++) {
+      let pos = vec2.fromValues(x, y);
       let res = Math.round(sdBezier(pos, points));
 
       ctx.fillStyle =
@@ -175,7 +97,7 @@ export function fill(
         "," +
         ((res * 5) % 256).toString() +
         " )";
-      ctx.fillRect(pos.x, pos.y, 1, 1);
+      ctx.fillRect(x, y, 1, 1);
     }
   }
 }

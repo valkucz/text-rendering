@@ -1,7 +1,8 @@
 // parsing text
 import { Typr } from "./Typr";
-import { Point, drawBezier, fillGlyph } from "./draw";
+import { drawBezier, fillGlyph } from "./draw";
 import { cubicToQuadratic } from "./bezier";
+import { vec2 } from "gl-matrix";
 
 async function loadFont(url: string) {
   const response: Response = await fetch(url);
@@ -12,8 +13,8 @@ async function loadFont(url: string) {
   return tables[0];
 }
 
-function getPosition(pos: number, crds: number[], koef: number = 1) {
-  return new Point(crds[pos] / koef, crds[pos + 1] / koef);
+function getPosition(pos: number, crds: number[]): vec2 {
+  return vec2.fromValues(crds[pos], crds[pos + 1]);
 }
 function parseShape(
   cmds: string[],
@@ -21,8 +22,7 @@ function parseShape(
   ctx: CanvasRenderingContext2D,
   segments: number = 50
 ) {
-  console.log(crds, cmds);
-  const scale: number = 350 / 1000;
+  const scale = 350 / 1000;
   const x = 0;
   const y = 350;
 
@@ -30,22 +30,22 @@ function parseShape(
   ctx.scale(scale, -scale);
 
   let pos: number = 0;
-  let points: Point[] = [];
-  let point: Point, lastPoint: Point, firstPoint: Point;
+  let points: vec2[] = [];
+  let point: vec2, lastPoint: vec2, firstPoint: vec2;
 
-  let quadraticCurves: Point[][] = [];
+  let quadraticCurves: vec2[][] = [];
   cmds.forEach((cmd) => {
     switch (cmd) {
       case "M":
         firstPoint = getPosition(pos, crds);
-        ctx.moveTo(firstPoint.x, firstPoint.y);
+        ctx.moveTo(firstPoint[0], firstPoint[1]);
         lastPoint = firstPoint;
         pos += 2;
         break;
       case "L":
         point = getPosition(pos, crds);
         quadraticCurves.push([lastPoint, getMiddle(lastPoint, point), point]);
-        ctx.lineTo(point.x, point.y);
+        ctx.lineTo(point[0], point[1]);
         ctx.stroke();
         lastPoint = point;
         pos += 2;
@@ -76,7 +76,7 @@ function parseShape(
         pos += 4;
         break;
       case "Z":
-        ctx.lineTo(firstPoint.x, firstPoint.y);
+        ctx.lineTo(firstPoint[0], firstPoint[1]);
         ctx.stroke();
         ctx.closePath();
         quadraticCurves.push([
@@ -105,7 +105,7 @@ export async function parseText(ctx: CanvasRenderingContext2D, text: string) {
   parseShape(path.cmds, path.crds, ctx);
 }
 
-export function findMinMax(crds: number[], koef: number = 1): Point[] {
+export function findMinMax(crds: number[]): vec2[] {
   let x, y;
 
   let xmin = Infinity;
@@ -114,8 +114,8 @@ export function findMinMax(crds: number[], koef: number = 1): Point[] {
   let xmax = -Infinity;
   let ymax = -Infinity;
   for (let i = 0; i < crds.length - 1; i = i + 2) {
-    x = crds[i] / koef;
-    y = crds[i + 1] / koef;
+    x = crds[i];
+    y = crds[i + 1];
     if (x < xmin) {
       xmin = x;
     }
@@ -129,9 +129,14 @@ export function findMinMax(crds: number[], koef: number = 1): Point[] {
       ymax = y;
     }
   }
-  return [new Point(xmin, ymin), new Point(xmax, ymax)];
+  return [vec2.fromValues(xmin, ymin), vec2.fromValues(xmax, ymax)];
 }
 
-function getMiddle(point1: Point, point2: Point): Point {
-  return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
+function getMiddle(point1: vec2, point2: vec2): vec2 {
+  const sum = vec2.create();
+  const middle = vec2.create();
+
+  vec2.add(sum, point1, point2);
+  return vec2.divide(middle, sum, vec2.fromValues(2, 2));
+
 }

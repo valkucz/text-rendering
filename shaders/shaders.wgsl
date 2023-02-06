@@ -3,6 +3,7 @@ struct Fragment {
     @location(0) Color : vec4<f32>
 };
 
+
 @vertex
 fn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {
     
