@@ -12,15 +12,19 @@ async function loadFont(url: string) {
   return tables[0];
 }
 
-function getPosition(pos: number, crds: number[], koef: number = 1) {
+function getPosition(pos: number, crds: number[], koef: number = 1): Point {
   return new Point(crds[pos] / koef, crds[pos + 1] / koef);
 }
 function parseShape(
   cmds: string[],
   crds: number[],
   ctx: CanvasRenderingContext2D,
-  segments: number = 50
+  segments: number = 50,
+  width: number,
+  height: number
 ) {
+  ctx.clearRect(0, 0, width, height);
+
   console.log(crds, cmds);
 
   let pos: number = 0;
@@ -70,14 +74,14 @@ function parseShape(
         pos += 4;
         break;
       case "Z":
-        ctx.lineTo(firstPoint.x, firstPoint.y);
-        ctx.stroke();
-        ctx.closePath();
-        quadraticCurves.push([
-          lastPoint,
-          getMiddle(lastPoint, firstPoint),
-          firstPoint,
-        ]);
+        // ctx.lineTo(firstPoint.x, firstPoint.y);
+        // ctx.stroke();
+        // ctx.closePath();
+        // quadraticCurves.push([
+        //   getPosition(pos - 4, crds),
+        //   getPosition(pos - 2, crds),
+        //   firstPoint,
+        // ]);
         break;
       default:
         break;
@@ -105,8 +109,8 @@ function parseShape(
 
   // Calculate projected curves
   const projectedCurves = normalizedCurves.map(cs => cs.map(c => new Point(
-    c.x * 128 + innerWidth * 0.5,
-    c.y * 128 + innerHeight * 0.5,
+    c.x * 256 + width * 0.5,
+    c.y * 256 + height * 0.5,
   )));
 
   // Draw bounding box of projected curves
@@ -119,10 +123,10 @@ function parseShape(
     maxBoundingBox.x = Math.max(maxBoundingBox.x, c.x);
     maxBoundingBox.y = Math.max(maxBoundingBox.y, c.y);
   }));
-  minBoundingBox.x -= 64;
-  minBoundingBox.y -= 64;
-  maxBoundingBox.x += 64;
-  maxBoundingBox.y += 64;
+  minBoundingBox.x -= 32;
+  minBoundingBox.y -= 32;
+  maxBoundingBox.x += 32;
+  maxBoundingBox.y += 32;
 
   ctx.strokeStyle = 'purple';
   ctx.strokeRect(
@@ -130,7 +134,7 @@ function parseShape(
     maxBoundingBox.x - minBoundingBox.x, maxBoundingBox.y - minBoundingBox.y);
 
   // Draw absolute shortest distance
-  let id = ctx.getImageData(0, 0, 1356, 681);
+  let id = ctx.getImageData(0, 0, width, height);
   let pixels = id.data;
 
   for (let x = minBoundingBox.x; x < maxBoundingBox.x; x++) {
@@ -138,18 +142,23 @@ function parseShape(
       let i = (Math.round(y) * id.width + Math.round(x)) * 4;
 
       let minDist = 100000.0;
-      for (const curve of projectedCurves.slice(0, 8)) {
+      let side = 1.0;
+      for (const curve of projectedCurves) {
         let point = new Point(x, y);
 
-        minDist = Math.min(minDist, Math.abs(sdBezier(point, curve)));
+        let sdist = sdBezier(point, curve);
+        let udist = Math.abs(sdist[0]);
+
+        if (udist <= minDist) {
+          minDist = udist;
+          side = sdist[1] >= 0.0 ? -1.0 : 1.0;
+        }
       }
       minDist = Math.round(minDist);
 
-      // console.log(x, y, i, minDist);
-
-      pixels[i]     = minDist; // R
-      pixels[i + 1] = minDist; // G
-      pixels[i + 2] = minDist; // B
+      pixels[i]     = side > 0.0 ? minDist : 0.0; // R
+      pixels[i + 1] = side > 0.0 ? 0.0 : minDist; // G
+      pixels[i + 2] = 0.0;     // B
       pixels[i + 3] = 255;     // A
     }
   }
@@ -158,23 +167,22 @@ function parseShape(
 
   // Draw control points/lines of curves
   ctx.strokeStyle = 'cyan';
-  for (const curve of projectedCurves.slice(0, 8)) {
+  for (const curve of projectedCurves) {
     ctx.moveTo(curve[0].x, curve[0].y);
     ctx.lineTo(curve[1].x, curve[1].y);
     ctx.lineTo(curve[2].x, curve[2].y);
     ctx.stroke();
-    ctx.closePath();
   }
 
   console.log('done');
 }
 
-export async function parseText(ctx: CanvasRenderingContext2D, text: string) {
+export async function parseText(ctx: CanvasRenderingContext2D, text: string, width: number, height: number) {
   const font = await loadFont("./MontserratAlternates-Medium.otf");
   const shape = Typr.U.shape(font, text, true);
   const path = Typr.U.shapeToPath(font, shape);
 
-  parseShape(path.cmds, path.crds, ctx);
+  parseShape(path.cmds, path.crds, ctx, 50, width, height);
 }
 
 export function findMinMax(crds: number[], koef: number = 1): Point[] {
