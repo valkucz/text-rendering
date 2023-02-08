@@ -1,7 +1,7 @@
 // parsing text
 import { Typr } from "./Typr";
 import { Point, drawBezier, fillGlyph } from "./draw";
-import { cubicToQuadratic } from "./decasteljau";
+import { cubicToQuadratic, sdBezier } from "./decasteljau";
 
 async function loadFont(url: string) {
   const response: Response = await fetch(url);
@@ -22,12 +22,6 @@ function parseShape(
   segments: number = 50
 ) {
   console.log(crds, cmds);
-  const scale: number = 350 / 1000;
-  const x = 0;
-  const y = 350;
-
-  ctx.translate(x, y);
-  ctx.scale(scale, -scale);
 
   let pos: number = 0;
   let points: Point[] = [];
@@ -59,7 +53,7 @@ function parseShape(
         // FIX: middle point 2times rendered
         cubicToQuadratic(points).forEach((qpoints) => {
           // fillCurve(qpoints, ctx);
-          drawBezier(qpoints, segments, ctx);
+          //drawBezier(qpoints, segments, ctx);
           quadraticCurves.push(qpoints);
         });
         points = [];
@@ -90,11 +84,89 @@ function parseShape(
     }
   });
 
-  let minmax = findMinMax(crds);
-  fillGlyph(minmax[0], minmax[1], quadraticCurves, ctx);
+  console.log('curves', quadraticCurves);
 
-  ctx.scale(1 / scale, -1 / scale);
-  ctx.translate(-x, -y);
+  // Normalize curves
+  let minmax = findMinMax(crds); // Find bounding box
+  let min = minmax[0];
+  let max = minmax[1];
+
+  // Find center by which all the points are moved to be centered
+  // around point [0, 0]
+  let center = new Point(0.5 * (max.x + min.x), 0.5 * (max.y - min.y));
+  let scale = Math.max(Math.abs(max.x - min.x), Math.abs(max.y - min.y));
+
+  const normalizedCurves = quadraticCurves.map(cs => cs.map(c => new Point(
+    (c.x - center.x) / scale,
+    (c.y - center.y) / scale,
+  )));
+
+  console.log(normalizedCurves);
+
+  // Calculate projected curves
+  const projectedCurves = normalizedCurves.map(cs => cs.map(c => new Point(
+    c.x * 128 + innerWidth * 0.5,
+    c.y * 128 + innerHeight * 0.5,
+  )));
+
+  // Draw bounding box of projected curves
+  let minBoundingBox = new Point(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+  let maxBoundingBox = new Point(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+  projectedCurves.forEach(cs => cs.forEach(c => {
+    minBoundingBox.x = Math.min(minBoundingBox.x, c.x);
+    minBoundingBox.y = Math.min(minBoundingBox.y, c.y);
+
+    maxBoundingBox.x = Math.max(maxBoundingBox.x, c.x);
+    maxBoundingBox.y = Math.max(maxBoundingBox.y, c.y);
+  }));
+  minBoundingBox.x -= 64;
+  minBoundingBox.y -= 64;
+  maxBoundingBox.x += 64;
+  maxBoundingBox.y += 64;
+
+  ctx.strokeStyle = 'purple';
+  ctx.strokeRect(
+    minBoundingBox.x, minBoundingBox.y,
+    maxBoundingBox.x - minBoundingBox.x, maxBoundingBox.y - minBoundingBox.y);
+
+  // Draw absolute shortest distance
+  let id = ctx.getImageData(0, 0, 1356, 681);
+  let pixels = id.data;
+
+  for (let x = minBoundingBox.x; x < maxBoundingBox.x; x++) {
+    for (let y = minBoundingBox.y; y < maxBoundingBox.y; y++) {
+      let i = (Math.round(y) * id.width + Math.round(x)) * 4;
+
+      let minDist = 100000.0;
+      for (const curve of projectedCurves.slice(0, 8)) {
+        let point = new Point(x, y);
+
+        minDist = Math.min(minDist, Math.abs(sdBezier(point, curve)));
+      }
+      minDist = Math.round(minDist);
+
+      // console.log(x, y, i, minDist);
+
+      pixels[i]     = minDist; // R
+      pixels[i + 1] = minDist; // G
+      pixels[i + 2] = minDist; // B
+      pixels[i + 3] = 255;     // A
+    }
+  }
+
+  ctx.putImageData(id, 0, 0);
+
+  // Draw control points/lines of curves
+  ctx.strokeStyle = 'cyan';
+  for (const curve of projectedCurves.slice(0, 8)) {
+    ctx.moveTo(curve[0].x, curve[0].y);
+    ctx.lineTo(curve[1].x, curve[1].y);
+    ctx.lineTo(curve[2].x, curve[2].y);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  console.log('done');
 }
 
 export async function parseText(ctx: CanvasRenderingContext2D, text: string) {

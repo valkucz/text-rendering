@@ -88,10 +88,12 @@ class CanvasController {
     var dpr = window.devicePixelRatio || 1;
     // Get the size of the canvas in CSS pixels.
     var rect = this.canvas.getBoundingClientRect();
+
+    console.log(dpr, rect, rect.width * dpr);
     // Give the canvas pixel dimensions of their CSS
     // size * the device pixel ratio.
-    this.canvas.width = rect.width * dpr * 3;
-    this.canvas.height = rect.height * dpr * 3;
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
     // this.ctx.scale(1, -1);
     this.ctx.strokeStyle = "black";
     this.canvas.style.cursor = "crosshair";
@@ -172,18 +174,18 @@ buttonController.addEventListener(
 );
 canvasController.addEventListener(pointsController);
 
-function testSdBezierLine(ctx: CanvasRenderingContext2D) {
-  let min = new Point(176, 276);
-  let max = new Point(647, 401);
-  // control points of quadratic bezier
-  let points = [new Point(197, 395), new Point(399, 120), new Point(635, 388)];
+// function testSdBezierLine(ctx: CanvasRenderingContext2D) {
+//   let min = new Point(176, 276);
+//   let max = new Point(647, 401);
+//   // control points of quadratic bezier
+//   let points = [new Point(197, 395), new Point(399, 120), new Point(635, 388)];
 
-  fill(min, max, points, ctx);
-  drawBezier(points, 17, ctx);
-}
+//   fill(min, max, points, ctx);
+//   drawBezier(points, 17, ctx);
+// }
 
 function testSdBezierLetter() {
-  parseText(canvasController.ctx, "i");
+  parseText(canvasController.ctx, "O");
 }
 // testSdBezierLine(canvasController.ctx);
 testSdBezierLetter();

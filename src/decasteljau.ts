@@ -1,4 +1,4 @@
-import { acos, cos, max, min, sin, sqrt } from "mathjs";
+// import { acos, cos, max, min, sin, sqrt } from "mathjs";
 import { Point } from "./draw";
 const gamma = 0.5;
 
@@ -55,7 +55,7 @@ export function cubicToQuadratic(cubicPoints: Point[]): Point[][] {
   return [quadraticPoints1, quadraticPoints2];
 }
 
-export function sdBezier(pos: Point, points: Point[]): number | math.Complex {
+export function sdBezier(pos: Point, points: Point[]): number {
   if (points.length !== 3) {
     throw new Error(
       " quadratic bezier line needs to have 3 control points, now it has: " +
@@ -84,15 +84,16 @@ export function sdBezier(pos: Point, points: Point[]): number | math.Complex {
       .sign()
       .multiplyPoint(x.abs().pow(new Point(1.0 / 3.0, 1.0 / 3.0)));
     const t = clamp(uv.x + uv.y - kx, 0.0, 1.0);
-    return sqrt(d.add(c.add(b.multiply(t)).multiply(t)).dot2());
+    return Math.sqrt(d.add(c.add(b.multiply(t)).multiply(t)).dot2());
   }
-  const z = sqrt(-p);
-  const v = acos(q / (p * z * 2.0)) / 3.0;
-  const m = cos(v);
-  const n = sin(v) * 1.732050808;
-  const t = new Point(m + m, -n - m).multiply(z).substract(kx).clamp(0.0, 1.0);
-  return sqrt(
-    min(
+  const z = Math.sqrt(-p);
+  const v = Math.acos(q / (p * z * 2.0)) / 3.0;
+  const m = Math.cos(v);
+  const n = Math.sin(v) * 1.732050808;
+  const t = new Point(m + m, -n - m).multiply(z).substract(new Point(kx, kx)).clamp(0.0, 1.0);
+
+  return Math.sqrt(
+    Math.min(
       d.add(c.add(b.multiply(t.x).multiply(t.x))).dot2(),
       d.add(c.add(b.multiply(t.y).multiply(t.y))).dot2()
     )
@@ -109,7 +110,7 @@ export function sdLine(p: Point, a: Point, b: Point): number {
 }
 
 export function clamp(value: number, minimum: number, maximum: number) {
-  return max(min(value, maximum), minimum);
+  return Math.max(Math.min(value, maximum), minimum);
 }
 
 function windingNumberCalculation(points: Point[]): number {
