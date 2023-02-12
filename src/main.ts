@@ -65,7 +65,7 @@ const controlPoints2: vec2[] = [
   vec2.fromValues(450, 388),
 ];
 
-const renderer = await initializeWebGPU([]);
+// const renderer = await initializeWebGPU([]);
 
 if (renderer) {
 
