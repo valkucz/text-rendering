@@ -3,7 +3,6 @@ import { solveDeCasteljau } from "./bezier";
 import { sdBezier } from "./distanceFunctions";
 import { isInsideGlyph } from "./winding";
 
-
 export function getCanvasPoint(e: MouseEvent, canvas: HTMLCanvasElement) {
   let rect = canvas.getBoundingClientRect();
   const res = vec2.fromValues(Math.ceil(
