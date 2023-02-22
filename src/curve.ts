@@ -1,4 +1,4 @@
-import { vec2 } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 import { getBezier } from "./bezier";
 import { Vertices } from "./rendering/renderer";
 import { VertexBuffer } from "./vertexBuffer";
@@ -14,7 +14,7 @@ export class Curve implements VertexBuffer {
 
   usage: number = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 
-  constructor(device: GPUDevice, vertices: vec2[]) {
+  constructor(device: GPUDevice, vertices: vec3[]) {
     this.device = device;
 
     // vertices represent 3 control points of bezier line
@@ -31,7 +31,7 @@ export class Curve implements VertexBuffer {
 
     this.bufferLayout = {
       // 2 * (32b = 4B) = 8
-      arrayStride: 20,
+      arrayStride: 24,
       attributes: [
         {
           shaderLocation: 0,
@@ -41,18 +41,18 @@ export class Curve implements VertexBuffer {
         {
           shaderLocation: 1,
           format: "float32x3",
-          offset: 8,
+          offset: 12,
         },
       ],
     };
   }
 
   getVertexCount():number {
-    return this.vertices.length / 5;
+    return this.vertices.length / 6;
   }
 
 
-  update(vertices: vec2[]): void {
+  update(vertices: vec3[]): void {
     this.vertices = getBezier(vertices);
 
     this.buffer = this.device.createBuffer({

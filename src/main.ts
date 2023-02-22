@@ -1,4 +1,4 @@
-import { vec2 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 // import { ButtonController, CanvasController2D, PointsController, SliderController } from "./controllers";
 // import { drawBezier, fill } from "./draw";
 // import { parseText } from "./fonts";
@@ -8,13 +8,12 @@ import { Curve } from "./curve";
 import { parseText } from "./fonts";
 import { Glyph } from "./glyph";
 
-
 /**
  * Initialization of WebGPU device, adapter.
  * @param vertices
  * @returns renderer if no error occured
  */
-async function initializeWebGPU(vertices: vec2[]): Promise<Renderer|void> {
+async function initializeWebGPU(vertices: vec3[]): Promise<Renderer | void> {
   console.log(navigator.gpu);
   if (!("gpu" in navigator)) {
     console.error("User agent doesn’t support WebGPU.");
@@ -32,10 +31,10 @@ async function initializeWebGPU(vertices: vec2[]): Promise<Renderer|void> {
   const device: GPUDevice = <GPUDevice>await adapter.requestDevice();
 
   const curveBuffer = new Curve(device, vertices);
+  console.log(curveBuffer);
 
   return new Renderer(ctx, device, curveBuffer);
 }
-
 
 // set canvas
 const canvas = <HTMLCanvasElement>document.getElementById("canvas");
@@ -51,28 +50,57 @@ var rect = canvas.getBoundingClientRect();
 canvas.width = rect.width * dpr * 3;
 canvas.height = rect.height * dpr * 3;
 
-export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
+export const conversionFactor = vec3.fromValues(canvas.width, canvas.height, 1);
 export const segments: number = 20;
 
-const controlPoints1: vec2[] = [
-  vec2.fromValues(197, 395),
-  vec2.fromValues(399, 120),
-  vec2.fromValues(635, 388),
+const controlPoints1: vec3[] = [
+  vec3.fromValues(197, 395, 0),
+  vec3.fromValues(399, 120, 0),
+  vec3.fromValues(635, 388, 0),
 ];
-const controlPoints2: vec2[] = [
-  vec2.fromValues(197, 395),
-  vec2.fromValues(399, 120),
-  vec2.fromValues(450, 388),
+const controlPoints2: vec3[] = [
+  vec3.fromValues(197, 395, 0),
+  vec3.fromValues(399, 120, 0),
+  vec3.fromValues(450, 388, 0),
 ];
 
-// const renderer = await initializeWebGPU([]);
-
+const renderer = await initializeWebGPU(controlPoints2);
+let t = 0;
+let x = -1;
+let vec: vec3 = [0, 0, 1];
 if (renderer) {
+  renderer.render(t, x, vec);
+  document.addEventListener("keypress", (event) => {
+    switch (event.key) {
+      case "d":
+        t += 0.1;
+        renderer.render(t, x, vec);
+        break;
+      case "a":
+        t -= 0.1;
+        renderer.render(t, x, vec);
+        break;
+      case "c":
+        x -= 0.1;
+        renderer.render(t, x, vec);
+        break;
+      case "x":
+        vec = [1, 0, 0];
+        renderer.render(t, x, vec);
+        break;
+      case "y":
+        vec = [0, 1, 0];
+        renderer.render(t, x, vec);
+        break;
+      case "z":
+        vec = [0, 0, 1];
+        renderer.render(t, x, vec);
+        break;
 
-  renderer.render(controlPoints1);
+    }
+    console.log(event.key, event.code, event);
+  });
 }
-
-
 // CTX 2D:
 
 // let drawBtn = <HTMLButtonElement>document.getElementById("drawBtn");
