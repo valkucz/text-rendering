@@ -10,7 +10,7 @@ struct Fragment {
     @location(0) Color : vec4<f32>
 };
 
-
+// TODO: split vertex and fragment into separate files
 @vertex
 fn vs_main(@location(0) vertexPosition: vec3<f32>, @location(1) vertexColor: vec3<f32>) -> Fragment {
 

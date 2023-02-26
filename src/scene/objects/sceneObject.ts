@@ -1,12 +1,14 @@
-// TODO: make this abstract class to avoid repetitve code in Curve and Glyph
-export interface VertexBuffer {
-  buffer: GPUBuffer;
+import { mat4 } from "gl-matrix";
 
-  bufferLayout: GPUVertexBufferLayout;
+// TODO: make this abstract class to avoid repetitve code in Curve and Glyph
+export interface SceneObject {
+  buffer: GPUBuffer;
 
   vertices: Float32Array;
 
   device: GPUDevice;
+
+  model: mat4;
 
   usage: number;
 

@@ -1,7 +1,7 @@
-import { mat4, vec2, vec3 } from "gl-matrix";
-import shader from "../../shaders/shaders.wgsl";
-import { conversionFactor } from "../main";
-import { VertexBuffer } from "../vertexBuffer";
+import { vec2, vec3 } from "gl-matrix";
+import shader from "../shaders/shaders.wgsl";
+import { SceneObject } from "../scene/objects/sceneObject";
+import { Camera } from "../scene/camera";
 
 export type Vertices = vec3[] | vec2[] | vec2[][];
 
@@ -10,25 +10,20 @@ export class Renderer {
   device: GPUDevice;
   format: GPUTextureFormat;
   pipeline: GPURenderPipeline;
-  vertexBuffer: VertexBuffer;
   bindGroup: GPUBindGroup;
   uniformBuffer: GPUBuffer;
-
-  // matrices
-  model: mat4;
-  view: mat4;
-  projection: mat4;
+  camera: Camera;
 
   constructor(
     ctx: GPUCanvasContext,
     device: GPUDevice,
-    vertexBuffer: VertexBuffer,
+    camera: Camera,
     format: GPUTextureFormat = "bgra8unorm"
   ) {
     this.ctx = ctx;
     this.device = device;
     this.format = format;
-    this.vertexBuffer = vertexBuffer;
+    this.camera = camera;
 
     this.ctx.configure({
       device: device,
@@ -38,48 +33,63 @@ export class Renderer {
 
     this.uniformBuffer = this.device.createBuffer({
       size: 64 * 3,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-  });
-
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
 
     // create pipeline
     this.pipeline = this.createPipeline();
   }
 
   createPipeline(): GPURenderPipeline {
-  
     const bindGroupLayout = this.device.createBindGroupLayout({
       entries: [
-          {
-              binding: 0,
-              visibility: GPUShaderStage.VERTEX,
-              buffer: {}
-          }
-      ]
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {},
+        },
+      ],
+    });
 
-  });
-
-  this.bindGroup = this.device.createBindGroup({
+    this.bindGroup = this.device.createBindGroup({
       layout: bindGroupLayout,
       entries: [
-          {
-              binding: 0,
-              resource: {
-                  buffer: this.uniformBuffer
-              }
-          }
-      ]
-  });
-  const pipelineLayout = this.device.createPipelineLayout({
-    bindGroupLayouts: [bindGroupLayout]
-});
+        {
+          binding: 0,
+          resource: {
+            buffer: this.uniformBuffer,
+          },
+        },
+      ],
+    });
+
+    const pipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    const bufferLayout: GPUVertexBufferLayout = {
+      arrayStride: 24,
+      attributes: [
+        {
+          shaderLocation: 0,
+          format: "float32x3",
+          offset: 0,
+        },
+        {
+          shaderLocation: 1,
+          format: "float32x3",
+          offset: 12,
+        },
+      ],
+    };
+
     return this.device.createRenderPipeline({
       vertex: {
         module: this.device.createShaderModule({
           code: shader,
         }),
         entryPoint: "vs_main",
-        buffers: [this.vertexBuffer.bufferLayout],
+        buffers: [bufferLayout],
       },
       fragment: {
         module: this.device.createShaderModule({
@@ -93,53 +103,48 @@ export class Renderer {
         ],
       },
       primitive: {
-        topology: "line-strip",
+        topology: "triangle-list",
       },
       layout: pipelineLayout,
     });
   }
 
-  render(t: number, x: number, vec: vec3) {
-    const commandEncoder: GPUCommandEncoder = this.device.createCommandEncoder();
+  render(objects: SceneObject[]) {
+    const commandEncoder: GPUCommandEncoder =
+      this.device.createCommandEncoder();
     // update vertices in the Curve class
     // this.vertexBuffer.update(vertices);
-    
-    this.model = mat4.create();
-    this.projection = mat4.create();
-    this.view = mat4.create();
 
-    // project matrix
-    mat4.perspective(this.projection, Math.PI / 4, conversionFactor[0] / conversionFactor[1], 0.1, 10);
-    // lookAt view matrix
-    mat4.lookAt(this.view, [x, 0, 1], [0, 0, 0], [0, 0, 1]);
+    // inversion of view matrix
+    // const viewInverse = mat4.create();
+    // mat4.invert(viewInverse, this.camera.view);
     // rotate model matrix
-    mat4.rotate(this.model, this.model, t, vec)
-    
-    
-    this.device.queue.writeBuffer(this.uniformBuffer, 0, <ArrayBuffer>this.model);
-    this.device.queue.writeBuffer(this.uniformBuffer, 64, <ArrayBuffer>this.view);
-    this.device.queue.writeBuffer(this.uniformBuffer, 128, <ArrayBuffer>this.projection);
+    // mat4.rotate(this.model, this.model, 0, [0, 0, 0]);
+    this.device.queue.writeBuffer(this.uniformBuffer, 64, <ArrayBuffer>this.camera.view);
+    this.device.queue.writeBuffer(this.uniformBuffer, 128, <ArrayBuffer>this.camera.projection);
 
-    console.log(this.ctx.getCurrentTexture())
-    const textureView: GPUTextureView = this.ctx
-      .getCurrentTexture()
-      .createView();
+    const textureView: GPUTextureView = this.ctx.getCurrentTexture().createView();
+  
+    const renderpass: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: textureView,
+          clearValue: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
+          loadOp: "clear",
+          storeOp: "store",
+        },
+      ],
+    });
 
-    const renderpass: GPURenderPassEncoder =
-      commandEncoder.beginRenderPass({
-        colorAttachments: [
-          {
-            view: textureView,
-            clearValue: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
-            loadOp: "clear",
-            storeOp: "store",
-          },
-        ],
-      });
     renderpass.setPipeline(this.pipeline);
-    renderpass.setVertexBuffer(0, this.vertexBuffer.buffer);
-    renderpass.setBindGroup(0, this.bindGroup);
-    renderpass.draw(this.vertexBuffer.getVertexCount(), 1, 0, 0);
+
+    objects.forEach((object) => {
+      this.device.queue.writeBuffer(this.uniformBuffer, 0, <ArrayBuffer>object.model);
+      renderpass.setVertexBuffer(0, object.buffer);
+      renderpass.setBindGroup(0, this.bindGroup);
+      renderpass.draw(object.getVertexCount(), 1, 0, 0);
+    });
+
     renderpass.end();
 
     this.device.queue.submit([commandEncoder.finish()]);

@@ -1,19 +1,16 @@
-import { vec2, vec3 } from "gl-matrix";
-// import { ButtonController, CanvasController2D, PointsController, SliderController } from "./controllers";
-// import { drawBezier, fill } from "./draw";
-// import { parseText } from "./fonts";
+import { vec3 } from "gl-matrix";
 import "./style.css";
-import { Renderer, Vertices } from "./rendering/renderer";
-import { Curve } from "./curve";
-import { parseText } from "./fonts";
-import { Glyph } from "./glyph";
+import { Renderer } from "./rendering/renderer";
+import { Square } from "./scene/objects/square";
+import { Camera } from "./scene/camera";
+import { mapKeyToMoveDirection } from "./scene/moveDirection";
 
 /**
  * Initialization of WebGPU device, adapter.
  * @param vertices
  * @returns renderer if no error occured
  */
-async function initializeWebGPU(vertices: vec3[]): Promise<Renderer | void> {
+async function initializeWebGPU(): Promise<Renderer | void> {
   console.log(navigator.gpu);
   if (!("gpu" in navigator)) {
     console.error("User agent doesn’t support WebGPU.");
@@ -30,10 +27,10 @@ async function initializeWebGPU(vertices: vec3[]): Promise<Renderer | void> {
   // create device
   const device: GPUDevice = <GPUDevice>await adapter.requestDevice();
 
-  const curveBuffer = new Curve(device, vertices);
-  console.log(curveBuffer);
+  // create camera
+  const camera: Camera = new Camera();
 
-  return new Renderer(ctx, device, curveBuffer);
+  return new Renderer(ctx, device, camera);
 }
 
 // set canvas
@@ -50,6 +47,7 @@ var rect = canvas.getBoundingClientRect();
 canvas.width = rect.width * dpr * 3;
 canvas.height = rect.height * dpr * 3;
 
+// TODO: remove export
 export const conversionFactor = vec3.fromValues(canvas.width, canvas.height, 1);
 export const segments: number = 20;
 
@@ -64,94 +62,16 @@ const controlPoints2: vec3[] = [
   vec3.fromValues(450, 388, 0),
 ];
 
-const renderer = await initializeWebGPU(controlPoints2);
-let t = 0;
-let x = -1;
-let vec: vec3 = [0, 0, 1];
+const renderer = await initializeWebGPU();
 if (renderer) {
-  renderer.render(t, x, vec);
-  document.addEventListener("keypress", (event) => {
-    switch (event.key) {
-      case "d":
-        t += 0.1;
-        renderer.render(t, x, vec);
-        break;
-      case "a":
-        t -= 0.1;
-        renderer.render(t, x, vec);
-        break;
-      case "c":
-        x -= 0.1;
-        renderer.render(t, x, vec);
-        break;
-      case "x":
-        vec = [1, 0, 0];
-        renderer.render(t, x, vec);
-        break;
-      case "y":
-        vec = [0, 1, 0];
-        renderer.render(t, x, vec);
-        break;
-      case "z":
-        vec = [0, 0, 1];
-        renderer.render(t, x, vec);
-        break;
+  
+  const object = new Square(renderer.device);
+  renderer.render([object]);
 
-    }
-    console.log(event.key, event.code, event);
-  });
+  document.addEventListener("keydown", (event) => {
+    console.log(event.key);
+    renderer.camera.move(mapKeyToMoveDirection(event.key));
+    renderer.camera.updateView();
+    renderer.render([object]);
+  })
 }
-// CTX 2D:
-
-// let drawBtn = <HTMLButtonElement>document.getElementById("drawBtn");
-// let deleteBtn = <HTMLButtonElement>document.getElementById("deleteBtn");
-// if (!drawBtn || !deleteBtn) {
-//   throw new Error("");
-// }
-// // create slider controller
-// let slider = document.getElementById("slider");
-// if (!slider) {
-//   throw new Error("Slider is null or undefined");
-// }
-
-// let sliderValue = document.getElementById("sliderValue");
-// if (!sliderValue) {
-//   throw new Error("sliderValue is null or undefined");
-// }
-// // create points controller
-// let pointsDisplay = document.getElementById("pointsValue");
-// if (!pointsDisplay) {
-//   throw new Error("pointsDisplay is null or undefined");
-// }
-
-// let canvasController2D = new CanvasController2D(canvas, ctx);
-
-// let pointsController = new PointsController(pointsDisplay);
-
-// let sliderController = new SliderController(slider, sliderValue);
-
-// let buttonController = new ButtonController(drawBtn, deleteBtn);
-
-// sliderController.addEventListener();
-// buttonController.addEventListener(
-//   pointsController,
-//   canvasController2D,
-//   sliderController
-// );
-// canvasController2D.addEventListener(pointsController);
-
-// function testSdBezierLine(ctx: CanvasRenderingContext2D) {
-//     let min = vec2.fromValues(176, 276);
-//     let max = vec2.fromValues(647, 401);
-//     // control points of quadratic bezier
-//     let points = [vec2.fromValues(197, 395), vec2.fromValues(399, 120), vec2.fromValues(635, 388)];
-
-//     fill(min, max, points, ctx);
-//     drawBezier(points, 17, ctx);
-//   }
-
-//   function testSdBezierLetter() {
-//     parseText(canvasController2D.ctx, "a");
-//   }
-//   // testSdBezierLine(canvasController.ctx);
-//   testSdBezierLetter();
