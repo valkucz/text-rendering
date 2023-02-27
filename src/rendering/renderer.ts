@@ -2,6 +2,7 @@ import { vec2, vec3 } from "gl-matrix";
 import shader from "../shaders/shaders.wgsl";
 import { SceneObject } from "../scene/objects/sceneObject";
 import { Camera } from "../scene/camera";
+import { Square } from "../scene/objects/square";
 
 export type Vertices = vec3[] | vec2[] | vec2[][];
 
@@ -10,7 +11,7 @@ export class Renderer {
   device: GPUDevice;
   format: GPUTextureFormat;
   pipeline: GPURenderPipeline;
-  bindGroup: GPUBindGroup;
+  bindGroupLayout: GPUBindGroupLayout;
   uniformBuffer: GPUBuffer;
   camera: Camera;
 
@@ -25,49 +26,52 @@ export class Renderer {
     this.format = format;
     this.camera = camera;
 
+    // bind group layout
+    this.bindGroupLayout = this.createBindGroupLayout();
+
     this.ctx.configure({
       device: device,
       format: format,
       alphaMode: "premultiplied",
     });
 
-    this.uniformBuffer = this.device.createBuffer({
-      size: 64 * 3,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    // create uniform buffer
+    this.uniformBuffer = this.createUniformBuffer();
 
     // create pipeline
     this.pipeline = this.createPipeline();
   }
 
-  createPipeline(): GPURenderPipeline {
-    const bindGroupLayout = this.device.createBindGroupLayout({
+  createBindGroupLayout(): GPUBindGroupLayout {
+    return this.device.createBindGroupLayout({
       entries: [
         {
           binding: 0,
           visibility: GPUShaderStage.VERTEX,
-          buffer: {},
-        },
-      ],
-    });
-
-    this.bindGroup = this.device.createBindGroup({
-      layout: bindGroupLayout,
-      entries: [
-        {
-          binding: 0,
-          resource: {
-            buffer: this.uniformBuffer,
+          buffer: {
+            type: "uniform",
           },
         },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {
+            type: "uniform",
+          },
+        }
       ],
     });
+  }
 
-    const pipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
+  createUniformBuffer(): GPUBuffer {
+    return this.device.createBuffer({
+      size: 64 * 3,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
+  }
 
-    const bufferLayout: GPUVertexBufferLayout = {
+  createBufferLayout(): GPUVertexBufferLayout {
+    return {
       arrayStride: 24,
       attributes: [
         {
@@ -82,6 +86,33 @@ export class Renderer {
         },
       ],
     };
+  }
+  createBindGroup(buffer: GPUBuffer): GPUBindGroup {
+    return this.device.createBindGroup({
+      layout: this.bindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.uniformBuffer,
+          },
+        },
+        {
+          binding: 1,
+          resource: {
+            buffer: buffer,
+          },
+        }
+      ],
+    });
+  }
+
+  createPipeline(): GPURenderPipeline {
+    const pipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [this.bindGroupLayout],
+    });
+
+    const bufferLayout = this.createBufferLayout();
 
     return this.device.createRenderPipeline({
       vertex: {
@@ -109,22 +140,40 @@ export class Renderer {
     });
   }
 
-  render(objects: SceneObject[]) {
+  render(square: Square, object: SceneObject) {
+
+    const bindGroup = this.createBindGroup(square.buffer);
     const commandEncoder: GPUCommandEncoder =
       this.device.createCommandEncoder();
-    // update vertices in the Curve class
-    // this.vertexBuffer.update(vertices);
 
-    // inversion of view matrix
-    // const viewInverse = mat4.create();
-    // mat4.invert(viewInverse, this.camera.view);
-    // rotate model matrix
-    // mat4.rotate(this.model, this.model, 0, [0, 0, 0]);
-    this.device.queue.writeBuffer(this.uniformBuffer, 64, <ArrayBuffer>this.camera.view);
-    this.device.queue.writeBuffer(this.uniformBuffer, 128, <ArrayBuffer>this.camera.projection);
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      64,
+      <ArrayBuffer>this.camera.view
+    );
 
-    const textureView: GPUTextureView = this.ctx.getCurrentTexture().createView();
-  
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      128,
+      <ArrayBuffer>this.camera.projection
+    );
+    
+
+    
+    for (let i = 0; i < 18; i += 3) {
+      let offset = i * 4;
+      this.device.queue.writeBuffer(
+        square.buffer,
+        offset,
+        new Float32Array([square.v2[i], square.v2[i + 1], square.v2[i + 2]])
+      )
+    }
+
+    
+    const textureView: GPUTextureView = this.ctx
+      .getCurrentTexture()
+      .createView();
+
     const renderpass: GPURenderPassEncoder = commandEncoder.beginRenderPass({
       colorAttachments: [
         {
@@ -138,12 +187,17 @@ export class Renderer {
 
     renderpass.setPipeline(this.pipeline);
 
-    objects.forEach((object) => {
-      this.device.queue.writeBuffer(this.uniformBuffer, 0, <ArrayBuffer>object.model);
+    renderpass.setBindGroup(0, bindGroup);
+
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      0,
+      <ArrayBuffer>object.model);
+      // set bindGroup for objects at location 1
+      
       renderpass.setVertexBuffer(0, object.buffer);
-      renderpass.setBindGroup(0, this.bindGroup);
       renderpass.draw(object.getVertexCount(), 1, 0, 0);
-    });
+    ;
 
     renderpass.end();
 

@@ -1,5 +1,6 @@
 import { mat4, vec3 } from "gl-matrix";
 import { getBezier } from "../../bezier";
+import { vec3ToFloat32 } from "../../math";
 import { SceneObject } from "./sceneObject";
 
 export class Curve implements SceneObject {
@@ -16,10 +17,12 @@ export class Curve implements SceneObject {
   constructor(device: GPUDevice, vertices: vec3[]) {
     this.device = device;
 
-    mat4.translate(this.model, this.model, [0, 0, 0]);
+    mat4.rotateY(this.model, this.model, Math.PI / 2);
+    mat4.scale(this.model, this.model, [0.5, 0.5, 0.5]);
+    // mat4.translate(this.model, this.model, [0, 0, 0]);
 
     // vertices represent 3 control points of bezier line
-    this.vertices = getBezier(vertices);
+    this.vertices = vec3ToFloat32(vertices);
 
     this.buffer = this.device.createBuffer({
       size: this.vertices.byteLength,

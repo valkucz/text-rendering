@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix";
 import { segments } from "./main";
-import { normalizeVec3 } from "./math";
+import { normalizeVec3, vec3ToFloat32 } from "./math";
 
 const gamma = 0.5;
 
@@ -76,12 +76,7 @@ export function getBezier(vertices: vec3[]): Float32Array {
   let float32Array = new Float32Array(normalizedPoints.length * 6);
   float32Array.fill(0);
 
-  for (let i = 0; i < allPoints.length; i++) {
-    float32Array[i * 6] = normalizedPoints[i][0];
-    float32Array[i * 6 + 1] = normalizedPoints[i][1];
-    float32Array[i * 6 + 2] = normalizedPoints[i][2];
-  }
-  return float32Array;
+  return vec3ToFloat32(normalizedPoints);
 }
 
 export function getBezierGlyph(glyph: vec3[][]): Float32Array {

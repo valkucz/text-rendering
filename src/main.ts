@@ -4,6 +4,7 @@ import { Renderer } from "./rendering/renderer";
 import { Square } from "./scene/objects/square";
 import { Camera } from "./scene/camera";
 import { mapKeyToMoveDirection } from "./scene/moveDirection";
+import { Curve } from "./scene/objects/curve";
 
 /**
  * Initialization of WebGPU device, adapter.
@@ -49,7 +50,7 @@ canvas.height = rect.height * dpr * 3;
 
 // TODO: remove export
 export const conversionFactor = vec3.fromValues(canvas.width, canvas.height, 1);
-export const segments: number = 20;
+export const segments: number = 15;
 
 const controlPoints1: vec3[] = [
   vec3.fromValues(197, 395, 0),
@@ -65,13 +66,15 @@ const controlPoints2: vec3[] = [
 const renderer = await initializeWebGPU();
 if (renderer) {
   
-  const object = new Square(renderer.device);
-  renderer.render([object]);
+  const square = new Square(renderer.device);
+  const curve = new Curve(renderer.device, controlPoints1);
+
+  renderer.render(square, curve);
 
   document.addEventListener("keydown", (event) => {
     console.log(event.key);
     renderer.camera.move(mapKeyToMoveDirection(event.key));
     renderer.camera.updateView();
-    renderer.render([object]);
+    renderer.render(square, curve);
   })
 }
