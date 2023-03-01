@@ -64,17 +64,18 @@ const controlPoints2: vec3[] = [
 ];
 
 const renderer = await initializeWebGPU();
+
 if (renderer) {
   
   const square = new Square(renderer.device);
   const curve = new Curve(renderer.device, controlPoints1);
 
-  renderer.render(square, curve);
+  renderer.render(curve);
 
   document.addEventListener("keydown", (event) => {
     console.log(event.key);
     renderer.camera.move(mapKeyToMoveDirection(event.key));
     renderer.camera.updateView();
-    renderer.render(square, curve);
+    renderer.render(curve);
   })
 }

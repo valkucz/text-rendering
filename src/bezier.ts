@@ -1,9 +1,10 @@
 import { vec3 } from "gl-matrix";
 import { segments } from "./main";
 import { normalizeVec3, vec3ToFloat32 } from "./math";
-
+// TODO: back to vec2
 const gamma = 0.5;
 
+// not needed
 function deCasteljau(points: vec3[], t: number): vec3 {
   if (points.length == 1) {
     return points[0];
@@ -20,6 +21,7 @@ function deCasteljau(points: vec3[], t: number): vec3 {
   }
 }
 
+// not needed.
 export function solveDeCasteljau(points: vec3[], segments: number): vec3[] {
   let res: vec3[] = [];
   for (let i = 0; i < segments; i++) {
@@ -63,22 +65,28 @@ export function cubicToQuadratic(cubicPoints: vec3[]): vec3[][] {
 
   return [quadraticPoints1, quadraticPoints2];
 }
-
+// TODO: delete later; no need
 export function getBezier(vertices: vec3[]): Float32Array {
   if (vertices.length == 0) {
     return new Float32Array();
   }
   const allPoints: vec3[] = solveDeCasteljau(vertices, segments);
-  const normalizedPoints: vec3[] = allPoints.map((point) =>
-    normalizeVec3(point)
-  );
+  // No need for normalization now; later in shader after winding number calculation
 
-  let float32Array = new Float32Array(normalizedPoints.length * 6);
+  // const normalizedPoints: vec3[] = allPoints.map((point) =>
+  //   normalizeVec3(point)
+  // );
+
+  // TODO: later change to 2
+  // 3 = vec3 
+  let float32Array = new Float32Array(allPoints.length * 3);
   float32Array.fill(0);
 
-  return vec3ToFloat32(normalizedPoints);
+  return vec3ToFloat32(allPoints);
 }
 
+// TODO: delete later
+// no need for deCastaleju for GPU.
 export function getBezierGlyph(glyph: vec3[][]): Float32Array {
 
   const length = glyph.length * segments * 5;

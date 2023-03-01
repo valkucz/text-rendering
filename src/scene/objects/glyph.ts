@@ -17,6 +17,8 @@ export class Glyph implements SceneObject {
 
     mat4.translate(this.model, this.model, [0, 0, 0]);
 
+    // TODO: only control points from Typr;
+    // only to float 32
     this.vertices = getBezierGlyph(vertices);
 
     this.buffer = this.device.createBuffer({
@@ -24,12 +26,14 @@ export class Glyph implements SceneObject {
       usage: this.usage,
       mappedAtCreation: true,
     });
+    // no need
     new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
 
     this.buffer.unmap();
   }
   
   getVertexCount(): number {
+    // TODO: only 3?
     return this.vertices.length / 6;
   }
 

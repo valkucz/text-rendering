@@ -27,14 +27,17 @@ export function normalizeVec3(vec: vec3): vec3 {
   
 }
 
+// TODO: back to vec2
 export function vec3ToFloat32(vertices: vec3[]) : Float32Array {
-  let float32Array = new Float32Array(vertices.length * 6);
+  // TODO: change to 2 later, no need for 3 vertices i guesss 
+  // 3 = vec3
+  let float32Array = new Float32Array(vertices.length * 3);
   float32Array.fill(0);
 
   for (let i = 0; i < vertices.length; i++) {
-    float32Array[i * 6] = vertices[i][0];
-    float32Array[i * 6 + 1] = vertices[i][1];
-    float32Array[i * 6 + 2] = vertices[i][2];
+    float32Array[i] = vertices[i][0];
+    float32Array[i + 1] = vertices[i][1];
+    float32Array[i + 2] = vertices[i][2];
   }
 
   return float32Array;

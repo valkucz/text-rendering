@@ -12,8 +12,9 @@ export class Curve implements SceneObject {
 
   model: mat4 = mat4.create();
 
-  usage: number = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+  usage: number = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
 
+  // TODO: vec2
   constructor(device: GPUDevice, vertices: vec3[]) {
     this.device = device;
 
@@ -21,6 +22,7 @@ export class Curve implements SceneObject {
     mat4.scale(this.model, this.model, [0.5, 0.5, 0.5]);
     // mat4.translate(this.model, this.model, [0, 0, 0]);
 
+    // TODO: change this to vec2
     // vertices represent 3 control points of bezier line
     this.vertices = vec3ToFloat32(vertices);
 
@@ -29,13 +31,16 @@ export class Curve implements SceneObject {
       usage: this.usage,
       mappedAtCreation: true,
     });
-    new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
+
+    // Why this is needed?
+    // new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
 
     this.buffer.unmap();
   }
 
   getVertexCount():number {
-    return this.vertices.length / 6;
+    // TODO: later change to 2; vec2 instead of vec3
+    return this.vertices.length / 3;
   }
 
 

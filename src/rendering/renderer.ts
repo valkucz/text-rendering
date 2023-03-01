@@ -140,12 +140,15 @@ export class Renderer {
     });
   }
 
-  render(square: Square, object: SceneObject) {
+  render(object: SceneObject) {
 
-    const bindGroup = this.createBindGroup(square.buffer);
+    const bindGroup = this.createBindGroup(object.buffer);
+
     const commandEncoder: GPUCommandEncoder =
       this.device.createCommandEncoder();
 
+
+    // Camera attribtues
     this.device.queue.writeBuffer(
       this.uniformBuffer,
       64,
@@ -157,18 +160,18 @@ export class Renderer {
       128,
       <ArrayBuffer>this.camera.projection
     );
-    
 
-    
-    for (let i = 0; i < 18; i += 3) {
-      let offset = i * 4;
-      this.device.queue.writeBuffer(
-        square.buffer,
-        offset,
-        new Float32Array([square.v2[i], square.v2[i + 1], square.v2[i + 2]])
-      )
-    }
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      0,
+      <ArrayBuffer>object.model);
 
+    this.device.queue.writeBuffer(
+      object.buffer,
+      0,
+      object.vertices.buffer
+    )
+    
     
     const textureView: GPUTextureView = this.ctx
       .getCurrentTexture()
@@ -188,16 +191,9 @@ export class Renderer {
     renderpass.setPipeline(this.pipeline);
 
     renderpass.setBindGroup(0, bindGroup);
-
-    this.device.queue.writeBuffer(
-      this.uniformBuffer,
-      0,
-      <ArrayBuffer>object.model);
-      // set bindGroup for objects at location 1
       
-      renderpass.setVertexBuffer(0, object.buffer);
-      renderpass.draw(object.getVertexCount(), 1, 0, 0);
-    ;
+    // renderpass.setVertexBuffer(0, object.buffer);
+    // renderpass.draw(object.getVertexCount(), 1, 0, 0);
 
     renderpass.end();
 

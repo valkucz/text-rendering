@@ -1,6 +1,7 @@
 import { mat4 } from "gl-matrix";
 import { SceneObject } from "./sceneObject";
 
+// TODO: not needed anymore?
 export class Square implements SceneObject {
     buffer: GPUBuffer;
 
@@ -51,7 +52,7 @@ export class Square implements SceneObject {
         });
 
         // new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
-        // this.buffer.unmap();
+        this.buffer.unmap();
 
     }
     getVertexCount(): number {
