@@ -1,5 +1,7 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, vec2, vec3 } from "gl-matrix";
 import { getBezierGlyph } from "../../bezier";
+import { conversionFactor } from "../../main";
+import { vec2ToFloat32 } from "../../math";
 import { SceneObject } from "./sceneObject";
 
 export class Glyph implements SceneObject {
@@ -11,46 +13,35 @@ export class Glyph implements SceneObject {
 
     model: mat4 = mat4.create();
   
-    usage: number = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
-  constructor(device: GPUDevice, vertices: vec3[][]) {
+    usage: number = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+  constructor(device: GPUDevice, vertices: vec2[][]) {
     this.device = device;
 
     mat4.translate(this.model, this.model, [0, 0, 0]);
 
-    // TODO: only control points from Typr;
-    // only to float 32
-    this.vertices = getBezierGlyph(vertices);
+    // TODO: make prettier
+    // TODO: or send conversionFactor with camera matrices
+    this.vertices = vec2ToFloat32([conversionFactor].concat(vertices.flat()));
 
     this.buffer = this.device.createBuffer({
       size: this.vertices.byteLength,
       usage: this.usage,
       mappedAtCreation: true,
     });
-    // no need
+    // TODO: no need
     new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
 
     this.buffer.unmap();
+  }
+  // TODO: delete from SceneObject
+  update(vertices: any[]): void {
+    throw new Error("Method not implemented.");
   }
   
   getVertexCount(): number {
-    // TODO: only 3?
-    return this.vertices.length / 6;
+    // + conversion factor
+    return this.vertices.length / 2 + 1;
   }
 
-  update(vertices: vec3[][]): void {
-    if (vertices.length === 0) {
-        return;
-    }
-    this.vertices = getBezierGlyph(vertices);
 
-    this.buffer = this.device.createBuffer({
-      size: this.vertices.byteLength,
-      usage: this.usage,
-      mappedAtCreation: true,
-    });
-
-    new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
-
-    this.buffer.unmap();
-  }
 }

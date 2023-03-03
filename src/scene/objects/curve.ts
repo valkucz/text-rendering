@@ -3,6 +3,7 @@ import { getBezier } from "../../bezier";
 import { vec3ToFloat32 } from "../../math";
 import { SceneObject } from "./sceneObject";
 
+// No need for this class
 export class Curve implements SceneObject {
   buffer: GPUBuffer;
 

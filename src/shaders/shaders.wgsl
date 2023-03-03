@@ -19,10 +19,17 @@ struct Fragment {
     // @location(0) Color : vec4<f32>
 };
 
+// TODO: rename
+struct SceneObject {
+    width: i32,
+    height: i32,
+    glyph: array<vec3<f32>, 100>,
+
+}
+
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
-// TODO: only vec2
-@binding(1) @group(0) var<uniform> curve: array<vec3<f32>, 3>;
-// bind here also conversionFactor as uniform buffer, for normalization
+@binding(1) @group(0) var<uniform> glyph: SceneObject;
+
 
 const SEGMENTS: u32 = 20;
 

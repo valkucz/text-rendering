@@ -18,15 +18,6 @@ export function powVec2(vec: vec2, exponent: number): vec2 {
     return vec2.fromValues(Math.pow(vec[0], exponent), Math.pow(vec[1], exponent));
   }
 
-
-export function normalizeVec3(vec: vec3): vec3 {
-  let normalized: vec3 = vec3.create();
-
-  vec3.divide(normalized, vec, conversionFactor);
-  return normalized;
-  
-}
-
 // TODO: back to vec2
 export function vec3ToFloat32(vertices: vec3[]) : Float32Array {
   // TODO: change to 2 later, no need for 3 vertices i guesss 
@@ -38,6 +29,18 @@ export function vec3ToFloat32(vertices: vec3[]) : Float32Array {
     float32Array[i] = vertices[i][0];
     float32Array[i + 1] = vertices[i][1];
     float32Array[i + 2] = vertices[i][2];
+  }
+
+  return float32Array;
+}
+
+export function vec2ToFloat32(vertices: vec2[]) : Float32Array {
+  let float32Array = new Float32Array(vertices.length * 2);
+  float32Array.fill(0);
+
+  for (let i = 0; i < vertices.length; i++) {
+    float32Array[i] = vertices[i][0];
+    float32Array[i + 1] = vertices[i][1];
   }
 
   return float32Array;

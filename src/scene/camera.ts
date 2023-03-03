@@ -63,7 +63,6 @@ export class Camera {
     }
 
     updateView() {
-        // TODO: move this to shader???
         this.front[0] = cos(glm.toRadian(this.yaw)) * cos(glm.toRadian(this.pitch));
         this.front[1] = sin(glm.toRadian(this.pitch));
         this.front[2] = sin(glm.toRadian(this.yaw)) * cos(glm.toRadian(this.pitch));

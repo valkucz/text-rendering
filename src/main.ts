@@ -1,10 +1,12 @@
-import { vec3 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 import "./style.css";
 import { Renderer } from "./rendering/renderer";
 import { Square } from "./scene/objects/square";
 import { Camera } from "./scene/camera";
 import { mapKeyToMoveDirection } from "./scene/moveDirection";
 import { Curve } from "./scene/objects/curve";
+import { parseText } from "./fonts";
+import { Glyph } from "./scene/objects/glyph";
 
 /**
  * Initialization of WebGPU device, adapter.
@@ -49,7 +51,7 @@ canvas.width = rect.width * dpr * 3;
 canvas.height = rect.height * dpr * 3;
 
 // TODO: remove export
-export const conversionFactor = vec3.fromValues(canvas.width, canvas.height, 1);
+export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
 
 const controlPoints1: vec3[] = [
@@ -67,15 +69,16 @@ const renderer = await initializeWebGPU();
 
 if (renderer) {
   
-  const square = new Square(renderer.device);
-  const curve = new Curve(renderer.device, controlPoints1);
+  const vertices = await parseText('o');
+  const glyph = new Glyph(renderer.device, vertices);
 
-  renderer.render(curve);
+
+  renderer.render(glyph);
 
   document.addEventListener("keydown", (event) => {
     console.log(event.key);
     renderer.camera.move(mapKeyToMoveDirection(event.key));
     renderer.camera.updateView();
-    renderer.render(curve);
+    renderer.render(glyph);
   })
 }
