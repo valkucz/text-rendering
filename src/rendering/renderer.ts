@@ -54,7 +54,7 @@ export class Renderer {
         },
         {
           binding: 1,
-          visibility: GPUShaderStage.VERTEX,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
           buffer: {
             type: "uniform",
           },

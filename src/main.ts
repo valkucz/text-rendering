@@ -4,7 +4,6 @@ import { Renderer } from "./rendering/renderer";
 import { Square } from "./scene/objects/square";
 import { Camera } from "./scene/camera";
 import { mapKeyToMoveDirection } from "./scene/moveDirection";
-import { Curve } from "./scene/objects/curve";
 import { parseText } from "./fonts";
 import { Glyph } from "./scene/objects/glyph";
 
@@ -70,6 +69,7 @@ const renderer = await initializeWebGPU();
 if (renderer) {
   
   const vertices = await parseText('o');
+  console.log(vertices);
   const glyph = new Glyph(renderer.device, vertices);
 
 

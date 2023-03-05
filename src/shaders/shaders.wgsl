@@ -1,3 +1,6 @@
+const SEGMENTS: u32 = 20;
+const LENGTH: u32 = 18 * 3;
+
 struct Uniforms {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
@@ -21,17 +24,15 @@ struct Fragment {
 
 // TODO: rename
 struct SceneObject {
-    width: i32,
-    height: i32,
-    glyph: array<vec3<f32>, 100>,
+    conversion_factor: vec2<f32>,
+    // error: aligned to 16 bytes
+    glyph: array<vec4<i32>, LENGTH>,
 
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
-@binding(1) @group(0) var<uniform> glyph: SceneObject;
+@binding(1) @group(0) var<uniform> object: SceneObject;
 
-
-const SEGMENTS: u32 = 20;
 
 const billboard : Billboard = Billboard(
     vec3<f32>(-0.5, -0.5, 0.0),
@@ -46,44 +47,48 @@ const billboard : Billboard = Billboard(
 // locations teda ani netreba ako draw
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-    // var pos = array<vec3<f32>, 6>;
 
     var output: vec4<f32>;
 
-    // output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize_point(curve[VertexIndex]), 1);
-
-    // output.Color = vec4<f32>(vertexColor, 1.0);
+    output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize(vec3<f32>(object.glyph[VertexIndex].xyz)),1.0);
 
     return output;
 };
 
-fn normalize_point(point: vec3<f32>) -> vec3<f32> {
-    var width = billboard.p6.x - billboard.p1.x;
-    var height = billboard.p1.y - billboard.p6.y;
+fn normalize(point: vec3<f32>) -> vec3<f32> {
+    const width = billboard.p6.x - billboard.p1.x;
+    const height = billboard.p1.y - billboard.p6.y;
 
-    var normalized = (point - billboard.p1) / vec3<f32>(width, height, 0);
-    var uv = vec3<f32>(normalized.x, 1.0 - normalized.y, 0);
+    var normalize = (point / vec3<f32>(object.conversion_factor, 1) - billboard.p1) / vec3<f32>(width, height, 0);
+    var uv = vec3<f32>(normalize.x, 1.0 - normalize.y, 0);
 
     return uv;
 }
 
-// sdf, winding bude tu na vypocet bodu, ci je vnutri / nie je vnutri
-// billboard je ako canvas pre tu krivku, krivku normalizovat na ten stvorec
+fn reverse_normalize(point: vec2<f32>) -> vec2<i32> {
+    var uv = (point * vec2<f32>(object.conversion_factor));
 
-@fragment
-// discard pre pixel mimo; draw pre pixel vnutri
-fn fs_main() -> @location(0) vec4<f32> {
-    return vec4(1.0, 0.0, 0.0, 1.0);
+    return vec2<i32>(uv);
+
 }
 
-// sending here parameters as typrs suggests
-// and afterrwards here perfsorm
-// normalization.
 
-fn windingNumberCalculation(p1: vec3<i32>, p2: vec3<i32>, p3: vec2<i32>, pos: vec3<i32>) -> i32 {
-    var a: vec2<i32> = p1.xy - pos.xy;
-    var b: vec2<i32> = p2.xy - pos.xy;
-    var c: vec2<i32> = p3.xy - pos.xy;
+@fragment
+fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
+    var pos: vec2<i32> = reverse_normalize(position.xy);
+    if (is_inside_glyph(pos)) {
+        return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    }
+    else {
+        return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    }
+}
+
+
+fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: vec2<i32>) -> i32 {
+    var a: vec2<i32> = p1 - pos;
+    var b: vec2<i32> = p2 - pos;
+    var c: vec2<i32> = p3 - pos;
 
     var r: vec2<i32> = a - 2 * b + c;
     var s: vec2<i32> = a - b;
@@ -117,4 +122,18 @@ fn windingNumberCalculation(p1: vec3<i32>, p2: vec3<i32>, p3: vec2<i32>, pos: ve
         }
     }
     return windingNumber;
+}
+
+fn is_inside_glyph(pos: vec2<i32>) -> bool {
+    var windingNumber: i32 = 0;
+    for (var i: u32 = 0; i < LENGTH; i++) {
+        // because vec4 is required
+        if (i % 2 == 0){
+            windingNumber += winding_number_calculation(object.glyph[i].xy, object.glyph[i].zw, object.glyph[i + 1].xy, pos);
+        }
+        else {
+            windingNumber += winding_number_calculation(object.glyph[i].zw, object.glyph[i + 1].xy, object.glyph[i + 1].zw, pos);
+        }
+    }
+    return windingNumber != 0;
 }
