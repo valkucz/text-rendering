@@ -112,15 +112,13 @@ export class Renderer {
       bindGroupLayouts: [this.bindGroupLayout],
     });
 
-    const bufferLayout = this.createBufferLayout();
-
     return this.device.createRenderPipeline({
       vertex: {
         module: this.device.createShaderModule({
           code: shader,
         }),
         entryPoint: "vs_main",
-        buffers: [bufferLayout],
+        // buffers: [bufferLayout],
       },
       fragment: {
         module: this.device.createShaderModule({
@@ -191,9 +189,10 @@ export class Renderer {
     renderpass.setPipeline(this.pipeline);
 
     renderpass.setBindGroup(0, bindGroup);
-      
+
     // renderpass.setVertexBuffer(0, object.buffer);
-    // renderpass.draw(object.getVertexCount(), 1, 0, 0);
+    console.log('object.getVertexCount(): ', object.getVertexCount());
+    renderpass.draw(7, 1, 0, 0);
 
     renderpass.end();
 

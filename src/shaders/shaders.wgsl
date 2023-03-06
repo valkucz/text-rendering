@@ -17,10 +17,9 @@ struct Billboard {
     p6: vec3<f32>,
 }
 
-struct Fragment {
-    @builtin(position) Position : vec4<f32>,
-    // @location(0) Color : vec4<f32>
-};
+struct Billboard2 {
+    p: array<vec3<f32>, 6>,
+}
 
 // TODO: rename
 struct SceneObject {
@@ -35,53 +34,73 @@ struct SceneObject {
 
 
 const billboard : Billboard = Billboard(
-    vec3<f32>(-0.5, -0.5, 0.0),
-    vec3<f32>(-0.5, 0.5, 0.0),
-    vec3<f32>(0.5, -0.5, 0.0),
-    vec3<f32>(0.5, -0.5, 0.0),
-    vec3<f32>(-0.5, 0.5, 0.0),
-    vec3<f32>(0.5, 0.5, 0.0)
+    vec3(-0.5, -0.5, 0.0),
+    vec3(-0.5, 0.5, 0.0),
+    vec3(0.5, -0.5, 0.0),
+    vec3(0.5, -0.5, 0.0),
+    vec3(-0.5, 0.5, 0.0),
+    vec3(0.5, 0.5, 0.0)
 );
 
+
 // TODO: split vertex and fragment into separate files
-// locations teda ani netreba ako draw
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-
+    var square = array<vec3<f32>, 6>(
+        vec3(-0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, 0.5, 0.0)
+        
+    );
+    var pos = array<vec2<f32>, 3>(
+    vec2(0.0, 0.5),
+    vec2(-0.5, -0.5),
+    vec2(0.5, -0.5)
+    );
     var output: vec4<f32>;
 
-    output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize(vec3<f32>(object.glyph[VertexIndex].xyz)),1.0);
+    // output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize(vec3<f32>(object.glyph[VertexIndex].xyz)), 1.0);
+    // output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize(vec3<f32>(vec2<f32>(square[VertexIndex].xy), 1.0)), 1.0);
+    // return output;
 
-    return output;
+    return vec4<f32>(square[VertexIndex].xyz, 1.0);
+
 };
 
 fn normalize(point: vec3<f32>) -> vec3<f32> {
     const width = billboard.p6.x - billboard.p1.x;
     const height = billboard.p1.y - billboard.p6.y;
 
-    var normalize = (point / vec3<f32>(object.conversion_factor, 1) - billboard.p1) / vec3<f32>(width, height, 0);
-    var uv = vec3<f32>(normalize.x, 1.0 - normalize.y, 0);
+    var normalize = (point / vec3<f32>(object.conversion_factor, 1) - billboard.p1) / vec3<f32>(width, height, 1);
+    var uv = vec3<f32>(normalize.x, 1.0 - normalize.y, 0) / vec3<f32>();
 
+    // var res = point / vec3<f32>(object.conversion_factor, 1);
     return uv;
 }
 
 fn reverse_normalize(point: vec2<f32>) -> vec2<i32> {
-    var uv = (point * vec2<f32>(object.conversion_factor));
+    const width = billboard.p6.x - billboard.p1.x;
+    const height = billboard.p1.y - billboard.p6.y;
+
+    var uv = (point * vec2<f32>(width, height) + billboard.p1.xy) * object.conversion_factor;
 
     return vec2<i32>(uv);
 
 }
 
 
+
 @fragment
 fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
-    var pos: vec2<i32> = reverse_normalize(position.xy);
-    if (is_inside_glyph(pos)) {
-        return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-    }
-    else {
-        return vec4<f32>(0.0, 0.0, 0.0, 0.0);
-    }
+    // var pos: vec2<i32> = reverse_normalize(position.xy);
+    return vec4<f32>(1.0, 1.0, 0.0, 1.0);
+    // if (is_inside_glyph(pos)) {
+        // return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    // }
+    // return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 
 

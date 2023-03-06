@@ -17,14 +17,16 @@ export class Glyph implements SceneObject {
   constructor(device: GPUDevice, vertices: vec2[][]) {
     this.device = device;
 
-    mat4.translate(this.model, this.model, [0, 0, 0]);
+    mat4.rotateY(this.model, this.model, Math.PI / 2);
+    mat4.scale(this.model, this.model, [0.5, 0.5, 0.5]);
 
     // TODO: make prettier
     // TODO: or send conversionFactor with camera matrices
+    console.log([conversionFactor].concat(vertices.flat()));
     this.vertices = vec2ToFloat32([conversionFactor].concat(vertices.flat()));
-
+    console.log(this.vertices);
     this.buffer = this.device.createBuffer({
-      size: this.vertices.byteLength,
+      size: this.vertices.byteLength * 4,
       usage: this.usage,
       mappedAtCreation: true,
     });
@@ -40,7 +42,7 @@ export class Glyph implements SceneObject {
   
   getVertexCount(): number {
     // + conversion factor
-    return this.vertices.length / 2 + 1;
+    return this.vertices.length;
   }
 
 

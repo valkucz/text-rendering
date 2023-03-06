@@ -35,10 +35,11 @@ export function vec3ToFloat32(vertices: vec3[]) : Float32Array {
 }
 
 export function vec2ToFloat32(vertices: vec2[]) : Float32Array {
-  let float32Array = new Float32Array(vertices.length * 2);
+  // + 1 conversion factor
+  let float32Array = new Float32Array(vertices.length + 1);
   float32Array.fill(0);
 
-  for (let i = 0; i < vertices.length; i++) {
+  for (let i = 0; i < vertices.length + 1; i += 2) {
     float32Array[i] = vertices[i][0];
     float32Array[i + 1] = vertices[i][1];
   }

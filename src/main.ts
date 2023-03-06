@@ -49,6 +49,7 @@ var rect = canvas.getBoundingClientRect();
 canvas.width = rect.width * dpr * 3;
 canvas.height = rect.height * dpr * 3;
 
+console.log('Canvas size', canvas.width, canvas.height);
 // TODO: remove export
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
@@ -77,8 +78,8 @@ if (renderer) {
 
   document.addEventListener("keydown", (event) => {
     console.log(event.key);
-    renderer.camera.move(mapKeyToMoveDirection(event.key));
-    renderer.camera.updateView();
+    // renderer.camera.move(mapKeyToMoveDirection(event.key));
+    // renderer.camera.updateView();
     renderer.render(glyph);
   })
 }
