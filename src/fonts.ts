@@ -2,12 +2,14 @@
 import { Typr } from "./Typr";
 import { cubicToQuadratic } from "./bezier";
 import { vec2 } from "gl-matrix";
-
+// TODO: make class, move to fonts
 async function loadFont(url: string) {
   const response: Response = await fetch(url);
   const blob = await response.blob();
   const arrayBuffer = await blob.arrayBuffer();
   const tables = Typr.parse(arrayBuffer);
+
+  console.log(tables);
   return tables[0];
 }
 
@@ -79,12 +81,14 @@ function parseShapeToGlyph(cmds: string[], crds: number[]): vec2[][] {
 }
 
 export async function parseText(text: string): Promise<vec2[][]> {
-  const font = await loadFont("./MontserratAlternates-Medium.otf");
+  const font = await loadFont("./Blogger_Sans.otf");
   const shape = Typr.U.shape(font, text, true);
   const path = Typr.U.shapeToPath(font, shape);
 
   const glyph = parseShapeToGlyph(path.cmds, path.crds);
-  return glyph;
+  const minmax = findMinMax(path.crds);
+  console.log('Min max: ', minmax);
+  return [minmax].concat(glyph);
 }
 
 export function findMinMax(crds: number[]): vec2[] {

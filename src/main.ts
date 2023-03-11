@@ -1,7 +1,6 @@
-import { vec2, vec3 } from "gl-matrix";
+import { vec2 } from "gl-matrix";
 import "./style.css";
 import { Renderer } from "./rendering/renderer";
-import { Square } from "./scene/objects/square";
 import { Camera } from "./scene/camera";
 import { mapKeyToMoveDirection } from "./scene/moveDirection";
 import { parseText } from "./fonts";
@@ -54,32 +53,22 @@ console.log('Canvas size', canvas.width, canvas.height);
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
 
-const controlPoints1: vec3[] = [
-  vec3.fromValues(197, 395, 0),
-  vec3.fromValues(399, 120, 0),
-  vec3.fromValues(635, 388, 0),
-];
-const controlPoints2: vec3[] = [
-  vec3.fromValues(197, 395, 0),
-  vec3.fromValues(399, 120, 0),
-  vec3.fromValues(450, 388, 0),
-];
-
 const renderer = await initializeWebGPU();
 
 if (renderer) {
   
-  const vertices = await parseText('o');
-  console.log(vertices);
+  const vertices = await parseText('guľôčka');
   const glyph = new Glyph(renderer.device, vertices);
-
+  
+  console.log('Glyph vertices: ', glyph.vertices);
+  console.log('Vertices: ', vertices);
 
   renderer.render(glyph);
 
   document.addEventListener("keydown", (event) => {
     console.log(event.key);
-    // renderer.camera.move(mapKeyToMoveDirection(event.key));
-    // renderer.camera.updateView();
+    renderer.camera.move(mapKeyToMoveDirection(event.key));
+    renderer.camera.updateView();
     renderer.render(glyph);
   })
 }

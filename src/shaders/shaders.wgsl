@@ -1,51 +1,29 @@
-const SEGMENTS: u32 = 20;
-const LENGTH: u32 = 18 * 3;
-
 struct Uniforms {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
+    glyph_length: f32,
+    
 };
-
-// TODO: make it better
-struct Billboard {
-    p1: vec3<f32>,
-    p2: vec3<f32>,
-    p3: vec3<f32>,
-    p4: vec3<f32>,
-    p5: vec3<f32>,
-    p6: vec3<f32>,
-}
-
-struct Billboard2 {
-    p: array<vec3<f32>, 6>,
-}
 
 // TODO: rename
 struct SceneObject {
-    conversion_factor: vec2<f32>,
+    conversion_factor: vec4<f32>,
     // error: aligned to 16 bytes
-    glyph: array<vec4<i32>, LENGTH>,
+    glyph: array<vec4<f32>>,
+}
 
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) uv: vec2<f32>,
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
-@binding(1) @group(0) var<uniform> object: SceneObject;
-
-
-const billboard : Billboard = Billboard(
-    vec3(-0.5, -0.5, 0.0),
-    vec3(-0.5, 0.5, 0.0),
-    vec3(0.5, -0.5, 0.0),
-    vec3(0.5, -0.5, 0.0),
-    vec3(-0.5, 0.5, 0.0),
-    vec3(0.5, 0.5, 0.0)
-);
-
+@binding(1) @group(0) var<storage, read_write> object: SceneObject;
 
 // TODO: split vertex and fragment into separate files
 @vertex
-fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
+fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
     var square = array<vec3<f32>, 6>(
         vec3(-0.5, -0.5, 0.0),
         vec3(-0.5, 0.5, 0.0),
@@ -55,52 +33,40 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<
         vec3(0.5, 0.5, 0.0)
         
     );
-    var pos = array<vec2<f32>, 3>(
-    vec2(0.0, 0.5),
-    vec2(-0.5, -0.5),
-    vec2(0.5, -0.5)
+    var squareUV = array<vec2<f32>, 6>(
+        vec2(0.0, 1.0),
+        vec2(0.0, 0.0),
+        vec2(1.0, 1.0),
+        vec2(1.0, 1.0),
+        vec2(0.0, 0.0),
+        vec2(1.0, 0.0)
     );
+
     var output: vec4<f32>;
 
-    // output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize(vec3<f32>(object.glyph[VertexIndex].xyz)), 1.0);
-    // output = uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(normalize(vec3<f32>(vec2<f32>(square[VertexIndex].xy), 1.0)), 1.0);
-    // return output;
+     return VertexOutput(
+        uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(square[VertexIndex].xyz, 1.0),
+        squareUV[VertexIndex],
+    );
 
-    return vec4<f32>(square[VertexIndex].xyz, 1.0);
 
 };
 
-fn normalize(point: vec3<f32>) -> vec3<f32> {
-    const width = billboard.p6.x - billboard.p1.x;
-    const height = billboard.p1.y - billboard.p6.y;
-
-    var normalize = (point / vec3<f32>(object.conversion_factor, 1) - billboard.p1) / vec3<f32>(width, height, 1);
-    var uv = vec3<f32>(normalize.x, 1.0 - normalize.y, 0) / vec3<f32>();
-
-    // var res = point / vec3<f32>(object.conversion_factor, 1);
-    return uv;
-}
-
-fn reverse_normalize(point: vec2<f32>) -> vec2<i32> {
-    const width = billboard.p6.x - billboard.p1.x;
-    const height = billboard.p1.y - billboard.p6.y;
-
-    var uv = (point * vec2<f32>(width, height) + billboard.p1.xy) * object.conversion_factor;
-
-    return vec2<i32>(uv);
-
-}
-
-
-
 @fragment
-fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
-    // var pos: vec2<i32> = reverse_normalize(position.xy);
-    return vec4<f32>(1.0, 1.0, 0.0, 1.0);
-    // if (is_inside_glyph(pos)) {
-        // return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-    // }
-    // return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // conversion_factor.x min x
+    // covnersion_factor.y min y
+    // conversion_factor.z max x
+    // covnersion factor.w max y
+    var x = object.conversion_factor.x + (object.conversion_factor.z - object.conversion_factor.x) * input.uv.x;
+    var y = object.conversion_factor.y + (object.conversion_factor.w  - object.conversion_factor.y) * input.uv.y;
+
+    let uvint = vec2(x, y);
+
+    if (is_inside_glyph(vec2<i32>(uvint))){
+        return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+    }
+    return vec4<f32>(1.0, 0.0, 1.0, 1.0);
 }
 
 
@@ -125,11 +91,11 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
         t2 = t1;
     }
   
-    var res1: f32 = (f32(r.x) * t1 - f32(s.x) * 2) * t1 + f32(a.x);
-    var res2: f32 = (f32(r.x) * t2 - f32(s.x) * 2) * t2 + f32(a.x);
+    var res1: f32 = (f32(r.x) * t1 - f32(s.x) * 2.0) * t1 + f32(a.x);
+    var res2: f32 = (f32(r.x) * t2 - f32(s.x) * 2.0) * t2 + f32(a.x);
   
-    var code1: i32 = (-(a.y) & (b.y | c.y)) | (-(b.y) & c.y);
-    var code2: i32 = (a.y & (-(b.y) | -(c.y))) | (b.y & -(c.y));
+    var code1: i32 = (~(a.y) & (b.y | c.y)) | (~(b.y) & c.y);
+    var code2: i32 = (a.y & (~(b.y) | ~(c.y))) | (b.y & ~(c.y));
     
     var windingNumber: i32 = 0;
     if ((code1 | code2) < 0) {
@@ -145,14 +111,14 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
 
 fn is_inside_glyph(pos: vec2<i32>) -> bool {
     var windingNumber: i32 = 0;
-    for (var i: u32 = 0; i < LENGTH; i++) {
+    for (var i: u32 = 0; i < u32(uniforms.glyph_length) - 1; i += 3) {
+        // sude => xy zw xy
+        // liche => zw xy zw
         // because vec4 is required
-        if (i % 2 == 0){
-            windingNumber += winding_number_calculation(object.glyph[i].xy, object.glyph[i].zw, object.glyph[i + 1].xy, pos);
-        }
-        else {
-            windingNumber += winding_number_calculation(object.glyph[i].zw, object.glyph[i + 1].xy, object.glyph[i + 1].zw, pos);
-        }
+        windingNumber += winding_number_calculation(vec2<i32>(object.glyph[i].xy), vec2<i32>(object.glyph[i].zw), vec2<i32>(object.glyph[i + 1].xy), pos);
+        windingNumber += winding_number_calculation(vec2<i32>(object.glyph[i + 1].zw), vec2<i32>(object.glyph[i + 2].xy), vec2<i32>(object.glyph[i + 2].zw), pos);
     }
+    
+
     return windingNumber != 0;
 }

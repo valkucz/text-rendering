@@ -2,7 +2,6 @@ import { vec2, vec3 } from "gl-matrix";
 import shader from "../shaders/shaders.wgsl";
 import { SceneObject } from "../scene/objects/sceneObject";
 import { Camera } from "../scene/camera";
-import { Square } from "../scene/objects/square";
 
 export type Vertices = vec3[] | vec2[] | vec2[][];
 
@@ -47,16 +46,16 @@ export class Renderer {
       entries: [
         {
           binding: 0,
-          visibility: GPUShaderStage.VERTEX,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
           buffer: {
             type: "uniform",
           },
         },
         {
           binding: 1,
-          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          visibility: GPUShaderStage.FRAGMENT,
           buffer: {
-            type: "uniform",
+            type: "storage",
           },
         }
       ],
@@ -65,7 +64,8 @@ export class Renderer {
 
   createUniformBuffer(): GPUBuffer {
     return this.device.createBuffer({
-      size: 64 * 3,
+      // mat4 = 4*4*(4 bytes) +  1 * 4(bytes) (length) + 4 * 4(bytes) (minmax)
+      size: 64 * 3 + 4 * 4,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
   }
@@ -145,7 +145,9 @@ export class Renderer {
     const commandEncoder: GPUCommandEncoder =
       this.device.createCommandEncoder();
 
-
+    const vertLength = new Float32Array(1);
+    vertLength[0] = (object.vertices.length - 4) / 4;
+    console.log('Length:', (object.vertices.length - 4) / 4);
     // Camera attribtues
     this.device.queue.writeBuffer(
       this.uniformBuffer,
@@ -159,6 +161,14 @@ export class Renderer {
       <ArrayBuffer>this.camera.projection
     );
 
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      192,
+      <ArrayBuffer>vertLength
+    )
+
+    // move model here
+    // remove from object attr
     this.device.queue.writeBuffer(
       this.uniformBuffer,
       0,
@@ -190,9 +200,7 @@ export class Renderer {
 
     renderpass.setBindGroup(0, bindGroup);
 
-    // renderpass.setVertexBuffer(0, object.buffer);
-    console.log('object.getVertexCount(): ', object.getVertexCount());
-    renderpass.draw(7, 1, 0, 0);
+    renderpass.draw(6, 1, 0, 0);
 
     renderpass.end();
 

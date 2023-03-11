@@ -1,6 +1,5 @@
-import { mat4, vec2, vec3 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 import { max, min } from "mathjs";
-import { conversionFactor } from "./main";
 
 export function clamp(value: number, minimum: number, maximum: number) {
     return max(min(value, maximum), minimum);
@@ -35,14 +34,13 @@ export function vec3ToFloat32(vertices: vec3[]) : Float32Array {
 }
 
 export function vec2ToFloat32(vertices: vec2[]) : Float32Array {
-  // + 1 conversion factor
-  let float32Array = new Float32Array(vertices.length + 1);
+  let float32Array = new Float32Array(vertices.length * 2);
   float32Array.fill(0);
 
-  for (let i = 0; i < vertices.length + 1; i += 2) {
-    float32Array[i] = vertices[i][0];
-    float32Array[i + 1] = vertices[i][1];
+  for (let i = 0; i < vertices.length; i++) {
+    let j = 2 * i;
+    float32Array[j] = vertices[i][0] * 100;
+    float32Array[j + 1] = vertices[i][1] * 100;
   }
-
   return float32Array;
 }
