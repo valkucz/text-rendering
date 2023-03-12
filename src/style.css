@@ -1,3 +1,7 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css";
+:root {
+  --shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 html, body {
   margin: 0;
   padding: 0;
@@ -18,25 +22,66 @@ html, body {
   width: 200px;
 }
 button { 
-  display: inline;
-  height: 50px;
-  width: 200px;
   background-color: white;
 }
 button:enabled{
   cursor: pointer;
 }
-button:enabled:hover{
-  background-color: rgb(226, 225, 225);
-}
+
 button:enabled:active{
   transform: translateY(4px);
 }
 #canvas {
   margin: 0;
-  /* width: 1000px;
-  height: 550px; */
-  border: solid 1px black;
-  background-color: #ffffff;
   cursor: crosshair;
+  box-shadow: var(--shadow);
+}
+
+.canvas-controller a:hover {
+  color: #f1f1f1;
+}
+.canvas-controller .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+.drag-controller {
+  position: absolute; 
+  z-index: 1;
+  cursor: grab;
+  right: 10%;
+  top: 15%;
+
+}
+
+.controller-menu {
+  padding:10px;
+  display: block; 
+  height: 500px;
+  width: 250px;
+  background-color: white;
+  box-shadow: var(--shadow);
+}
+.controller-span {
+  float: left;
+  display: inline;
+}
+.controller-menu-button {
+  width:250px;
+  height: 30px;
+  box-shadow: var(--shadow);
+  border: none;
+}
+
+.menu-icon {
+  height: 100%;
+  float:right;
+  transition: transform 1.0s ease;
+}
+
+.controller-menu input, select, button { 
+  width: 100%;
 }

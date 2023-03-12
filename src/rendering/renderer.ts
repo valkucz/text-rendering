@@ -147,7 +147,7 @@ export class Renderer {
 
     const vertLength = new Float32Array(1);
     vertLength[0] = (object.vertices.length - 4) / 4;
-    console.log('Length:', (object.vertices.length - 4) / 4);
+
     // Camera attribtues
     this.device.queue.writeBuffer(
       this.uniformBuffer,
@@ -203,6 +203,7 @@ export class Renderer {
     renderpass.draw(6, 1, 0, 0);
 
     renderpass.end();
+
 
     this.device.queue.submit([commandEncoder.finish()]);
   }

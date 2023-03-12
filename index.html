@@ -1,31 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
-  </head>
-  <body>
-    <script type="module" src="/src/main.ts"></script>
-    <h1 style="text-align: center; position: auto; margin: 20px 10px 10px 20px;">Bezier curves</h1>
-    <div class="canvas-container">
-        <div class="canvas-controller" >
-            <div>
-                <h2>Line segments</h2>
-                <input type="range" min="1" max="17" value="17" class="slider" id="slider">
-                <p>Value: <span id="sliderValue"></span></p>
-            </div>
-            <div>
-                <h2>Points: <span id="pointsValue">0</span></h2>
-            </div>
-            <button id="drawBtn">Draw curve</button>
-            <button id="deleteBtn"> Delete </button>
-        </div>
-        <div>
-          <canvas id="canvas">
-          </canvas>
-        </div> 
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Text rendering</title>
+  <!-- <link rel="stylesheet" href="../node_modules/bulma/css/bulma.css"> -->
+</head>
+
+<body>
+  <script type="module" src="/src/main.ts"></script>
+  <section class="section">
+    <div class="drag-controller" id="drag-controler">
+      <span class="controller-span"> <button class="controller-menu-button" id="controller-menu-button"><img
+            id="menu-icon" class="menu-icon" src="./public/icons/arrow.png"></img></button></span>
+
+      <div class="controller-menu" id="controller-menu">
+        <ul>
+          <li>Scale</li>
+          <input type="range" min="1" max="17" value="5" class="slider" id="scale">
+          <li>Rotate</li>
+          <input type="range" min="1" max="17" value="5" class="slider" id="rotate">
+          <li>Move</li>
+          <input type="range" min="1" max="17" value="5" class="slider" id="move">
+          <li>Font</li>
+          <select>
+            <option value="opt1">Blogger_Sans.otf</option>
+            <option value="opt2">MontserratAlternates-Medium.otf</option>
+
+          </select>
+
+          <li>Color</li>
+          <input type="color" id="colorpicker" value="#0000ff">
+
+          <li>Text</li>
+          <input type="text">
+          <button>Submit</button>
+        </ul>
+      </div>
     </div>
-  </body>
+    <div class="container is-fullhd">
+      <h1 class="title">
+        Text rendering
+      </h1>
+      <div>
+        <canvas class="column is-full" id="canvas">
+        </canvas>
+      </div>
+    </div>
+  </section>
+</body>
+
 </html>

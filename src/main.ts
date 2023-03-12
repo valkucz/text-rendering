@@ -48,7 +48,6 @@ var rect = canvas.getBoundingClientRect();
 canvas.width = rect.width * dpr * 3;
 canvas.height = rect.height * dpr * 3;
 
-console.log('Canvas size', canvas.width, canvas.height);
 // TODO: remove export
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
@@ -57,18 +56,70 @@ const renderer = await initializeWebGPU();
 
 if (renderer) {
   
-  const vertices = await parseText('guľôčka');
+  const vertices = await parseText('op');
   const glyph = new Glyph(renderer.device, vertices);
-  
-  console.log('Glyph vertices: ', glyph.vertices);
-  console.log('Vertices: ', vertices);
 
   renderer.render(glyph);
 
   document.addEventListener("keydown", (event) => {
-    console.log(event.key);
     renderer.camera.move(mapKeyToMoveDirection(event.key));
     renderer.camera.updateView();
     renderer.render(glyph);
   })
+}
+
+// TODO: move to custom file
+
+const menuButtonElement = document.getElementById('controller-menu-button');
+const menuElement = document.getElementById('controller-menu');
+const menuImg = document.getElementById('menu-icon');
+
+menuButtonElement.addEventListener('click', () => {
+  if (menuElement.style.display === 'none') {
+    menuImg.style.transform = 'rotate(90deg)';
+    menuElement.style.display = 'block';
+    // menuImg.src = "./public/icons/angle-down.png"
+  }
+  else {
+    menuImg.style.transform = 'rotate(0deg)';
+    menuElement.style.display = 'none';
+    // menuImg.src = "./public/icons/angle-right.png"
+
+  }
+});
+
+const draggableElement = document.getElementById('drag-controler');
+
+
+if (!draggableElement) {
+  throw new Error('Document elemenet with id "draggable" not found');
+}
+
+let mouseX = 0;
+let mouseY = 0;
+let elementX = 0;
+let elementY = 0;
+
+draggableElement.addEventListener('mousedown', (event) => {
+  document.addEventListener('mousemove', drag);
+
+  mouseX = event.clientX;
+  mouseY = event.clientY;
+  elementX = draggableElement.offsetLeft;
+  elementY = draggableElement.offsetTop;
+});
+
+draggableElement.addEventListener('mouseup', () => {
+  document.removeEventListener('mousemove', drag);
+});
+
+
+function drag(event) {
+  const deltaX = event.clientX - mouseX;
+  const deltaY = event.clientY - mouseY;
+  const newElementX = elementX + deltaX;
+  const newElementY = elementY + deltaY;
+
+  draggableElement.style.left = `${newElementX}px`;
+  draggableElement.style.top = `${newElementY}px`;
 }
