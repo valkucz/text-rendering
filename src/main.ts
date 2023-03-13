@@ -55,11 +55,14 @@ export const segments: number = 15;
 const renderer = await initializeWebGPU();
 
 const slider = document.getElementById('slider-rotate');
+const textInput = document.getElementById('text-input');
+
+const submitBtn = document.getElementById('submit-btn');
 
 if (renderer) {
   
   const vertices = await parseText('op');
-  const glyph = new Glyph(renderer.device, vertices);
+  let glyph = new Glyph(renderer.device, vertices);
 
   renderer.render(glyph);
 
@@ -69,6 +72,19 @@ if (renderer) {
     renderer.render(glyph);
   
   });
+
+  submitBtn.addEventListener('click', async () => {
+  // TODO: add "update vertices method"
+    const text = textInput.value;
+
+    textInput.value = "";
+
+    const vertices = await parseText(text);
+
+    glyph = new Glyph(renderer.device, vertices);
+
+    renderer.render(glyph);
+  })
 }
 
 // TODO: move to custom file
