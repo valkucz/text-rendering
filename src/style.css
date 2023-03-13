@@ -85,3 +85,7 @@ button:enabled:active{
 .controller-menu input, select, button { 
   width: 100%;
 }
+
+.level {
+  margin-top: 20px;
+}

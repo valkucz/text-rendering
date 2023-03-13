@@ -54,6 +54,8 @@ export const segments: number = 15;
 
 const renderer = await initializeWebGPU();
 
+const slider = document.getElementById('slider-rotate');
+
 if (renderer) {
   
   const vertices = await parseText('op');
@@ -61,11 +63,12 @@ if (renderer) {
 
   renderer.render(glyph);
 
-  document.addEventListener("keydown", (event) => {
-    renderer.camera.move(mapKeyToMoveDirection(event.key));
-    renderer.camera.updateView();
+
+  slider.addEventListener('input', () => {
+    glyph.rotate(slider.value);
     renderer.render(glyph);
-  })
+  
+  });
 }
 
 // TODO: move to custom file
@@ -73,6 +76,10 @@ if (renderer) {
 const menuButtonElement = document.getElementById('controller-menu-button');
 const menuElement = document.getElementById('controller-menu');
 const menuImg = document.getElementById('menu-icon');
+
+
+
+
 
 menuButtonElement.addEventListener('click', () => {
   if (menuElement.style.display === 'none') {

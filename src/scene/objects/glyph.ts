@@ -12,12 +12,15 @@ export class Glyph implements SceneObject {
     model: mat4 = mat4.create();
   
     usage: number = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
+
+    velocity: number = 0.2;
+
   constructor(device: GPUDevice, vertices: vec2[][]) {
     this.device = device;
 
+    
     mat4.rotateY(this.model, this.model, Math.PI / 2);
     mat4.scale(this.model, this.model, [0.5, 0.5, 0.5]);
-    // TODO: make prettier
 
     // TODO: or send conversionFactor with camera matrices
 
@@ -41,6 +44,12 @@ export class Glyph implements SceneObject {
   // TODO: remove
   getVertexCount(): number {
     return this.vertices.length;
+  }
+  // TODO: change
+  rotate(value: number): void {
+    const max = 18;
+    mat4.rotateY(this.model, this.model, Math.PI / max  * this.velocity)
+
   }
 
 
