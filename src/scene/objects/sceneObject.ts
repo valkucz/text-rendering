@@ -1,25 +1,12 @@
-import { mat4 } from "gl-matrix";
-
-// TODO: make this abstract class to avoid repetitve code in Curve and Glyph
 export interface SceneObject {
-  buffer: GPUBuffer;
 
-  vertices: Float32Array;
+  velocity: number;
 
-  device: GPUDevice;
+  // vertexBuffer: VertexBuffer;
 
-  model: mat4;
+  rotate(): void;
 
-  usage: number;
+  move(): void;
 
-  /**
-   * @returns number of vertices to draw
-   */
-  getVertexCount(): number;
-
-  /**
-   * Updates GPU buffer with new vertices
-   * @param vertices
-   */
-  update(vertices: any[]): void;
+  // zoom / scale ?
 }

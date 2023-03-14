@@ -39,8 +39,8 @@ export function vec2ToFloat32(vertices: vec2[]) : Float32Array {
 
   for (let i = 0; i < vertices.length; i++) {
     let j = 2 * i;
-    float32Array[j] = vertices[i][0] * 100;
-    float32Array[j + 1] = vertices[i][1] * 100;
+    float32Array[j] = vertices[i][0];
+    float32Array[j + 1] = vertices[i][1];
   }
   return float32Array;
 }

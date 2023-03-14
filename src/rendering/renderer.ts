@@ -2,9 +2,9 @@ import { vec2, vec3 } from "gl-matrix";
 import shader from "../shaders/shaders.wgsl";
 import { SceneObject } from "../scene/objects/sceneObject";
 import { Camera } from "../scene/camera";
+import { Glyph } from "../scene/objects/glyph";
 
-export type Vertices = vec3[] | vec2[] | vec2[][];
-
+const MAT4LENGTH = 64;
 export class Renderer {
   ctx: GPUCanvasContext;
   device: GPUDevice;
@@ -13,19 +13,22 @@ export class Renderer {
   bindGroupLayout: GPUBindGroupLayout;
   uniformBuffer: GPUBuffer;
   camera: Camera;
+  object: Glyph;
 
   constructor(
     ctx: GPUCanvasContext,
     device: GPUDevice,
     camera: Camera,
+    object: Glyph,
     format: GPUTextureFormat = "bgra8unorm"
   ) {
     this.ctx = ctx;
     this.device = device;
     this.format = format;
     this.camera = camera;
+    this.object = object;
 
-    // bind group layout
+    // Bind group layout
     this.bindGroupLayout = this.createBindGroupLayout();
 
     this.ctx.configure({
@@ -34,10 +37,10 @@ export class Renderer {
       alphaMode: "premultiplied",
     });
 
-    // create uniform buffer
+    // Create uniform buffer
     this.uniformBuffer = this.createUniformBuffer();
 
-    // create pipeline
+    // Create pipeline
     this.pipeline = this.createPipeline();
   }
 
@@ -64,8 +67,8 @@ export class Renderer {
 
   createUniformBuffer(): GPUBuffer {
     return this.device.createBuffer({
-      // mat4 = 4*4*(4 bytes) +  1 * 4(bytes) (length) + 4 * 4(bytes) (minmax)
-      size: 64 * 3 + 4 * 4,
+      // + 16 = 4 * 4; bounding box; glyph length
+      size: MAT4LENGTH * 3 + 16 + 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
   }
@@ -87,7 +90,7 @@ export class Renderer {
       ],
     };
   }
-  createBindGroup(buffer: GPUBuffer): GPUBindGroup {
+  createBindGroup(): GPUBindGroup {
     return this.device.createBindGroup({
       layout: this.bindGroupLayout,
       entries: [
@@ -100,7 +103,7 @@ export class Renderer {
         {
           binding: 1,
           resource: {
-            buffer: buffer,
+            buffer: this.object.vertexBuffer.buffer,
           },
         }
       ],
@@ -138,15 +141,11 @@ export class Renderer {
     });
   }
 
-  render(object: SceneObject) {
-
-    const bindGroup = this.createBindGroup(object.buffer);
-
-    const commandEncoder: GPUCommandEncoder =
-      this.device.createCommandEncoder();
-
+  updateGraphicsBuffers() {
+    const vertexBuffer = this.object.vertexBuffer;
     const vertLength = new Float32Array(1);
-    vertLength[0] = (object.vertices.length - 4) / 4;
+    vertLength[0] = vertexBuffer.getVertexCount() / 4;
+    console.log(vertLength);
 
     // Camera attribtues
     this.device.queue.writeBuffer(
@@ -161,25 +160,49 @@ export class Renderer {
       <ArrayBuffer>this.camera.projection
     );
 
+    // Object attributes
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      0,
+      <ArrayBuffer>this.object.model
+    );
+    
+    // Bounding box
+    console.log('Bounding box', vertexBuffer.getBoundingBox());
     this.device.queue.writeBuffer(
       this.uniformBuffer,
       192,
-      <ArrayBuffer>vertLength
-    )
+      <ArrayBuffer>vertexBuffer.getBoundingBox()
+    );
 
-    // move model here
-    // remove from object attr
+    // Vertices length
     this.device.queue.writeBuffer(
       this.uniformBuffer,
-      0,
-      <ArrayBuffer>object.model);
+      208,
+      <ArrayBuffer>vertLength
+    );
 
+    // Vertices
     this.device.queue.writeBuffer(
-      object.buffer,
+      vertexBuffer.buffer,
       0,
-      object.vertices.buffer
-    )
-    
+      vertexBuffer.vertices.buffer
+    );
+  }
+
+  // Used with new font or text
+  updateObject(object: Glyph) {
+    this.object = object;
+  }
+  
+  render() {
+    // Does it need to be here:
+    const bindGroup = this.createBindGroup();
+
+    const commandEncoder: GPUCommandEncoder =
+      this.device.createCommandEncoder();
+
+    this.updateGraphicsBuffers();
     
     const textureView: GPUTextureView = this.ctx
       .getCurrentTexture()
@@ -197,13 +220,9 @@ export class Renderer {
     });
 
     renderpass.setPipeline(this.pipeline);
-
     renderpass.setBindGroup(0, bindGroup);
-
     renderpass.draw(6, 1, 0, 0);
-
     renderpass.end();
-
 
     this.device.queue.submit([commandEncoder.finish()]);
   }

@@ -1,9 +1,9 @@
 import { mat4, vec3, glMatrix as glm } from "gl-matrix";
 import { cos, sin } from "mathjs";
 import { conversionFactor } from "../main";
-import { MoveDirection } from "./moveDirection";
+import { SceneObject } from "./objects/sceneObject";
 
-export class Camera {
+export class Camera implements SceneObject{
     view: mat4;
 
     projection: mat4;
@@ -24,7 +24,7 @@ export class Camera {
 
     front: vec3 = vec3.create();
 
-    velocity: number = 0.1;
+    velocity: number = 0.2;
 
     constructor(){
         // create projection matrix
@@ -38,29 +38,30 @@ export class Camera {
         
     }
 
-    move(dir: MoveDirection) {
-        let vec = vec3.create();
-        switch (dir) {
-            case MoveDirection.Forward:
-                vec3.scale(vec, this.front, this.velocity);
-                vec3.add(this.eye, this.eye, vec);
-                break;
-            case MoveDirection.Backward:
-                vec3.scale(vec, this.front, this.velocity);
-                vec3.sub(this.eye, this.eye, vec);
-                break;
-            case MoveDirection.Left:
-                vec3.scale(vec, this.right, this.velocity);
-                vec3.sub(this.eye, this.eye, vec);
-                break;
-            case MoveDirection.Right:
-                vec3.scale(vec, this.right, this.velocity);
-                vec3.add(this.eye, this.eye, vec);
-                break;
-            default:
-                break;
-        }
-    }
+    // move(dir: MoveDirection) {
+    //     let vec = vec3.create();
+    //     switch (dir) {
+    //         case MoveDirection.Forward:
+    //             vec3.scale(vec, this.front, this.velocity);
+    //             vec3.add(this.eye, this.eye, vec);
+    //             break;
+    //         case MoveDirection.Backward:
+    //             vec3.scale(vec, this.front, this.velocity);
+    //             vec3.sub(this.eye, this.eye, vec);
+    //             break;
+    //         case MoveDirection.Left:
+    //             vec3.scale(vec, this.right, this.velocity);
+    //             vec3.sub(this.eye, this.eye, vec);
+    //             break;
+    //         case MoveDirection.Right:
+    //             vec3.scale(vec, this.right, this.velocity);
+    //             vec3.add(this.eye, this.eye, vec);
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
+
 
     updateView() {
         this.front[0] = cos(glm.toRadian(this.yaw)) * cos(glm.toRadian(this.pitch));
@@ -82,6 +83,13 @@ export class Camera {
         vec3.add(this.center, this.eye, this.front);
 
         mat4.lookAt(this.view, this.eye, this.center, this.up);
+    }
+
+    move(): void {
+
+    }
+
+    rotate(): void {
     }
 
 }

@@ -1,8 +1,7 @@
 import { mat4 } from "gl-matrix";
-import { SceneObject } from "./sceneObject";
 
-// TODO: not needed anymore?
-export class Square implements SceneObject {
+// TODO: not needed anymore?; delete later, move vertices of billboard to glyph.
+export class Square {
     buffer: GPUBuffer;
 
     vertices: Float32Array;
@@ -22,16 +21,6 @@ export class Square implements SceneObject {
         mat4.rotateY(this.model, this.model, Math.PI / 4);
         mat4.scale(this.model, this.model, [0.5, 0.5, 0.5]);
 
-        // this.vertices = new Float32Array([
-        //     // triangle 1
-        //     -0.5, -0.5, 0.0, 1.0, 0.7, 1.0,
-        //     -0.5, 0.5, 0.0, 1.0, 1.0, 1.0,
-        //     0.5, -0.5, 0.0, 0.7, 1.0, 1.0,
-        //     // triangle 2
-        //     0.5, -0.5, 0.0, 1.0, 1.0, 0.7,
-        //     -0.5, 0.5, 0.0, 1.0, 0.7, 1.0,
-        //     0.5, 0.5, 0.0, 1.0, 1.0, 1.0,
-        // ]);
         this.v2 = [
             // triangle 1
             -0.5, -0.5, 0.0,
@@ -51,14 +40,13 @@ export class Square implements SceneObject {
             mappedAtCreation: false
         });
 
-        // new Float32Array(this.buffer.getMappedRange()).set(this.vertices);
         this.buffer.unmap();
 
     }
     getVertexCount(): number {
         return 6;
     }
-    update(vertices: any[]): void {
-        throw new Error("Method not implemented.");
+    update(vertices: Float32Array): void {
+        this.vertices = vertices;
     }
 }

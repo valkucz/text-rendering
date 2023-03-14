@@ -1,15 +1,16 @@
+// FIXME: premenovat
 struct Uniforms {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
+    conversion_factor: vec4<f32>,
     glyph_length: f32,
-    
 };
 
 // TODO: rename
 struct SceneObject {
-    conversion_factor: vec4<f32>,
     // error: aligned to 16 bytes
+    // FIXME: ak je to storage, da sa zmenit na vec2? 
     glyph: array<vec4<f32>>,
 }
 
@@ -17,6 +18,8 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
 }
+// TODO:
+// struct color bg, text
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
 @binding(1) @group(0) var<storage, read_write> object: SceneObject;
@@ -48,18 +51,17 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
         uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(square[VertexIndex].xyz, 1.0),
         squareUV[VertexIndex],
     );
-
-
 };
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // return vec4<f32>(object.glyph[14].w / (28600 * 2), 0.0, 0.0, 1.0);
     // conversion_factor.x min x
     // covnersion_factor.y min y
     // conversion_factor.z max x
     // covnersion factor.w max y
-    var x = object.conversion_factor.x + (object.conversion_factor.z - object.conversion_factor.x) * input.uv.x;
-    var y = object.conversion_factor.y + (object.conversion_factor.w  - object.conversion_factor.y) * input.uv.y;
+    var x = uniforms.conversion_factor.x + (uniforms.conversion_factor.z - uniforms.conversion_factor.x) * input.uv.x;
+    var y = uniforms.conversion_factor.y + (uniforms.conversion_factor.w  - uniforms.conversion_factor.y) * input.uv.y;
 
     let uvint = vec2(x, y);
 
@@ -111,6 +113,7 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
 
 fn is_inside_glyph(pos: vec2<i32>) -> bool {
     var windingNumber: i32 = 0;
+    // 15; i < 14 ... max i = 13 ... po 3, i = 12
     for (var i: u32 = 0; i < u32(uniforms.glyph_length) - 1; i += 3) {
         // sude => xy zw xy
         // liche => zw xy zw

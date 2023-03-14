@@ -60,8 +60,9 @@ button:enabled:active{
 .controller-menu {
   padding:10px;
   display: block; 
-  height: 500px;
+  max-height: 500px;
   width: 250px;
+  overflow: auto;
   background-color: white;
   box-shadow: var(--shadow);
 }
@@ -88,4 +89,11 @@ button:enabled:active{
 
 .level {
   margin-top: 20px;
+}
+
+.menu-list li {
+  margin: 5px;
+}
+.menu-label {
+  font-size: 0.9em;
 }

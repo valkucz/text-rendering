@@ -1,38 +1,6 @@
 import { vec2 } from "gl-matrix";
+import { App } from "./app";
 import "./style.css";
-import { Renderer } from "./rendering/renderer";
-import { Camera } from "./scene/camera";
-import { mapKeyToMoveDirection } from "./scene/moveDirection";
-import { parseText } from "./fonts";
-import { Glyph } from "./scene/objects/glyph";
-
-/**
- * Initialization of WebGPU device, adapter.
- * @param vertices
- * @returns renderer if no error occured
- */
-async function initializeWebGPU(): Promise<Renderer | void> {
-  console.log(navigator.gpu);
-  if (!("gpu" in navigator)) {
-    console.error("User agent doesn’t support WebGPU.");
-    return;
-  }
-
-  // create adapter
-  const adapter: GPUAdapter = <GPUAdapter>await navigator.gpu.requestAdapter();
-  if (!adapter) {
-    console.error("No WebGPU adapters found.");
-    return;
-  }
-
-  // create device
-  const device: GPUDevice = <GPUDevice>await adapter.requestDevice();
-
-  // create camera
-  const camera: Camera = new Camera();
-
-  return new Renderer(ctx, device, camera);
-}
 
 // set canvas
 const canvas = <HTMLCanvasElement>document.getElementById("canvas");
@@ -52,40 +20,17 @@ canvas.height = rect.height * dpr * 3;
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
 
-const renderer = await initializeWebGPU();
+
+
+
+const app = await App.initialize(ctx);
+app.addEventListeners();
 
 const slider = document.getElementById('slider-rotate');
 const textInput = document.getElementById('text-input');
-
 const submitBtn = document.getElementById('submit-btn');
 
-if (renderer) {
-  
-  const vertices = await parseText('op');
-  let glyph = new Glyph(renderer.device, vertices);
 
-  renderer.render(glyph);
-
-
-  slider.addEventListener('input', () => {
-    glyph.rotate(slider.value);
-    renderer.render(glyph);
-  
-  });
-
-  submitBtn.addEventListener('click', async () => {
-  // TODO: add "update vertices method"
-    const text = textInput.value;
-
-    textInput.value = "";
-
-    const vertices = await parseText(text);
-
-    glyph = new Glyph(renderer.device, vertices);
-
-    renderer.render(glyph);
-  })
-}
 
 // TODO: move to custom file
 
@@ -95,22 +40,22 @@ const menuImg = document.getElementById('menu-icon');
 
 
 
-
-
 menuButtonElement.addEventListener('click', () => {
   if (menuElement.style.display === 'none') {
     menuImg.style.transform = 'rotate(90deg)';
     menuElement.style.display = 'block';
-    // menuImg.src = "./public/icons/angle-down.png"
   }
   else {
     menuImg.style.transform = 'rotate(0deg)';
     menuElement.style.display = 'none';
-    // menuImg.src = "./public/icons/angle-right.png"
-
   }
 });
 
+
+
+
+
+// NO NEED; REMOVE
 const draggableElement = document.getElementById('drag-controler');
 
 

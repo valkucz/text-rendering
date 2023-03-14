@@ -10,6 +10,7 @@ async function loadFont(url: string) {
   const tables = Typr.parse(arrayBuffer);
 
   console.log(tables);
+  console.log(tables[0]);
   return tables[0];
 }
 
