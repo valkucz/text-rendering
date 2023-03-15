@@ -1,3 +1,4 @@
+// TODO: remove vec3
 import { vec2, vec3 } from "gl-matrix";
 import { max, min } from "mathjs";
 
@@ -43,4 +44,8 @@ export function vec2ToFloat32(vertices: vec2[]) : Float32Array {
     float32Array[j + 1] = vertices[i][1];
   }
   return float32Array;
+}
+
+export function degToRad(deg: number): number {
+  return deg * (Math.PI / 180);
 }

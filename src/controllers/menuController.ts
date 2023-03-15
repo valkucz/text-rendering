@@ -1,3 +1,4 @@
+import { App } from "../app";
 import { Controller } from "./controller";
 
 export class MenuController implements Controller {
@@ -9,7 +10,7 @@ export class MenuController implements Controller {
         this.menuButtonElement = document.getElementById('controller-menu-button') as HTMLElement;
     }
 
-    addEventListener(): void {
+    addEventListener(app: App): void {
         this.menuButtonElement.addEventListener('click', () => {
             if (this.element.style.display === 'none') {
                 this.element.style.display = 'block';

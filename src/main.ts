@@ -26,30 +26,6 @@ export const segments: number = 15;
 const app = await App.initialize(ctx);
 app.addEventListeners();
 
-const slider = document.getElementById('slider-rotate');
-const textInput = document.getElementById('text-input');
-const submitBtn = document.getElementById('submit-btn');
-
-
-
-// TODO: move to custom file
-
-const menuButtonElement = document.getElementById('controller-menu-button');
-const menuElement = document.getElementById('controller-menu');
-const menuImg = document.getElementById('menu-icon');
-
-
-
-menuButtonElement.addEventListener('click', () => {
-  if (menuElement.style.display === 'none') {
-    menuImg.style.transform = 'rotate(90deg)';
-    menuElement.style.display = 'block';
-  }
-  else {
-    menuImg.style.transform = 'rotate(0deg)';
-    menuElement.style.display = 'none';
-  }
-});
 
 
 

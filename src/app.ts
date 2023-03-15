@@ -15,16 +15,16 @@ export class App {
   fontParser: FontParser;
   renderer: Renderer;
 
-  cameraController: Controller;
-  glyphController: Controller;
+  cameraController: SceneController;
+  glyphController: SceneController;
   textController: Controller;
   menuController: Controller;
 
   constructor(
     renderer: Renderer,
     fontParser: FontParser,
-    cameraController: Controller,
-    glyphController: Controller,
+    cameraController: SceneController,
+    glyphController: SceneController,
     textController: Controller,
     menuController: Controller
   ) {
@@ -35,7 +35,7 @@ export class App {
     this.textController = textController;
     this.menuController = menuController;
   }
-
+  // TODO: upravit OOP
   static async initialize(ctx: GPUCanvasContext): Promise<App> {
     console.log(navigator.gpu);
     if (!("gpu" in navigator)) {
@@ -67,7 +67,7 @@ export class App {
     const glyph = new Glyph(device, vertices);
 
     // Create renderer
-    const renderer = new Renderer(ctx, device, camera, glyph);
+    const renderer = new Renderer(ctx, device);
 
     // Create controllers
 
@@ -77,11 +77,22 @@ export class App {
     const textController = new TextController(fontParser);
     const menuController = new MenuController();
 
+    renderer.render(<Glyph>(glyphController.object), <Camera>(cameraController.object));
+
     return new App(renderer, fontParser, cameraController, glyphController, textController, menuController);
   }
 
 
   addEventListeners() {
-    this.renderer.render();
+    console.log('here');
+    this.cameraController.addEventListener(this);
+    this.glyphController.addEventListener(this);
+    this.textController.addEventListener(this);
+    this.menuController.addEventListener(this);
+
+  }
+  notify(){
+    // FIXME: solve this type conversion
+    this.renderer.render(<Glyph>(this.glyphController.object), <Camera>(this.cameraController.object));
   }
 }

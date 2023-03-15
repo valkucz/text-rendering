@@ -1,3 +1,5 @@
+import { App } from "../app";
+
 export interface Controller {
-    addEventListener(): void;
+    addEventListener(app: App): void;
 }

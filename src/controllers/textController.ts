@@ -1,6 +1,6 @@
 import { FontParser } from "../fonts/fontParser";
 import { Controller } from "./controller";
-
+import { App } from "../app";
 export class TextController implements Controller {
     
   inputElem: HTMLElement;
@@ -22,5 +22,5 @@ export class TextController implements Controller {
 
     this.fontParser = fontParser;
   }
-  addEventListener(): void {}
+  addEventListener(app: App): void {}
 }

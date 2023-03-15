@@ -11,22 +11,16 @@ export class Renderer {
   format: GPUTextureFormat;
   pipeline: GPURenderPipeline;
   bindGroupLayout: GPUBindGroupLayout;
-  uniformBuffer: GPUBuffer;
-  camera: Camera;
-  object: Glyph;
+  uniformBuffer: GPUBuffer;;
 
   constructor(
     ctx: GPUCanvasContext,
     device: GPUDevice,
-    camera: Camera,
-    object: Glyph,
     format: GPUTextureFormat = "bgra8unorm"
   ) {
     this.ctx = ctx;
     this.device = device;
     this.format = format;
-    this.camera = camera;
-    this.object = object;
 
     // Bind group layout
     this.bindGroupLayout = this.createBindGroupLayout();
@@ -90,7 +84,7 @@ export class Renderer {
       ],
     };
   }
-  createBindGroup(): GPUBindGroup {
+  createBindGroup(object: Glyph): GPUBindGroup {
     return this.device.createBindGroup({
       layout: this.bindGroupLayout,
       entries: [
@@ -103,7 +97,7 @@ export class Renderer {
         {
           binding: 1,
           resource: {
-            buffer: this.object.vertexBuffer.buffer,
+            buffer: object.vertexBuffer.buffer,
           },
         }
       ],
@@ -141,8 +135,8 @@ export class Renderer {
     });
   }
 
-  updateGraphicsBuffers() {
-    const vertexBuffer = this.object.vertexBuffer;
+  updateGraphicsBuffers(object: Glyph, camera: Camera) {
+    const vertexBuffer = object.vertexBuffer;
     const vertLength = new Float32Array(1);
     vertLength[0] = vertexBuffer.getVertexCount() / 4;
     console.log(vertLength);
@@ -151,20 +145,20 @@ export class Renderer {
     this.device.queue.writeBuffer(
       this.uniformBuffer,
       64,
-      <ArrayBuffer>this.camera.view
+      <ArrayBuffer>camera.view
     );
 
     this.device.queue.writeBuffer(
       this.uniformBuffer,
       128,
-      <ArrayBuffer>this.camera.projection
+      <ArrayBuffer>camera.projection
     );
 
     // Object attributes
     this.device.queue.writeBuffer(
       this.uniformBuffer,
       0,
-      <ArrayBuffer>this.object.model
+      <ArrayBuffer>object.model
     );
     
     // Bounding box
@@ -189,20 +183,18 @@ export class Renderer {
       vertexBuffer.vertices.buffer
     );
   }
-
-  // Used with new font or text
-  updateObject(object: Glyph) {
-    this.object = object;
-  }
-  
-  render() {
+  // FIXME: 
+  // BindGroup je stale ta ista, az kym sa nezmeni text, 
+  // objekt by mohol byt predava
+  render(object: Glyph, camera: Camera) {
+    console.log(object.model);
     // Does it need to be here:
-    const bindGroup = this.createBindGroup();
+    const bindGroup = this.createBindGroup(object);
 
     const commandEncoder: GPUCommandEncoder =
       this.device.createCommandEncoder();
 
-    this.updateGraphicsBuffers();
+    this.updateGraphicsBuffers(object, camera);
     
     const textureView: GPUTextureView = this.ctx
       .getCurrentTexture()
