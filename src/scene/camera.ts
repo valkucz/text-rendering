@@ -1,9 +1,10 @@
 import { mat4, vec3, glMatrix as glm } from "gl-matrix";
 import { cos, sin } from "mathjs";
 import { conversionFactor } from "../main";
+import { degToRad } from "../math";
 import { SceneObject } from "./objects/sceneObject";
 
-export class Camera implements SceneObject{
+export class Camera extends SceneObject{
     view: mat4;
 
     projection: mat4;
@@ -24,9 +25,8 @@ export class Camera implements SceneObject{
 
     front: vec3 = vec3.create();
 
-    velocity: number = 0.2;
-
     constructor(){
+        super();
         // create projection matrix
         this.projection = mat4.create();
         // TODO: remove global conversion factor, only as constructor parameter
@@ -85,9 +85,31 @@ export class Camera implements SceneObject{
         mat4.lookAt(this.view, this.eye, this.center, this.up);
     }
 
-    move(): void {
+    rotateX(value: number): void {
+        // value < 0, 360 >, initial 90 => Math.PI / 2
+        mat4.rotateX(this.view, this.view, degToRad(value) * this.velocity);
+      }
+    
+      rotateY(value: number): void {
+        // value < 0, 360 >, initial 90 => Math.PI / 2
+        mat4.rotateY(this.view, this.view, degToRad(value) * this.velocity);
+      }
+    
+      rotateZ(value: number): void {
+        // value < 0, 360 >, initial 90 => Math.PI / 2
+        mat4.rotateZ(this.view, this.view, degToRad(value) * this.velocity);
+      }
+
+    move(vec: vec3): void {
+        vec3.scale(vec, vec, this.velocity);
+        mat4.translate(this.view, this.view, vec);
 
     }
+
+    scale(value: number): void {
+        mat4.scale(this.view, this.view, [value, value, value]);
+    
+      }
 
     rotate(): void {
     }

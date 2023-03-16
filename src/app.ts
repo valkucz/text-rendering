@@ -2,6 +2,7 @@ import { Controller } from "./controllers/controller";
 import { MenuController } from "./controllers/menuController";
 import { SceneController } from "./controllers/sceneController";
 import { TextController } from "./controllers/textController";
+import { EventHandler } from "./eventHandler";
 import { parseText } from "./fonts";
 import { FontParser } from "./fonts/fontParser";
 import { vec2ToFloat32 } from "./math";
@@ -11,29 +12,24 @@ import { Glyph } from "./scene/objects/glyph";
 
 const defaultUrl = "./public/Blogger_Sans.otf";
 
+
+// rename to manager,
+// divide -> manager, app 
 export class App {
+  
   fontParser: FontParser;
   renderer: Renderer;
-
-  cameraController: SceneController;
-  glyphController: SceneController;
-  textController: Controller;
-  menuController: Controller;
+  controllers: Controller[];
 
   constructor(
     renderer: Renderer,
     fontParser: FontParser,
-    cameraController: SceneController,
-    glyphController: SceneController,
-    textController: Controller,
-    menuController: Controller
+    controllers: Controller[]
   ) {
     this.renderer = renderer;
     this.fontParser = fontParser;
-    this.cameraController = cameraController;
-    this.glyphController = glyphController;
-    this.textController = textController;
-    this.menuController = menuController;
+
+    this.controllers = controllers;
   }
   // TODO: upravit OOP
   static async initialize(ctx: GPUCanvasContext): Promise<App> {
@@ -67,32 +63,27 @@ export class App {
     const glyph = new Glyph(device, vertices);
 
     // Create renderer
-    const renderer = new Renderer(ctx, device);
+    const renderer = new Renderer(ctx, device, glyph, camera);
 
     // Create controllers
 
-    // Camera controller
-    const cameraController = new SceneController("camera", camera);
-    const glyphController = new SceneController("glyph", glyph);
-    const textController = new TextController(fontParser);
-    const menuController = new MenuController();
+    const controllers = [
+      new SceneController("camera", camera),
+      new SceneController("glyph", glyph),
+      new TextController(fontParser),
+      // Is to kosher?
+      new MenuController(),
+    ];
 
-    renderer.render(<Glyph>(glyphController.object), <Camera>(cameraController.object));
-
-    return new App(renderer, fontParser, cameraController, glyphController, textController, menuController);
+    return new App(renderer, fontParser, controllers);
   }
 
-
-  addEventListeners() {
-    console.log('here');
-    this.cameraController.addEventListener(this);
-    this.glyphController.addEventListener(this);
-    this.textController.addEventListener(this);
-    this.menuController.addEventListener(this);
-
+  notify() {
+    this.renderer.render();
   }
-  notify(){
-    // FIXME: solve this type conversion
-    this.renderer.render(<Glyph>(this.glyphController.object), <Camera>(this.cameraController.object));
+
+  run() {
+    this.renderer.render();
+    this.controllers.forEach((controller) => controller.addEventListener(this));
   }
 }

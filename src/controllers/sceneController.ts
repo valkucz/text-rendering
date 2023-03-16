@@ -1,4 +1,6 @@
+import { vec3 } from "gl-matrix";
 import { App } from "../app";
+import { Renderer } from "../rendering/renderer";
 import { SceneObject } from "../scene/objects/sceneObject";
 import { Controller } from "./controller";
 
@@ -12,6 +14,8 @@ export class SceneController implements Controller {
     moveY: HTMLElement;
     moveZ: HTMLElement;
 
+    scale: HTMLElement;
+
     rotateXvalue: number;
     rotateYvalue: number;
     rotateZvalue: number;
@@ -20,7 +24,11 @@ export class SceneController implements Controller {
     moveYvalue: number;
     moveZvalue: number;
 
+    scaleValue: number
+
+
     object: SceneObject;
+
     
     constructor(id: string, object: SceneObject){
         this.rotateX = document.getElementById(id + '-rotate-x') as HTMLElement;
@@ -30,6 +38,8 @@ export class SceneController implements Controller {
         this.moveX = document.getElementById(id + '-move-x') as HTMLElement;
         this.moveY = document.getElementById(id + '-move-y') as HTMLElement;
         this.moveZ = document.getElementById(id + '-move-z') as HTMLElement;
+
+        this.scale = document.getElementById(id + '-scale') as HTMLElement;
 
         // or set default in different directtion ... 
         // not from html, but to html 
@@ -41,6 +51,8 @@ export class SceneController implements Controller {
         this.moveXvalue = this.moveX.value;
         this.moveYvalue = this.moveY.value;
         this.moveZvalue = this.moveZ.value;
+
+        this.scaleValue = this.scale.value;
 
         this.object = object;
     }
@@ -64,18 +76,21 @@ export class SceneController implements Controller {
         });
 
         this.moveX.addEventListener('input', () => {
-            this.object.move();
+            this.object.move(vec3.fromValues(this.moveX.value - this.moveXvalue, 0, 0));
+            this.moveXvalue = this.moveX.value;
             app.notify();
         });
         this.moveY.addEventListener('input', () => {
-            this.object.move();
+            this.object.move(vec3.fromValues(0, this.moveY.value - this.moveYvalue, 0));
+            this.moveYvalue = this.moveY.value;
             app.notify();
         });
         this.moveZ.addEventListener('input', () => {
-            this.object.move();
+            this.object.move(vec3.fromValues(0, 0, this.moveZ.value - this.moveZvalue));
+            this.moveZvalue = this.moveZ.value;
             app.notify();
         });
-        
+ 
     }
 
 }

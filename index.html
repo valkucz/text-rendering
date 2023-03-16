@@ -11,137 +11,141 @@
 <body>
   <script type="module" src="/src/main.ts"></script>
   <section class="section">
-    <div class="drag-controller" id="drag-controler">
-      <span class="controller-span"> <button class="controller-menu-button" id="controller-menu-button"><img
-            id="menu-icon" class="menu-icon" src="./public/icons/arrow.png"></img></button></span>
 
-      <div class="controller-menu" id="controller-menu">
-        <aside class="menu">
-          <p class="menu-label">
-            Text
-          </p>
-          <ul class="menu-list">
-            <li>
-              <input id="text-input" type="text">
-            </li>
-            <li>
-              <button id="text-submit-btn">Submit</button>
-            </li>
-            <li>
-              <p>Font</p>
-              <select id="text-font">
-                <option value="opt1">Blogger_Sans.otf</option>
-                <option value="opt2">MontserratAlternates-Medium.otf</option>
-              </select>
-            </li>
-            <li>
-              <p>Color</p>
-              <input type="color" id="text-color" value="#0000ff">
-            </li>
-            <li>
-              <p>Background color</p>
-              <input type="color" id="bgcolor" value="#0000ff">
-            </li>
-          </ul>
-          <p class="menu-label">
-            <!-- TODO: rename to Glyph? -->
-            Object
-          </p>
-          <ul class="menu-list">
-            <li>Position</li>
-            <li>
-              <ul>
-                <li>
-                  <p>x</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="glyph-move-x">
-                </li>
-                <li>
-                  <p>y</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="glyph-move-y">
-                </li>
-                <li>
-                  <p>z</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="glyph-move-z">
-                </li>
-              </ul>
-            </li>
-            <li>Rotation</li>
-            <li>
-              <ul>
-                <li>
-                  <p>x</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-x">
-                </li>
-                <li>
-                  <p>y</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-y">
-                </li>
-                <li>
-                  <p>z</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-z">
-                </li>
-              </ul>
-            </li>
-            <li>Scale</li>
-            <ul>
-              <li><input type="range" min="1" max="360" value="180" class="slider" id="glyph-scale"></li>
-            </ul>
-            <li><button id="glyph-reset">Reset</button></li>
-          </ul>
-          <p class="menu-label">
-            Camera
-          </p>
-          <ul class="menu-list">
-            <li>Position</li>
-            <li>
-              <ul>
-                <li>
-                  <p>x</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="camera-move-x">
-                </li>
-                <li>
-                  <p>y</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="camera-move-y">
-                </li>
-                <li>
-                  <p>z</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="camera-move-z">
-                </li>
-              </ul>
-            </li>
-            <li>Rotation</li>
-            <li>
-              <ul>
-                <li>
-                  <p>x</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="camera-rotate-x">
-                </li>
-                <li>
-                  <p>y</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="camera-rotate-y">
-                </li>
-                <li>
-                  <p>z</p>
-                  <input type="range" min="1" max="360" value="180" class="slider" id="camera-rotate-z">
-                </li>
-              </ul>
-            </li>
-            <li>Zoom</li>
-            <ul>
-              <li><input type="range" min="1" max="360" value="180" class="slider" id="zoom"></li>
-            </ul>
-            <li><button id="camera-reset">Reset</button></li>
-          </ul>
-        </aside>
-      </div>
-    </div>
     <div class="container is-fullhd">
       <h1 class="title">
         Text rendering
       </h1>
-      <div>
-        <canvas class="column is-full" id="canvas">
-        </canvas>
+      <div class="columns">
+        <div>
+          
+          <canvas class="is-full" id="canvas">
+          </canvas>
+        </div>
+        <div class="column controller-menu" id="controller-menu">
+           <button class="controller-menu-button" id="controller-menu-button"><img
+                id="menu-icon" class="menu-icon" src="./public/icons/arrow.png"></img></button>
+    
+          <div class="content-menu" id="content-menu">
+            <aside class="menu">
+              <p class="menu-label">
+                Text
+              </p>
+              <ul class="menu-list">
+                <li>
+                  <input id="text-input" type="text">
+                </li>
+                <li>
+                  <button id="text-submit-btn">Submit</button>
+                </li>
+                <li>
+                  <p>Font</p>
+                  <select id="text-font">
+                    <option value="opt1">Blogger_Sans.otf</option>
+                    <option value="opt2">MontserratAlternates-Medium.otf</option>
+                  </select>
+                </li>
+                <li>
+                  <p>Color</p>
+                  <input type="color" id="text-color" value="#0000ff">
+                </li>
+                <li>
+                  <p>Background color</p>
+                  <input type="color" id="bgcolor" value="#0000ff">
+                </li>
+              </ul>
+              <p class="menu-label">
+                <!-- TODO: rename to Glyph? -->
+                Object
+              </p>
+              <ul class="menu-list">
+                <li>Position</li>
+                <li>
+                  <ul>
+                    <li>
+                      <p>x</p>
+                      <input type="range" min="1" max="100" value="50" class="slider" id="glyph-move-x">
+                    </li>
+                    <li>
+                      <p>y</p>
+                      <input type="range" min="1" max="100" value="50" class="slider" id="glyph-move-y">
+                    </li>
+                    <li>
+                      <p>z</p>
+                      <input type="range" min="1" max="100" value="50" class="slider" id="glyph-move-z">
+                    </li>
+                  </ul>
+                </li>
+                <li>Rotation</li>
+                <li>
+                  <ul>
+                    <li>
+                      <p>x</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-x">
+                    </li>
+                    <li>
+                      <p>y</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-y">
+                    </li>
+                    <li>
+                      <p>z</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-z">
+                    </li>
+                  </ul>
+                </li>
+                <li>Scale</li>
+                <ul>
+                  <li><input type="range" min="1" max="20" value="10" class="slider" id="glyph-scale"></li>
+                </ul>
+                <li><button id="glyph-reset">Reset</button></li>
+              </ul>
+              <p class="menu-label">
+                Camera
+              </p>
+              <ul class="menu-list">
+                <li>Position</li>
+                <li>
+                  <ul>
+                    <li>
+                      <p>x</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="camera-move-x">
+                    </li>
+                    <li>
+                      <p>y</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="camera-move-y">
+                    </li>
+                    <li>
+                      <p>z</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="camera-move-z">
+                    </li>
+                  </ul>
+                </li>
+                <li>Rotation</li>
+                <li>
+                  <ul>
+                    <li>
+                      <p>x</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="camera-rotate-x">
+                    </li>
+                    <li>
+                      <p>y</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="camera-rotate-y">
+                    </li>
+                    <li>
+                      <p>z</p>
+                      <input type="range" min="1" max="360" value="180" class="slider" id="camera-rotate-z">
+                    </li>
+                  </ul>
+                </li>
+                <li>Zoom</li>
+                <ul>
+                  <li><input type="range" min="1" max="360" value="180" class="slider" id="camera-scale"></li>
+                </ul>
+                <li><button id="camera-reset">Reset</button></li>
+              </ul>
+            </aside>
+          </div>
+        </div>
       </div>
     </div>
   </section>
