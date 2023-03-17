@@ -1,6 +1,7 @@
 @import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css";
 :root {
   --shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
 }
 html, body {
   margin: 0;
@@ -8,111 +9,62 @@ html, body {
   height: 100%;
   font-family: 'Open Sans', sans-serif;
 }
-.canvas-container{
-  display: flex;
-  justify-content: space-around;
+.menu button {
+  border: none;
 }
-.canvas-controller{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-}
-.canvas-controller div {
-  width: 200px;
-}
-button { 
-  background-color: white;
-}
+
+
 button:enabled{
   cursor: pointer;
+}
+
+button:hover {
+  scale: 1.1;
 }
 
 button:enabled:active{
   transform: translateY(4px);
 }
-#canvas {
-  margin: 0;
+.canvas {
   cursor: crosshair;
-  box-shadow: var(--shadow);
-  /* to match with menu */
-  margin-right: 50px;
 }
 
-.canvas-controller a:hover {
-  color: #f1f1f1;
-}
-.canvas-controller .closebtn {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-left: 50px;
-}
-
-.drag-controller {
-  position: absolute; 
-  z-index: 1;
-  cursor: grab;
-  right: 10%;
-  top: 15%;
-
-}
-/* menu controller */
 .controller-menu {
-  /* draggable: */
-  padding: 10px;
-  /* padding:10px;
-  display: block; 
-  max-height: 500px;
-  width: 250px;
-  overflow: auto;
-  background-color: white; */
-
-  /* collapsable: */
+  padding: 0.5rem;
   position: absolute;
-  z-index: 100;
+  z-index: 1;
   top: 0;
   right: 0;
-  width: 250px;
-  /* height: 100%; */
-  max-height: 562px;
+  height: 100%;
   background-color: white;
   overflow: auto;
+  overflow-x: hidden;
   z-index: 1; /* ensure the panel is on top of the canvas */
-  transition: right 0.3s ease-in-out;
-
-
+  transition: right 1.0s ease-in-out;
   box-shadow: var(--shadow);
 }
 
 .controller-menu.is-expanded {
   right: 0;
 }
-/* menu content */
+
 .content-menu {
   margin-right: 0;
-  transition: margin-right 0.3s ease-in-out;
+  transition: margin-right 1s ease-in-out;
 }
-
 
 .controller-span {
   float: left;
   display: inline;
 }
 .controller-menu-button {
-  /* width:250px; */
   height: 40px;
   width: 40px;
-  
-  /* box-shadow: var(--shadow); */
+  top: 50%;
+  background-color: transparent ;
   border: none;
-}
-
-.menu-icon {
-  /* height: 100%; */
-
-  transition: transform 1.0s ease;
+  display: inline-block;
+  margin: 0.2rem;
 }
 
 .controller-menu input, select, button { 
@@ -126,10 +78,26 @@ button:enabled:active{
 .menu-list li {
   margin: 5px;
 }
+
 .menu-label {
   font-size: 0.9em;
 }
 
-.columns {
-  position: relative;
+.container {
+  padding: 0;
+  height: 40rem;
+  background: 0px 2px 3px rgba(255,255,255,0.5);
+  margin: auto;
+  width: auto;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.my-icon {
+  width: 2rem;
+  height: 2rem;
+  float: right;
+}
+.section {
+  padding: 2rem;
 }

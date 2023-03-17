@@ -4,7 +4,9 @@ import { Controller } from "./controller";
 export class MenuController implements Controller {
     private element: HTMLElement;
     private content: HTMLElement;
-    private menuButtonElement: HTMLElement;
+    private openMenuBtn: HTMLElement;
+    private closeMenuBtn: HTMLElement;
+    private canvas: HTMLElement;
 
     private expanded: boolean = true;
     private width: number = 250;
@@ -12,26 +14,20 @@ export class MenuController implements Controller {
     constructor() {
         this.element = document.getElementById('controller-menu') as HTMLElement;
         this.content = document.getElementById('content-menu') as HTMLElement;
-        this.menuButtonElement = document.getElementById('controller-menu-button') as HTMLElement;
+        this.canvas = document.getElementById('canvas') as HTMLElement;	
+        this.openMenuBtn = document.getElementById('open-menu-button') as HTMLElement;
+        this.closeMenuBtn = document.getElementById('close-menu-button') as HTMLElement;
     }
 
     addEventListener(app: App): void {
         console.log('Offset width', this.element.offsetWidth);
-        this.menuButtonElement.addEventListener('click', () => {
-            if (this.expanded) {
-                console.log('not expanding');
-                this.element.style.right = `-${200}px`;
-                this.content.style.opacity = '50%';
-                // this.content.style.visibility = 'hidden';
-                this.expanded = false;
-            }
-            else {
-                console.log('expanding');
-                this.element.style.right = `${0}px`;
-                this.content.style.opacity = '50%';
-                // this.content.style.visibility = 'visible';
-                this.expanded = true;
-            }
+
+        this.openMenuBtn.addEventListener('click', () => {
+            this.element.style.right = `0px`;
         });
+        this.closeMenuBtn.addEventListener('click', () => {
+            this.element.style.right = `-${this.element.offsetWidth + 2}px`;
+        });
+
     }
 }

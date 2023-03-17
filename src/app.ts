@@ -59,7 +59,7 @@ export class App {
     // Create object
 
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
-    const vertices = fontParser.parseText("horld");
+    const vertices = fontParser.parseText("O");
     const glyph = new Glyph(device, vertices);
 
     // Create renderer
