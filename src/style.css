@@ -8,6 +8,9 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: 'Open Sans', sans-serif;
+  /* background: rgb(233,213,238); */
+/* background: linear-gradient(0deg, rgba(233,213,238,1) 0%, rgba(255,255,255,1) 100%); */
+  
 }
 .menu button {
   border: none;
@@ -96,8 +99,33 @@ button:enabled:active{
 .my-icon {
   width: 2rem;
   height: 2rem;
-  float: right;
+  /* float: right; */
 }
 .section {
+  height: 50rem;
   padding: 2rem;
 }
+
+.header-element {
+  margin-top: 10rem;
+  font-size: 10rem;
+  text-align: center;
+  
+
+  text-shadow: 0px 1px rgb(255, 255, 255), 0px 2px 3px #000000;
+  color: transparent;
+  /* text-shadow: 0px 2px 3px rgba(255, 255, 255, 0.8); */
+  /* position: absolute; */
+}
+
+.title {
+  margin-left: 3.5rem;
+}
+
+.container {
+  /* text-align: center; */
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
+}
+.content {}
