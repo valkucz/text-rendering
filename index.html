@@ -5,34 +5,71 @@
   <meta charset="utf-8">
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="module">
-    import '@jamescoyle/svg-icon'
-  </script>
   <title>Text rendering</title>
 </head>
 
 <body>
   <script type="module" src="/src/main.ts"></script>
+  <nav class="navbar is-visible is-fixed-top" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
   
-  <section class="section">
-    <div class="container">
+    <div class="navbar-menu">
+      <div class="navbar-start">
+        <div class="tabs is-boxed">
+          <ul>
+            <li class="is-active"><a href="#section-1">Home</a></li>
+            <li><a href="#section-2">Demo</a></li>
+            <li><a href="#section-3">About</a></li>
+          </ul>
+        </div>
+      </div>
+  
+      <div class="navbar-end">
+        <div class="buttons">
+          <a class="button">
+            <span class="icon"><ion-icon name="logo-github" size="large">
+  
+            </ion-icon></span>
+          </a>
+          <a class="button">
+            <span class="icon"><ion-icon name="moon-outline" size="large">
+            </ion-icon></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div style="position: absolute">
+
+
+  <section class="section" id="section-1">
+    <!-- <div class="container"> -->
       <h1 class="title header-element">
        Text rendering
       </h1>
-    </div>
+    <!-- </div> -->
   </section>
 
-  <section class="section">
+  <section class="section" id="section-2">
+    <div class="content">
+      <h1 class="title">Demo</h1>
+    </div>
     <div class="container columns is-multiliner">
 
           <canvas class="canvas" id="canvas">
           </canvas>
-          <button id="open-menu-button"  class="controller-menu-button"><ion-icon name="grid-outline" size="large"></ion-icon></button>
+          <button id="open-menu-button"  class="controller-menu-button"><ion-icon name="chevron-back-outline" size="large"></ion-icon></ion-icon></button>
 
           <div class="container-child controller-menu" id="controller-menu">
             <div>
 
-              <button id="close-menu-button" class="controller-menu-button"><ion-icon name="close-circle-outline" size="large"></ion-icon></button>
+              <button id="close-menu-button" class="controller-menu-button"><ion-icon name="chevron-forward-outline" size="large"></ion-icon></button>
             </div>
           <div class="content-menu column" id="content-menu">
             <aside class="menu">
@@ -156,9 +193,12 @@
         </div>
     </div>
   </section>
-  <section class="section">
-    <h1 class="title">About</h1>
-    <div class="container content">
+  <section class="section" id="section-3">
+    <div class="content">
+      <h1 class="title">About</h1>
+      <p>The purpose of this website is to showcase a web application built with WebGPU<sup><a>[1]</a></sup>
+        that enables the rendering of fonts in a dynamic 3D space.</p>
+
       <p>Lorem ipsum<sup><a>[1]</a></sup> dolor sit amet, consectetur adipiscing elit. Nulla accumsan, metus ultrices eleifend gravida, nulla nunc varius lectus, nec rutrum justo nibh eu lectus. Ut vulputate semper dui. Fusce erat odio, sollicitudin vel erat vel, interdum mattis neque. Sub<sub>script</sub> works as well!</p>
       <h3>Project overlay</h3>
       <p>Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit. Quisque condimentum maximus mi, sit amet commodo arcu rutrum id. Proin pretium urna vel cursus venenatis. Suspendisse potenti. Etiam mattis sem rhoncus lacus dapibus facilisis. Donec at dignissim dui. Ut et neque nisl.</p>
@@ -168,9 +208,7 @@
         <li>Aliquam nec felis in sapien venenatis viverra fermentum nec lectus.</li>
         <li>Ut non enim metus.</li>
       </ul>
-      <blockquote>Ut venenatis, nisl scelerisque sollicitudin fermentum, quam libero hendrerit ipsum, ut blandit est tellus sit amet turpis.</blockquote>
-      <p>Quisque at semper enim, eu hendrerit odio. Etiam auctor nisl et <em>justo sodales</em> elementum. Maecenas ultrices lacus quis neque consectetur, et lobortis nisi molestie.</p>
-      <p>Sed sagittis enim ac tortor maximus rutrum. Nulla facilisi. Donec mattis vulputate risus in luctus. Maecenas vestibulum interdum commodo.</p>
+     
       <dl>
         <dt>Web</dt>
         <dd>The part of the Internet that contains websites and web pages</dd>
@@ -182,7 +220,7 @@
       <p>Suspendisse egestas sapien non felis placerat elementum. Morbi tortor nisl, suscipit sed mi sit amet, mollis malesuada nulla. Nulla facilisi. Nullam ac erat ante.</p>
       <h4>Fourth level</h4>
       <p>Nulla efficitur eleifend nisi, sit amet bibendum sapien fringilla ac. Mauris euismod metus a tellus laoreet, at elementum ex efficitur.</p>
-      <pre>
+      <pre class="box-element">
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
       &lt;head&gt;
@@ -200,13 +238,10 @@
       <p>
         <strong>Text rendering</strong> by <a href="#">Zdenka Valkučáková</a>.
       </p>
-      <a href="#">
-        <img class="my-icon" src="./public/icons/github.png">
-      </a>
     </div>
   </footer>
+</div>
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 
 </html>
