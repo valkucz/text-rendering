@@ -63,6 +63,13 @@ export class Renderer {
           buffer: {
             type: "storage",
           },
+        },
+        {
+          binding: 2,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {
+            type: "storage",
+          },
         }
       ],
     });
@@ -108,6 +115,12 @@ export class Renderer {
           resource: {
             buffer: this.glyph.vertexBuffer.buffer,
           },
+        },
+        {
+          binding: 2,
+          resource: {
+            buffer: this.glyph.colorBuffer.buffer,
+          }
         }
       ],
     });
@@ -195,6 +208,15 @@ export class Renderer {
       0,
       vertexBuffer.vertices.buffer
     );
+
+    // Color
+    this.device.queue.writeBuffer(
+      this.glyph.colorBuffer.buffer,
+      0,
+      this.glyph.colorBuffer.vertices.buffer
+    );
+
+
   }
   // FIXME: 
   // BindGroup je stale ta ista, az kym sa nezmeni text

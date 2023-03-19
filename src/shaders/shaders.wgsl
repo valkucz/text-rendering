@@ -20,9 +20,14 @@ struct VertexOutput {
 }
 // TODO:
 // struct color bg, text
+struct Color {
+    background: vec4<f32>,
+    glyph: vec4<f32>,
+}
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
 @binding(1) @group(0) var<storage, read_write> object: SceneObject;
+@binding(2) @group(0) var<storage, read_write> color: Color;
 
 // TODO: split vertex and fragment into separate files
 @vertex
@@ -66,9 +71,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let uvint = vec2(x, y);
 
     if (is_inside_glyph(vec2<i32>(uvint))){
-        return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+        return color.glyph;
     }
-    return vec4<f32>(1.0, 0.0, 1.0, 1.0);
+    return color.background;
 }
 
 

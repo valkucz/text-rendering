@@ -37,7 +37,8 @@ export class VertexBuffer {
     getVertexCount(): number {
         return this.vertices.length;
     }
-
+    
+    // TODO: why is it here, move to glyph?
     getBoundingBox(): Float32Array {
         const min = vec2.fromValues(Infinity, Infinity);
         const max = vec2.fromValues(-Infinity, -Infinity);

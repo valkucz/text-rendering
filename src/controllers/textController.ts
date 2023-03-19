@@ -1,6 +1,8 @@
 import { FontParser } from "../fonts/fontParser";
 import { Controller } from "./controller";
 import { App } from "../app";
+
+// FIXME: why is there problem with loading textController.ts
 export class TextController implements Controller {
     
   private inputElem: HTMLElement;
