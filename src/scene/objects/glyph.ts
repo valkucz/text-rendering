@@ -29,4 +29,8 @@ export class Glyph extends SceneObject {
   createVertexBuffer(device: GPUDevice, vertices: Float32Array): VertexBuffer {
     return new VertexBuffer(device, vertices);
   }
+
+  update() {
+    this.colorBuffer.update(this.getColor());
+  }
 }

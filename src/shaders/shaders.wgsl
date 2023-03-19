@@ -21,8 +21,8 @@ struct VertexOutput {
 // TODO:
 // struct color bg, text
 struct Color {
-    background: vec4<f32>,
     glyph: vec4<f32>,
+    background: vec4<f32>,
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;

@@ -1,32 +1,62 @@
 import { FontParser } from "../fonts/fontParser";
 import { Controller } from "./controller";
 import { App } from "../app";
+import { Glyph } from "../scene/objects/glyph";
 
 // FIXME: why is there problem with loading textController.ts
 export class TextController implements Controller {
     
-  private inputElem: HTMLElement;
+  private inputElem: HTMLInputElement;
   private buttonElem: HTMLElement;
-  private fontElem: HTMLElement;
-  private colorElem: HTMLElement;
-  private bgcolorElem: HTMLElement;
+  private colorElem: HTMLInputElement;
+  private bgcolorElem: HTMLInputElement;
 
   fontParser: FontParser;
 
+  glyph: Glyph;
+
 
   constructor(
-    fontParser: FontParser
+    fontParser: FontParser,
+    glyph: Glyph
   ) {
     this.fontParser = fontParser;
+    this.glyph = glyph;
 
-    this.inputElem = document.getElementById("text-input") as HTMLElement;
+    this.inputElem = document.getElementById("text-input") as HTMLInputElement;
     this.buttonElem = document.getElementById("text-submit-btn") as HTMLElement;
-    this.fontElem = document.getElementById("text-font") as HTMLElement;
-    this.colorElem = document.getElementById("text-color") as HTMLElement;
-    this.bgcolorElem = document.getElementById("bgcolor") as HTMLElement;
+    this.colorElem = document.getElementById("text-color") as HTMLInputElement;
+    this.bgcolorElem = document.getElementById("bgcolor") as HTMLInputElement;
+
+    // FIXME: setup; change
+    this.glyph.color = this.hexToRgb(this.colorElem.value);
+    this.glyph.background = this.hexToRgb(this.bgcolorElem.value);
+    glyph.update();
 
   }
   addEventListener(app: App): void {
-    // empty
+    this.colorElem.addEventListener("input", () => {
+      this.glyph.color = this.hexToRgb(this.colorElem.value);
+
+      this.glyph.update();
+      app.notify();
+    });
+
+    this.bgcolorElem.addEventListener("input", () => {
+      this.glyph.background = this.hexToRgb(this.bgcolorElem.value);
+
+      this.glyph.update();
+      app.notify();
+    });
+    
+  }
+
+  hexToRgb(hex: string): number[] {
+    // Convert hex color string to RGB color object
+    const r = parseInt(hex.substring(1, 3), 16) / 255;
+    const g = parseInt(hex.substring(3, 5), 16) / 255;
+    const b = parseInt(hex.substring(5, 7), 16) / 255;
+    const a = 1.0;
+    return [r, g, b, a];
   }
 }

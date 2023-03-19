@@ -69,7 +69,7 @@ export class App {
 
     const controllers = [
       new SceneController("glyph", glyph),
-      new TextController(fontParser),
+      new TextController(fontParser, glyph),
       // Is to kosher?
       new MenuController(),
     ];
