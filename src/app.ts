@@ -68,7 +68,6 @@ export class App {
     // Create controllers
 
     const controllers = [
-      new SceneController("camera", camera),
       new SceneController("glyph", glyph),
       new TextController(fontParser),
       // Is to kosher?
