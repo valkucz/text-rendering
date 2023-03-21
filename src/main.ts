@@ -20,27 +20,19 @@ canvas.height = rect.height * dpr * 3;
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
 
-
 const app = await App.initialize(ctx);
 app.run();
 
 // TODO: move to menu controller, rename menu controller?
-var navbar = document.querySelector('.navbar') as HTMLElement;
+var navbar = document.querySelector(".navbar") as HTMLElement;
 var lastScrollTop = 0;
 
-document.addEventListener('scroll', function() {
+document.addEventListener("scroll", function () {
   var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   if (scrollTop > lastScrollTop) {
-    navbar.classList.remove('is-visible');
+    navbar.classList.remove("is-visible");
   } else {
-    navbar.classList.add('is-visible');
+    navbar.classList.add("is-visible");
   }
   lastScrollTop = scrollTop;
 });
-
-
-
-
-
-
-

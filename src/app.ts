@@ -9,11 +9,9 @@ import { Glyph } from "./scene/objects/glyph";
 
 const defaultUrl = "./public/Blogger_Sans.otf";
 
-
 // rename to manager,
-// divide -> manager, app 
+// divide -> manager, app
 export class App {
-  
   fontParser: FontParser;
   renderer: Renderer;
   controllers: Controller[];
@@ -60,7 +58,13 @@ export class App {
     const glyph = new Glyph(device, vertices);
 
     // Create renderer
-    const renderer = new Renderer(device, ctx, glyph, camera.projection, camera.view);
+    const renderer = new Renderer(
+      device,
+      ctx,
+      glyph,
+      camera.projection,
+      camera.view
+    );
 
     // Create controllers
 
@@ -75,7 +79,7 @@ export class App {
   }
 
   notify() {
-    console.log('notified');
+    console.log("notified");
     const perFrameData = this.renderer.prepare();
     this.renderer.render(perFrameData);
   }

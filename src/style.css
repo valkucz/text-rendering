@@ -1,21 +1,23 @@
 @import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css";
+
 :root {
   --container-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   --draggable-shadow: inset 0 -1px 0px rgba(0, 0, 0, 0.19);
-  --secondary-style-color: rgba(201, 204, 213,1);
+  --secondary-style-color: rgba(201, 204, 213, 1);
   --secondary-bg-color: rgba(201, 205, 215, 0.603);
   --text-primary-color: rgb(107, 110, 117);
-  --family-primary:  'Open Sans', sans-serif;
+  --family-primary: 'Open Sans', sans-serif;
   --content-table-foot-cell-color: #f5f5f5;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
   color: var(--text-primary-color);
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%),
-  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='100%25' width='100%25'%3E%3Cdefs%3E%3Cpattern id='doodad' width='300' height='300' viewBox='0 0 40 40' patternUnits='userSpaceOnUse' patternTransform='rotate(135)'%3E%3Crect width='100%25' height='100%25' fill='rgba(247, 250, 252,1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L36 8h-32v24z' fill='rgba(201, 204, 213,1)' filter='url(%23filter-doodad-1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L4 32h32v-24z' fill='rgba(228, 216, 220,1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L0 40h40v-40z' fill='rgba(201, 204, 213,1)' filter='url(%23filter-doodad-1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L40 0h-40v40z' fill='rgba(228, 216, 220,1)'/%3E%3C/pattern%3E%3Cfilter id='filter-doodad-1'%3E%3CfeTurbulence baseFrequency='0' numOctaves='2' type='fractalNoise' result='result1'/%3E%3CfeDisplacementMap in2='result1' scale='0' result='result2' xChannelSelector='R' in='SourceGraphic'/%3E%3CfeComposite in2='result2' in='SourceGraphic' operator='atop' result='fbSourceGraphic'/%3E%3C/filter%3E%3C/defs%3E%3Crect fill='url(%23doodad)' height='200%25' width='200%25'/%3E%3C/svg%3E ");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='100%25' width='100%25'%3E%3Cdefs%3E%3Cpattern id='doodad' width='300' height='300' viewBox='0 0 40 40' patternUnits='userSpaceOnUse' patternTransform='rotate(135)'%3E%3Crect width='100%25' height='100%25' fill='rgba(247, 250, 252,1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L36 8h-32v24z' fill='rgba(201, 204, 213,1)' filter='url(%23filter-doodad-1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L4 32h32v-24z' fill='rgba(228, 216, 220,1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L0 40h40v-40z' fill='rgba(201, 204, 213,1)' filter='url(%23filter-doodad-1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L40 0h-40v40z' fill='rgba(228, 216, 220,1)'/%3E%3C/pattern%3E%3Cfilter id='filter-doodad-1'%3E%3CfeTurbulence baseFrequency='0' numOctaves='2' type='fractalNoise' result='result1'/%3E%3CfeDisplacementMap in2='result1' scale='0' result='result2' xChannelSelector='R' in='SourceGraphic'/%3E%3CfeComposite in2='result2' in='SourceGraphic' operator='atop' result='fbSourceGraphic'/%3E%3C/filter%3E%3C/defs%3E%3Crect fill='url(%23doodad)' height='200%25' width='200%25'/%3E%3C/svg%3E ");
   background-size: cover;
   background-repeat: no-repeat;
   scroll-behavior: smooth;
@@ -25,14 +27,14 @@ html, body {
 
 .menu button {
   letter-spacing: 0.05rem;
-  background:  var(--secondary-style-color);
+  background: var(--secondary-style-color);
   border: none;
-  border-radius: 1rem; 
+  border-radius: 1rem;
   box-shadow: var(--draggable-shadow);
   text-transform: uppercase;
 }
 
-button:enabled{
+button:enabled {
   cursor: pointer;
 }
 
@@ -40,9 +42,10 @@ button:hover {
   scale: 1.1;
 }
 
-button:enabled:active{
+button:enabled:active {
   transform: translateY(4px);
 }
+
 .canvas {
   cursor: crosshair;
 }
@@ -58,7 +61,8 @@ button:enabled:active{
   background-color: white;
   overflow: auto;
   overflow-x: hidden;
-  z-index: 1; /* ensure the panel is on top of the canvas */
+  z-index: 1;
+  /* ensure the panel is on top of the canvas */
   transition: right 1.0s ease-in-out;
   box-shadow: var(--container-shadow);
 }
@@ -76,17 +80,20 @@ button:enabled:active{
   float: left;
   display: inline;
 }
+
 .controller-menu-button {
   height: 40px;
   width: 40px;
   top: 50%;
-  background-color: transparent ;
+  background-color: transparent;
   border: none;
   display: inline-block;
   margin: 0.2rem;
 }
 
-.controller-menu input, select, button { 
+.controller-menu input,
+select,
+button {
   width: 100%;
 }
 
@@ -105,7 +112,7 @@ button:enabled:active{
 .container {
   padding: 0;
   height: 40rem;
-  background: 0px 2px 3px rgba(255,255,255,0.5);
+  background: 0px 2px 3px rgba(255, 255, 255, 0.5);
   margin: auto;
   width: auto;
   box-shadow: var(--container-shadow);
@@ -137,7 +144,7 @@ button:enabled:active{
 .slider {
   box-shadow: var(--draggable-shadow);
   -webkit-appearance: none;
-  border-radius: 1rem;  
+  border-radius: 1rem;
   background: #f1e8eb;
   outline: none;
   -webkit-transition: .2s;
@@ -150,14 +157,14 @@ button:enabled:active{
   appearance: none;
   width: 1rem;
   height: 1rem;
-  border-radius: 50%; 
+  border-radius: 50%;
   background: var(--secondary-style-color);
   cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
   box-shadow: var(--draggable-shadow);
-  background:  var(--secondary-style-color);
+  background: var(--secondary-style-color);
   cursor: pointer;
 }
 
@@ -179,9 +186,9 @@ input:hover {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background:  var(--secondary-style-color);
+  background: var(--secondary-style-color);
   box-shadow: var(--draggable-shadow);
-  border-radius: 1rem; 
+  border-radius: 1rem;
 }
 
 .footer {
@@ -201,10 +208,10 @@ ion-icon {
 .section {
   /* color: var(--text-primary-color);
    */
-   
+
 }
 
-.navbar{
+.navbar {
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
   transform: translateY(-100%);
   opacity: 0;
@@ -213,7 +220,7 @@ ion-icon {
   transition: 0.3s ease-in-out;
   /* opacity: 0; */
   z-index: 1;
-  
+
   /* visibility: hidden; */
   /* position: fixed; */
 }
@@ -222,6 +229,7 @@ ion-icon {
   transform: translateY(0);
   opacity: 1;
 }
+
 .navbar:hover {
   opacity: 1;
   transform: translateY(0.1rem);

@@ -1,9 +1,8 @@
 import { SceneObject } from "./sceneObject";
 import { VertexBuffer } from "./vertexBuffer";
 
-  // TODO: square for each glyph?
+// TODO: square for each glyph?
 export class Glyph extends SceneObject {
-
   vertexBuffer: VertexBuffer;
 
   colorBuffer: VertexBuffer;
@@ -12,7 +11,6 @@ export class Glyph extends SceneObject {
 
   // move it
   background: number[] = [1.0, 0.0, 1.0, 1.0];
-
 
   constructor(device: GPUDevice, vertices: Float32Array) {
     super();
@@ -23,7 +21,7 @@ export class Glyph extends SceneObject {
   }
 
   getColor(): Float32Array {
-    return  new Float32Array(this.color.concat(this.background));
+    return new Float32Array(this.color.concat(this.background));
   }
 
   createVertexBuffer(device: GPUDevice, vertices: Float32Array): VertexBuffer {

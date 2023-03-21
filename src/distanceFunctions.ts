@@ -18,7 +18,7 @@ export function sdBezier(pos: vec2, points: vec2[]): number | math.Complex {
   vec2.scale(sc, points[1], 2);
   vec2.subtract(b, points[0], sc);
   vec2.add(b, b, points[2]);
-  
+
   // const b = points[0].substract(points[1].multiply(2)).add(points[2]);
   let c = vec2.create();
   vec2.scale(c, a, 2);
@@ -63,7 +63,7 @@ export function sdBezier(pos: vec2, points: vec2[]): number | math.Complex {
   const v = acos(q / (p * z * 2.0)) / 3.0;
   const m = cos(v);
   const n = sin(v) * 1.732050808;
-  
+
   // const t = new Point(m + m, -n - m).multiply(z).substract(kx).clamp(0.0, 1.0);
   let t1 = vec2.fromValues(m + m, -n - m);
   vec2.scale(t1, t1, z);
@@ -84,13 +84,7 @@ export function sdBezier(pos: vec2, points: vec2[]): number | math.Complex {
   vec2.add(t4, b2, c);
   vec2.add(t4, d, c);
 
-
-  return sqrt(
-    min(
-      vec2.dot(t3, t3),
-      vec2.dot(t4, t4)
-    )
-  );
+  return sqrt(min(vec2.dot(t3, t3), vec2.dot(t4, t4)));
 }
 
 export function sdLine(p: vec2, a: vec2, b: vec2): number {

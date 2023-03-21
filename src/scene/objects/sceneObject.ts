@@ -8,7 +8,6 @@ export class SceneObject {
 
   // vertexBuffer: VertexBuffer;
 
-
   constructor() {
     this.velocity = 0.1;
 
@@ -23,7 +22,7 @@ export class SceneObject {
   }
 
   // Scene methods:
-  
+
   rotateX(value: number): void {
     // value < 0, 360 >, initial 90 => Math.PI / 2
     mat4.rotateX(this.model, this.model, degToRad(value));
@@ -59,5 +58,3 @@ export class SceneObject {
     this.setModel();
   }
 }
-
-
