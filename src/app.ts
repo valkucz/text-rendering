@@ -60,7 +60,7 @@ export class App {
     const glyph = new Glyph(device, vertices);
 
     // Create renderer
-    const renderer = new Renderer(ctx, device, glyph, camera);
+    const renderer = new Renderer(device, ctx, glyph, camera.projection, camera.view);
 
     // Create controllers
 
@@ -75,11 +75,14 @@ export class App {
   }
 
   notify() {
-    this.renderer.render();
+    console.log('notified');
+    const perFrameData = this.renderer.prepare();
+    this.renderer.render(perFrameData);
   }
 
   run() {
-    this.renderer.render();
+    const perFrameData = this.renderer.prepare();
+    this.renderer.render(perFrameData);
     this.controllers.forEach((controller) => controller.addEventListener(this));
   }
 }
