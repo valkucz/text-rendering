@@ -1,4 +1,3 @@
-// TODO: rename to approximation
 import { vec2 } from "gl-matrix";
 
 const gamma = 0.5;

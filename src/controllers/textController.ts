@@ -11,6 +11,7 @@ export class TextController implements Controller {
   private colorElem: HTMLInputElement;
   private bgcolorElem: HTMLInputElement;
 
+  // font parser has glyph or glyph has font parser, so no need to pass both
   fontParser: FontParser;
 
   glyph: Glyph;
@@ -34,6 +35,7 @@ export class TextController implements Controller {
     glyph.update();
 
   }
+  
   addEventListener(app: App): void {
     this.colorElem.addEventListener("input", () => {
       this.glyph.color = this.hexToRgb(this.colorElem.value);

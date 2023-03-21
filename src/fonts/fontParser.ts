@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { cubicToQuadratic } from "../bezier";
+import { cubicToQuadratic } from "../approximation";
 import { Typr } from "../Typr";
 import Font from "./font";
 

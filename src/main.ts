@@ -21,12 +21,11 @@ export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 export const segments: number = 15;
 
 
-
-
 const app = await App.initialize(ctx);
 app.run();
 
-var navbar = document.querySelector('.navbar');
+// TODO: move to menu controller, rename menu controller?
+var navbar = document.querySelector('.navbar') as HTMLElement;
 var lastScrollTop = 0;
 
 document.addEventListener('scroll', function() {
