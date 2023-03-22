@@ -1,7 +1,6 @@
 import { mat4, vec3, glMatrix as glm } from "gl-matrix";
 import { cos, sin } from "mathjs";
 import { conversionFactor } from "../main";
-import { degToRad } from "../math";
 import { SceneObject } from "./objects/sceneObject";
 
 export class Camera extends SceneObject {
@@ -9,7 +8,7 @@ export class Camera extends SceneObject {
 
   projection: mat4;
 
-  worldUp: vec3 = [0, 1, 0];
+  worldUp: vec3 = [0, -1, 0];
 
   eye: vec3 = [-1, 0, 0];
 
@@ -86,30 +85,6 @@ export class Camera extends SceneObject {
     vec3.add(this.center, this.eye, this.front);
 
     mat4.lookAt(this.view, this.eye, this.center, this.up);
-  }
-
-  rotateX(value: number): void {
-    // value < 0, 360 >, initial 90 => Math.PI / 2
-    mat4.rotateX(this.view, this.view, degToRad(value) * this.velocity);
-  }
-
-  rotateY(value: number): void {
-    // value < 0, 360 >, initial 90 => Math.PI / 2
-    mat4.rotateY(this.view, this.view, degToRad(value) * this.velocity);
-  }
-
-  rotateZ(value: number): void {
-    // value < 0, 360 >, initial 90 => Math.PI / 2
-    mat4.rotateZ(this.view, this.view, degToRad(value) * this.velocity);
-  }
-
-  move(vec: vec3): void {
-    vec3.scale(vec, vec, this.velocity);
-    mat4.translate(this.view, this.view, vec);
-  }
-
-  scale(value: number): void {
-    mat4.scale(this.view, this.view, [value, value, value]);
   }
 
   rotate(): void {}

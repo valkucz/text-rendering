@@ -4,12 +4,14 @@ import { degToRad } from "../../math";
 // TODO: remove
 export class SceneObject {
   model: mat4 = mat4.create();
-  velocity: number;
+  moveVelocity: number;
+  scaleVelocity: number;
 
   // vertexBuffer: VertexBuffer;
 
   constructor() {
-    this.velocity = 0.1;
+    this.moveVelocity = 0.1;
+    this.scaleVelocity = 1.1;
 
     this.setModel();
   }
@@ -29,6 +31,7 @@ export class SceneObject {
   }
 
   // FIXME: moving in opposite direction; check camera
+  // TODO: check rotation if it's in reality correct number
   rotateY(value: number): void {
     // value < 0, 360 >, initial 90 => Math.PI / 2
     mat4.rotateY(this.model, this.model, degToRad(value));
@@ -40,19 +43,17 @@ export class SceneObject {
   }
 
   move(vec: vec3): void {
-    vec3.scale(vec, vec, this.velocity);
+    vec3.scale(vec, vec, this.moveVelocity);
     mat4.translate(this.model, this.model, vec);
   }
 
   scale(value: number): void {
-    mat4.scale(this.model, this.model, [value, value, value]);
+    const amount = (this.scaleVelocity) ** value;
+    const vec = vec3.fromValues(amount, amount, amount);
+    mat4.scale(this.model, this.model, vec);
   }
 
-  // move(vec: vec3): void {
-  //   vec3.scale(vec, vec, this.velocity);
-  //   mat4.translate(this.model, this.model, vec);
-  // }
-  // zoom / scale ?
+  // TOO: rename
   reset() {
     this.model = mat4.create();
     this.setModel();

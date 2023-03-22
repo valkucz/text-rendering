@@ -4,8 +4,6 @@ import { Glyph } from "../scene/objects/glyph";
 import { SceneObject } from "../scene/objects/sceneObject";
 import { Controller } from "./controller";
 
-// rename it only to GlyphController or ObjectController as it moves only with glyph,
-// maniputlation with camera will be removed.
 export class SceneController implements Controller {
   // TODO: remove duplicity
   rotateX: HTMLInputElement;
@@ -106,6 +104,7 @@ export class SceneController implements Controller {
     });
 
     this.scale.addEventListener("input", () => {
+      console.log('scaling');
       this.object.scale(parseInt(this.scale.value) - this.scaleValue);
       this.scaleValue = parseInt(this.scale.value);
       app.notify();

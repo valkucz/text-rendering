@@ -4,14 +4,20 @@ import { Typr } from "../Typr";
 import Font from "./font";
 
 export class FontParser {
+  initFont: Font;
   font: Font;
 
   constructor(font: Font) {
     this.font = font;
+    this.initFont = font;
   }
 
   static async initialize(url: string): Promise<FontParser> {
     return FontParser.loadFont(url).then((font) => new FontParser(font));
+  }
+
+  reset() {
+    this.font = this.initFont;
   }
 
   static async loadFont(url: string): Promise<Font> {
@@ -31,7 +37,6 @@ export class FontParser {
   parseText(text: string): Float32Array {
     const shape = Typr.U.shape(this.font, text, true);
     const path = Typr.U.shapeToPath(this.font, shape);
-
     return this.parseShapeToGlyph(path.cmds, path.crds);
   }
 

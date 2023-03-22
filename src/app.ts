@@ -3,10 +3,12 @@ import { MenuController } from "./controllers/menuController";
 import { SceneController } from "./controllers/sceneController";
 import { TextController } from "./controllers/textController";
 import { FontParser } from "./fonts/fontParser";
+import { hexToRgb } from "./math";
 import { Renderer } from "./rendering/renderer";
 import { Camera } from "./scene/camera";
 import { Glyph } from "./scene/objects/glyph";
 
+// FIXME: move to fontParser
 const defaultUrl = "./public/Blogger_Sans.otf";
 
 // rename to manager,
@@ -51,10 +53,16 @@ export class App {
     const camera: Camera = new Camera();
 
     // Create object
+    const bgColor = hexToRgb(getComputedStyle(document.documentElement)
+    .getPropertyValue('--secondary-style-color'));
 
+    const textColor = hexToRgb(getComputedStyle(document.documentElement)
+    .getPropertyValue('--primary-style-color'));
+  
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
-    const vertices = fontParser.parseText("Oo");
-    const glyph = new Glyph(device, vertices);
+    const text = 'Oo';
+    const vertices = fontParser.parseText(text);
+    const glyph = new Glyph(device, vertices, textColor, bgColor);
 
     // Create renderer
     const renderer = new Renderer(
@@ -66,10 +74,10 @@ export class App {
     );
 
     // Create controllers
-
+    
     const controllers = [
       new SceneController("glyph", glyph),
-      new TextController(fontParser, glyph),
+      new TextController(fontParser, glyph, text),
       new MenuController(),
     ];
 
