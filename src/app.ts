@@ -23,7 +23,6 @@ export class App {
   ) {
     this.renderer = renderer;
     this.fontParser = fontParser;
-
     this.controllers = controllers;
   }
   // TODO: upravit OOP
@@ -54,7 +53,7 @@ export class App {
     // Create object
 
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
-    const vertices = fontParser.parseText("O");
+    const vertices = fontParser.parseText("Oo");
     const glyph = new Glyph(device, vertices);
 
     // Create renderer
@@ -71,7 +70,6 @@ export class App {
     const controllers = [
       new SceneController("glyph", glyph),
       new TextController(fontParser, glyph),
-      // Is to kosher?
       new MenuController(),
     ];
 
