@@ -53,7 +53,8 @@ export function degToRad(deg: number): number {
   return deg * (Math.PI / 180);
 }
 
-export function  hexToRgb(hex: string): number[] {
+export function hexToRgba(hex: string): number[] {
+  console.log(hex);
   // Convert hex color string to RGB color object
   const r = parseInt(hex.substring(1, 3), 16) / 255;
   const g = parseInt(hex.substring(3, 5), 16) / 255;
@@ -61,4 +62,18 @@ export function  hexToRgb(hex: string): number[] {
   const a = 1.0;
 
   return [r, g, b, a];
+}
+
+export function rgbaToHex(rgba: number[]): string {
+  const [r, g, b, a] = rgba;
+
+  const red = Math.round(r).toString(16).padStart(2, "0");
+  const green = Math.round(g).toString(16).padStart(2, "0");
+  const blue = Math.round(b).toString(16).padStart(2, "0");
+
+  const alpha = Math.round(a * 255)
+    .toString(16)
+    .padStart(2, "0");
+
+  return `#${red}${green}${blue}${alpha}`;
 }

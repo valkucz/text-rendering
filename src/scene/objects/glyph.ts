@@ -1,3 +1,4 @@
+import { FontParser } from "../../fonts/fontParser";
 import { SceneObject } from "./sceneObject";
 import { VertexBuffer } from "./vertexBuffer";
 
@@ -5,61 +6,91 @@ const defaultColor = [0.0, 0.0, 0.0, 1.0];
 const defaultBgColor = [1.0, 1.0, 1.0, 1.0];
 // TODO: square for each glyph?
 export class Glyph extends SceneObject {
-  vertexBuffer: VertexBuffer;
+  private _vertexBuffer: VertexBuffer;
 
-  colorBuffer: VertexBuffer;
+  private _colorBuffer: VertexBuffer;
 
-  initColor: number[];
+  private _text: string;
 
-  initBgColor: number[];
+  private _color: number[];
 
-  color: number[];
+  private _bgColor: number[];
 
-  backgroundColor: number[];
+  fontParser: FontParser;
 
-  constructor(device: GPUDevice, vertices: Float32Array, color?: number[], backgroundColor?: number[]) {
+
+  // TODO: ukladat text namiesto vertices, potom ale nutna dependency na font parser
+  constructor(device: GPUDevice, fontParser: FontParser, text: string, color?: number[], backgroundColor?: number[]) {
     super();
 
-    this.color = color ?? defaultColor;
+    this._text = text;
 
-    this.initColor = color ?? defaultColor;
+    this.fontParser = fontParser;
+  
+    this._color = color ?? defaultColor;
 
-    this.backgroundColor = backgroundColor ?? defaultBgColor;
+    this._bgColor = backgroundColor ?? defaultBgColor;
 
-    this.initBgColor = backgroundColor ?? defaultBgColor;
+    this._colorBuffer = this.createVertexBuffer(device, this.getColorArray());
     
-    this.colorBuffer = this.createVertexBuffer(device, this.getColor());
-    
-    this.vertexBuffer = this.createVertexBuffer(device, vertices);
+    this._vertexBuffer = this.createVertexBuffer(device, this.textVertices);
   }
 
-  getColor(): Float32Array {
-    return new Float32Array(this.color.concat(this.backgroundColor));
+  private getColorArray(): Float32Array {
+    return new Float32Array(this._color.concat(this._bgColor));
   }
 
-  createVertexBuffer(device: GPUDevice, vertices: Float32Array): VertexBuffer {
+  private createVertexBuffer(device: GPUDevice, vertices: Float32Array): VertexBuffer {
     return new VertexBuffer(device, vertices);
   }
 
-  updateColor() {
-    this.colorBuffer.update(this.getColor());
+  public get text(): string {
+    return this._text;
   }
 
-  updateVertices(vertices: Float32Array) {
-    this.vertexBuffer.update(vertices);
+  public get color(): number[] {
+    return this._color;
   }
 
-  resetColor() {
-    const changed = this.color != this.initBgColor || this.backgroundColor != this.initBgColor;
-    this.color = this.initColor;
-    this.backgroundColor = this.initBgColor;
-
-    if (changed) {
-      this.updateColor();
-    }
-
-
+  public get bgColor(): number[] {
+    return this._bgColor;
   }
 
-  
+  public set color(color: number[]) {
+    this._color = color;
+    this._colorBuffer.update(this.getColorArray());
+  }
+
+  public set bgColor(bgColor: number[]) {
+    this._bgColor = bgColor;
+    this._colorBuffer.update(this.getColorArray());
+  }
+
+  public get vertexBuffer(): VertexBuffer {
+    return this._vertexBuffer;
+  }
+
+  public get colorBuffer(): VertexBuffer {
+    return this._colorBuffer;
+  }
+
+  private get textVertices() {
+    return this.fontParser.parseText(this._text);
+  }
+
+  updateText(text: string) {
+    this._text = text;
+    this._vertexBuffer.update(this.textVertices);
+  }
+
+  async updateFont(font: string) {
+    await this.fontParser.changeFont(font);
+    this._vertexBuffer.update(this.textVertices);
+  }
+
+  resetText() {
+    this.fontParser.reset();
+    this._vertexBuffer.update(this.textVertices);
+  }
+
 }

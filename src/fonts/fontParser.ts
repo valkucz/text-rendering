@@ -13,6 +13,7 @@ export class FontParser {
   }
 
   static async initialize(url: string): Promise<FontParser> {
+    console.log(url);
     return FontParser.loadFont(url).then((font) => new FontParser(font));
   }
 
@@ -31,6 +32,7 @@ export class FontParser {
   }
 
   async changeFont(url: string): Promise<void> {
+    console.log(url);
     this.font = await FontParser.loadFont(url);
   }
 

@@ -1,9 +1,15 @@
-import { FontParser } from "../fonts/fontParser";
 import { Controller } from "./controller";
-import { App } from "../app";
+import { App, defaultUrl } from "../app";
 import { Glyph } from "../scene/objects/glyph";
-import { hexToRgb } from "../math";
+import { hexToRgba } from "../math";
 
+const PREFIX = "./public/";
+
+const defaultColorHex = '#c9ccd5';
+
+const defaultBgColorHex = '#f1e8eb';
+
+const defaultText = 'A';
 // FIXME: why is there problem with loading textController.ts
 export class TextController implements Controller {
     
@@ -11,69 +17,98 @@ export class TextController implements Controller {
   private resetBtn: HTMLButtonElement;
   private colorElem: HTMLInputElement;
   private bgcolorElem: HTMLInputElement;
+  private fontElem: HTMLSelectElement;
 
-  // font parser has glyph or glyph has font parser, so no need to pass both
-  fontParser: FontParser;
 
+  color: number[];
+  bgColor: number[];
   glyph: Glyph;
 
-  text: string;
+  defaultColor: number[];
+  defaultBgColor: number[];
+  // font parser has glyph or glyph has font parser, so no need to pass both
 
 
   constructor(
-    fontParser: FontParser,
     glyph: Glyph,
-    text: string
   ) {
-    this.fontParser = fontParser;
-    this.glyph = glyph;
-    this.text = text;
 
     this.inputElem = document.getElementById("text-input") as HTMLInputElement;
     this.resetBtn = document.getElementById("text-reset") as HTMLButtonElement;
     this.colorElem = document.getElementById("text-color") as HTMLInputElement;
     this.bgcolorElem = document.getElementById("bgcolor") as HTMLInputElement;
+    this.fontElem = document.getElementById("text-font") as HTMLSelectElement;
+    
+    this.defaultColor = this.color = hexToRgba(defaultColorHex);
+    this.defaultBgColor = this.bgColor = hexToRgba(defaultBgColorHex);
+    this.glyph = glyph;
 
-
+    this.setup();
+    
+    
   }
   
+  setup() {
+    this.inputElem.value = defaultText;
+    this.glyph.updateText(defaultText);
+    this.glyph.color = this.defaultColor;
+    this.glyph.bgColor = this.defaultBgColor;
+  }
+
   addEventListener(app: App): void {
     this.colorElem.addEventListener("input", () => {
-      this.glyph.color = hexToRgb(this.colorElem.value);
+      this.color = hexToRgba(this.colorElem.value);
+      this.glyph.color = this.color;
 
-      this.glyph.updateColor();
       app.notify();
     });
 
     this.bgcolorElem.addEventListener("input", () => {
-      this.glyph.backgroundColor = hexToRgb(this.bgcolorElem.value);
+      this.bgColor = hexToRgba(this.bgcolorElem.value);
+      this.glyph.bgColor = this.bgColor;
 
-      this.glyph.updateColor();
       app.notify();
     });
 
-
-    // FIXME: how should handle empty.
     this.inputElem.addEventListener("input", () => {
-      this.text = this.inputElem.value;
-      if (this.text.length > 0) {
-        const vertices = this.fontParser.parseText(this.text);
-        this.glyph.updateVertices(vertices);
-        app.notify();
+      const text = this.inputElem.value;
+      if (text.length > 0) {
+
+        this.glyph.updateText(text);
       }
+
+      app.notify();
     });
 
-    this.resetBtn.addEventListener("click", () => {
-      this.inputElem.value = "";
-      // TODO: reset inputer with color
-      this.fontParser.reset();
-      const vertices = this.fontParser.parseText(this.text);
-      this.glyph.updateVertices(vertices);
-      this.glyph.resetColor();
+    this.resetBtn.addEventListener("click", async () => {
 
+      if (this.color != this.defaultColor || this.bgColor != this.defaultBgColor) {
+        this.color = this.defaultColor;
+        this.bgColor = this.defaultBgColor;
+
+        this.glyph.color = this.color;
+        this.glyph.bgColor = this.bgColor;
+        this.bgcolorElem.value = defaultBgColorHex;
+        this.colorElem.value = defaultColorHex;
+
+        
+      }
+      const url = PREFIX + this.fontElem.value;
+      this.fontElem.selectedIndex = 0;
+      if (url != defaultUrl) {
+        await this.glyph.updateFont(defaultUrl);
+      }
+
+      this.inputElem.value = defaultText;
+      this.glyph.updateText(defaultText);
       app.notify();
     })
-    
+
+    this.fontElem.addEventListener("change", async () => {
+      const url = PREFIX + this.fontElem.value;
+      await this.glyph.updateFont(url);
+      app.notify();
+    })   
   }
 
 }
