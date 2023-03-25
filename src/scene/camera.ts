@@ -8,7 +8,7 @@ export class Camera extends SceneObject {
 
   projection: mat4;
 
-  worldUp: vec3 = [0, -1, 0];
+  worldUp: vec3 = [0, 1, 0];
 
   eye: vec3 = [-1, 0, 0];
 

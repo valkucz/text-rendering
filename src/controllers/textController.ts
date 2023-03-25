@@ -8,7 +8,6 @@ import { hexToRgb } from "../math";
 export class TextController implements Controller {
     
   private inputElem: HTMLInputElement;
-  private submitBtn: HTMLButtonElement;
   private resetBtn: HTMLButtonElement;
   private colorElem: HTMLInputElement;
   private bgcolorElem: HTMLInputElement;
@@ -31,7 +30,6 @@ export class TextController implements Controller {
     this.text = text;
 
     this.inputElem = document.getElementById("text-input") as HTMLInputElement;
-    this.submitBtn = document.getElementById("text-submit") as HTMLButtonElement;
     this.resetBtn = document.getElementById("text-reset") as HTMLButtonElement;
     this.colorElem = document.getElementById("text-color") as HTMLInputElement;
     this.bgcolorElem = document.getElementById("bgcolor") as HTMLInputElement;

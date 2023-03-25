@@ -112,6 +112,7 @@ export class FontParser {
             this.getMiddle(last, curr),
             curr,
           ]);
+          vec2.copy(last, curr);
           indexArr += 6;
           index += 2;
           break;
@@ -148,7 +149,6 @@ export class FontParser {
           break;
       }
     });
-    console.log(vertices);
     return vertices;
   }
 }

@@ -28,14 +28,12 @@ export class Glyph extends SceneObject {
 
     this.initBgColor = backgroundColor ?? defaultBgColor;
     
-    this.vertexBuffer = this.createVertexBuffer(device, vertices);
-    
     this.colorBuffer = this.createVertexBuffer(device, this.getColor());
-
+    
+    this.vertexBuffer = this.createVertexBuffer(device, vertices);
   }
 
   getColor(): Float32Array {
-    // console.log(this.color)
     return new Float32Array(this.color.concat(this.backgroundColor));
   }
 
