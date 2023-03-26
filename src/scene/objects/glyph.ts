@@ -92,5 +92,4 @@ export class Glyph extends SceneObject {
     this.fontParser.reset();
     this._vertexBuffer.update(this.textVertices);
   }
-
 }

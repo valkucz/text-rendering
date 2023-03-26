@@ -3,8 +3,7 @@ struct Uniforms {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
-    conversion_factor: vec4<f32>,
-    glyph_length: f32,
+
 };
 
 // TODO: rename
@@ -25,10 +24,23 @@ struct Color {
     background: vec4<f32>,
 }
 
+// TODO: no need? remove?
+struct Canvas {
+    width: f32,
+    height: f32
+}
+
+struct TextInfo  {
+    bbox: vec4<f32>,
+    coordinates_bbox: vec4<f32>,
+    glyph_length: f32,
+}
+
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
 @binding(1) @group(0) var<storage, read_write> object: SceneObject;
 @binding(2) @group(0) var<storage, read_write> color: Color;
-
+@binding(3) @group(0) var<uniform> canvas: Canvas;
+@binding(4) @group(0) var<uniform> bbox: TextInfo;
 // TODO: split vertex and fragment into separate files
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
@@ -39,8 +51,10 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
         vec3(0.5, -0.5, 0.0),
         vec3(-0.5, 0.5, 0.0),
         vec3(0.5, 0.5, 0.0)
-        
     );
+
+    var rectangle = get_rectangle();
+
     var squareUV = array<vec2<f32>, 6>(
         vec2(0.0, 1.0),
         vec2(0.0, 0.0),
@@ -50,23 +64,43 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
         vec2(1.0, 0.0)
     );
 
+
     var output: vec4<f32>;
 
      return VertexOutput(
-        uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(square[VertexIndex].xyz, 1.0),
+        uniforms.projection * uniforms.view * uniforms.model * vec4<f32>(rectangle[VertexIndex].xyz, 1.0),
         squareUV[VertexIndex],
     );
 };
 
+
+fn get_rectangle() -> array<vec3<f32>, 6> {
+    // bbox.x min x
+    // covnersion_factor.y min y
+    // bbox.z max x
+    // covnersion factor.w max y
+    var min_x = ((2 * (bbox.bbox.x - bbox.coordinates_bbox.x)) / (bbox.coordinates_bbox.z - bbox.coordinates_bbox.x)) - 1.0;
+    var max_x = ((2 * (bbox.bbox.z - bbox.coordinates_bbox.x)) / (bbox.coordinates_bbox.z - bbox.coordinates_bbox.x)) - 1.0;
+    return array<vec3<f32>, 6>(
+        vec3(min_x, -0.5, 0.0),
+        vec3(min_x, 0.5, 0.0),
+        vec3(max_x, -0.5, 0.0),
+        vec3(max_x, -0.5, 0.0),
+        vec3(min_x, 0.5, 0.0),
+        vec3(max_x, 0.5, 0.0)
+    );
+}
+
+
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // return vec4<f32>(object.glyph[14].w / (28600 * 2), 0.0, 0.0, 1.0);
-    // conversion_factor.x min x
+    // bbox.x min x
     // covnersion_factor.y min y
-    // conversion_factor.z max x
+    // bbox.z max x
     // covnersion factor.w max y
-    var x = uniforms.conversion_factor.x + (uniforms.conversion_factor.z - uniforms.conversion_factor.x) * input.uv.x;
-    var y = uniforms.conversion_factor.y + (uniforms.conversion_factor.w  - uniforms.conversion_factor.y) * input.uv.y;
+    var x = bbox.bbox.x + (bbox.bbox.z - bbox.bbox.x) * input.uv.x;
+    var y = bbox.bbox.y + (bbox.bbox.w  - bbox.bbox.y) * input.uv.y;
 
     let uvint = vec2(x, y);
 
@@ -119,7 +153,7 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
 fn is_inside_glyph(pos: vec2<i32>) -> bool {
     var windingNumber: i32 = 0;
     // 15; i < 14 ... max i = 13 ... po 3, i = 12
-    for (var i: u32 = 0; i < u32(uniforms.glyph_length) - 1; i += 3) {
+    for (var i: u32 = 0; i < u32(bbox.glyph_length) - 1; i += 3) {
         // sude => xy zw xy
         // liche => zw xy zw
         // because vec4 is required

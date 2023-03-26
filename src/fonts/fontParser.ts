@@ -31,6 +31,12 @@ export class FontParser {
     return tables[0];
   }
 
+  getBb(): number[] {
+    return [
+      this.font.head.xMin * 100, this.font.head.yMin * 100, 
+      this.font.head.xMax * 100, this.font.head.yMax * 100];
+  }
+
   async changeFont(url: string): Promise<void> {
     console.log(url);
     this.font = await FontParser.loadFont(url);

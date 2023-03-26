@@ -2,6 +2,7 @@ import shader from "../shaders/shaders.wgsl";
 import { Glyph } from "../scene/objects/glyph";
 import { PerFrameData } from "./perFrameData";
 import { mat4 } from "gl-matrix";
+import { RendererBuffers } from "./rendererBuffers";
 
 /** Length of the matrix in bytes
  * the matrix is 4x4 and each element is 4 bytes => 4 * 4 * 4 = 64
@@ -20,14 +21,17 @@ export class Renderer {
   /** Canvas context used for rendering */
   ctx: GPUCanvasContext;
 
+  /** WebGPU canvas */
+  canvas: HTMLCanvasElement;
+
   /** Pipeline used for rendering */
   pipeline: GPURenderPipeline;
 
   /** Bind group layout used for rendering */
   bindGroupLayout: GPUBindGroupLayout;
 
-  /** Uniform buffer used for rendering */
-  uniformBuffer: GPUBuffer;
+  /** Buffers */
+  buffers: RendererBuffers;
 
   /** Glyph to renderer */
   glyph: Glyph;
@@ -46,7 +50,7 @@ export class Renderer {
   /**
    * Creates a new Renderer instance.
    * @param device - GPU device used for rendering
-   * @param ctx - Canvas context used for rendering
+   * @param canvas - WebGPU canvas
    * @param glyph - Glyph to renderer
    * @param projection - Camera attribute: projection matrix
    * @param view - Camera attribute: view matrix
@@ -56,21 +60,25 @@ export class Renderer {
    */
   constructor(
     device: GPUDevice,
-    ctx: GPUCanvasContext,
+    canvas: HTMLCanvasElement,
     glyph: Glyph,
     projection: mat4,
     view: mat4,
     format: GPUTextureFormat = "bgra8unorm"
   ) {
     this.device = device;
-    this.ctx = ctx;
+    this.canvas = canvas;
+    this.ctx = <GPUCanvasContext>canvas.getContext("webgpu");
+    if (!this.ctx) {
+      throw new Error("Context is null or undefined");
+    }    
     this.glyph = glyph;
     this.projection = projection;
     this.view = view;
     this.format = format;
 
     this.bindGroupLayout = this.createBindGroupLayout();
-    this.uniformBuffer = this.createUniformBuffer();
+    this.buffers = this.createBuffers();
     this.pipeline = this.createPipeline();
 
     this.ctx.configure({
@@ -80,6 +88,33 @@ export class Renderer {
     });
   }
 
+  /**
+   * Creates buffers.
+   * @returns buffers
+   */
+  createBuffers(): RendererBuffers {
+    const uniformBuffer = this.device.createBuffer({
+      // + 16 = 4 * 4; bounding box; glyph length
+      size: MAT4LENGTH * 3,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    const canvasBuffer = this.device.createBuffer({
+      size: 16,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    const bbBuffer = this.device.createBuffer({
+      size: 16 * 3,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    return {
+      uniform: uniformBuffer,
+      canvas: canvasBuffer,
+      bb: bbBuffer,
+    };
+  }
   /**
    * Creates GPU pipeline.
    * @returns GPU render pipeline
@@ -143,6 +178,20 @@ export class Renderer {
             type: "storage",
           },
         },
+        {
+          binding: 3,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: {
+            type: "uniform",
+          },
+        },
+        {
+          binding: 4,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          buffer: {
+            type: "uniform",
+          },
+        },
       ],
     });
   }
@@ -158,7 +207,7 @@ export class Renderer {
         {
           binding: 0,
           resource: {
-            buffer: this.uniformBuffer,
+            buffer: this.buffers.uniform,
           },
         },
         {
@@ -173,19 +222,19 @@ export class Renderer {
             buffer: this.glyph.colorBuffer.buffer,
           },
         },
+        {
+          binding: 3,
+          resource: {
+            buffer: this.buffers.canvas,
+          },
+        },
+        {
+          binding: 4,
+          resource: {
+            buffer: this.buffers.bb,
+          },
+        },
       ],
-    });
-  }
-
-  /**
-   * Creates uniform buffer that is used to pass data to the shader.
-   * @returns uniform buffer
-   */
-  createUniformBuffer(): GPUBuffer {
-    return this.device.createBuffer({
-      // + 16 = 4 * 4; bounding box; glyph length
-      size: MAT4LENGTH * 3 + 16 + 16,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
   }
 
@@ -195,39 +244,23 @@ export class Renderer {
   private setupBuffer() {
     // Camera projection matrix
     this.device.queue.writeBuffer(
-      this.uniformBuffer,
+      this.buffers.uniform,
       128,
       <ArrayBuffer>this.projection
     );
 
     // Camera view matrix
     this.device.queue.writeBuffer(
-      this.uniformBuffer,
+      this.buffers.uniform,
       64,
       <ArrayBuffer>this.view
     );
 
     // Glyph model matrix
     this.device.queue.writeBuffer(
-      this.uniformBuffer,
+      this.buffers.uniform,
       0,
       <ArrayBuffer>this.glyph.model
-    );
-
-    // Bounding box
-    this.device.queue.writeBuffer(
-      this.uniformBuffer,
-      192,
-      <ArrayBuffer>this.glyph.vertexBuffer.getBoundingBox()
-    );
-
-    // Vertices length
-    this.device.queue.writeBuffer(
-      this.uniformBuffer,
-      208,
-      <ArrayBuffer>(
-        new Float32Array([this.glyph.vertexBuffer.getVertexCount() / 4])
-      )
     );
 
     // Vertices
@@ -242,6 +275,38 @@ export class Renderer {
       this.glyph.colorBuffer.buffer,
       0,
       this.glyph.colorBuffer.vertices.buffer
+    );
+
+    // Canvas 
+    this.device.queue.writeBuffer(
+      this.buffers.canvas,
+      0,
+      <ArrayBuffer>(new Float32Array([this.canvas.width, this.canvas.height]))
+    );
+    console.log('canvas', this.canvas.width, this.canvas.height);
+
+    // Bounding box
+    this.device.queue.writeBuffer(
+      this.buffers.bb,
+      0,
+      <ArrayBuffer>this.glyph.vertexBuffer.getBoundingBox()
+    );
+    console.log('bb', this.glyph.vertexBuffer.getBoundingBox());
+
+    // Bounding box of font coordinate system
+    this.device.queue.writeBuffer(
+      this.buffers.bb,
+      16,
+      <ArrayBuffer>new Float32Array(this.glyph.fontParser.getBb())
+    );
+
+    // Vertices length
+    this.device.queue.writeBuffer(
+      this.buffers.bb,
+      32,
+      <ArrayBuffer>(
+        new Float32Array([this.glyph.vertexBuffer.getVertexCount() / 4])
+      )
     );
   }
 

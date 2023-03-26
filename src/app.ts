@@ -29,7 +29,7 @@ export class App {
     this.controllers = controllers;
   }
   // TODO: upravit OOP
-  static async initialize(ctx: GPUCanvasContext): Promise<App> {
+  static async initialize(canvas: HTMLCanvasElement): Promise<App> {
     console.log(navigator.gpu);
     if (!("gpu" in navigator)) {
       console.error("User agent doesn’t support WebGPU.");
@@ -62,7 +62,7 @@ export class App {
     // Create renderer
     const renderer = new Renderer(
       device,
-      ctx,
+      canvas,
       glyph,
       camera.projection,
       camera.view
