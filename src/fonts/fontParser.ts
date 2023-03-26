@@ -33,8 +33,8 @@ export class FontParser {
 
   getBb(): number[] {
     return [
-      this.font.head.xMin * 100, this.font.head.yMin * 100, 
-      this.font.head.xMax * 100, this.font.head.yMax * 100];
+      this.font.head.xMin * 16, this.font.head.yMin * 16, 
+      this.font.head.xMax * 16, this.font.head.yMax * 16];
   }
 
   async changeFont(url: string): Promise<void> {
@@ -49,7 +49,7 @@ export class FontParser {
   }
 
   getPosition(pos: number, crds: number[]): vec2 {
-    return vec2.fromValues(crds[pos] * 100, crds[pos + 1] * 100);
+    return vec2.fromValues(crds[pos] * 16, crds[pos + 1] * 16);
   }
 
   getMiddle(point1: vec2, point2: vec2): vec2 {
@@ -157,6 +157,7 @@ export class FontParser {
           break;
       }
     });
+    console.log('Vertices:', vertices);
     return vertices;
   }
 }

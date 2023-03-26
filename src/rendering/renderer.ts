@@ -75,7 +75,7 @@ export class Renderer {
     this.glyph = glyph;
     this.projection = projection;
     this.view = view;
-    this.format = format;
+    this.format = navigator.gpu.getPreferredCanvasFormat();
 
     this.bindGroupLayout = this.createBindGroupLayout();
     this.buffers = this.createBuffers();
@@ -144,6 +144,9 @@ export class Renderer {
       },
       primitive: {
         topology: "triangle-list",
+      },
+      multisample: {
+        count: 1,
       },
       layout: pipelineLayout,
     });
@@ -305,7 +308,7 @@ export class Renderer {
       this.buffers.bb,
       32,
       <ArrayBuffer>(
-        new Float32Array([this.glyph.vertexBuffer.getVertexCount() / 4])
+        new Float32Array([this.glyph.vertexBuffer.getVertexCount() / 2])
       )
     );
   }
@@ -314,6 +317,13 @@ export class Renderer {
    * Prepares data ahead needed for rendering.
    */
   prepare(): PerFrameData {
+    // const renderTarget = this.device.createTexture({
+    //   size: [this.canvas.width, this.canvas.height],
+    //   sampleCount: 4,
+    //   format: this.format,
+    //   usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    // });
+    // const renderTargetView = renderTarget.createView();
     this.setupBuffer();
     const bindGroup = this.createBindGroup();
     const commandEncoder = this.device.createCommandEncoder();

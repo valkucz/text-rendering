@@ -8,9 +8,7 @@ struct Uniforms {
 
 // TODO: rename
 struct SceneObject {
-    // error: aligned to 16 bytes
-    // FIXME: ak je to storage, da sa zmenit na vec2? 
-    glyph: array<vec4<f32>>,
+    glyph: array<vec2<f32>>,
 }
 
 struct VertexOutput {
@@ -44,15 +42,6 @@ struct TextInfo  {
 // TODO: split vertex and fragment into separate files
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
-    var square = array<vec3<f32>, 6>(
-        vec3(-0.5, -0.5, 0.0),
-        vec3(-0.5, 0.5, 0.0),
-        vec3(0.5, -0.5, 0.0),
-        vec3(0.5, -0.5, 0.0),
-        vec3(-0.5, 0.5, 0.0),
-        vec3(0.5, 0.5, 0.0)
-    );
-
     var rectangle = get_rectangle();
 
     var squareUV = array<vec2<f32>, 6>(
@@ -126,8 +115,7 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
     var t1: f32 = (f32(s.y) - d) * ra;
     var t2: f32 = (f32(s.y) + d) * ra;
     
-    // if 0 or close to 0
-    if (r.y == 0) {
+    if (abs(r.y) == 0) {
         t1 = f32(a.y) * rb;
         t2 = t1;
     }
@@ -152,15 +140,8 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
 
 fn is_inside_glyph(pos: vec2<i32>) -> bool {
     var windingNumber: i32 = 0;
-    // 15; i < 14 ... max i = 13 ... po 3, i = 12
-    for (var i: u32 = 0; i < u32(bbox.glyph_length) - 1; i += 3) {
-        // sude => xy zw xy
-        // liche => zw xy zw
-        // because vec4 is required
-        windingNumber += winding_number_calculation(vec2<i32>(object.glyph[i].xy), vec2<i32>(object.glyph[i].zw), vec2<i32>(object.glyph[i + 1].xy), pos);
-        windingNumber += winding_number_calculation(vec2<i32>(object.glyph[i + 1].zw), vec2<i32>(object.glyph[i + 2].xy), vec2<i32>(object.glyph[i + 2].zw), pos);
+    for (var i: u32 = 0; i < u32(bbox.glyph_length) - 2; i += 3) {
+        windingNumber += winding_number_calculation(vec2<i32>(object.glyph[i]), vec2<i32>(object.glyph[i + 1]), vec2<i32>(object.glyph[i + 2]), pos);
     }
-    
-
     return windingNumber != 0;
 }
