@@ -12,4 +12,9 @@ export interface PerFrameData {
   commandEncoder: GPUCommandEncoder;
 
   renderPass: GPURenderPassEncoder;
+
+  // TODO: remove
+  querySet: GPUQuerySet;
+
+  queryBuffer: GPUBuffer;
 }

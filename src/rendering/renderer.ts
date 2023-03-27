@@ -317,21 +317,44 @@ export class Renderer {
    * Prepares data ahead needed for rendering.
    */
   prepare(): PerFrameData {
-    // const renderTarget = this.device.createTexture({
-    //   size: [this.canvas.width, this.canvas.height],
-    //   sampleCount: 4,
-    //   format: this.format,
-    //   usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    // });
-    // const renderTargetView = renderTarget.createView();
+      // FIXME: temporary, writeTimestamp
+      const capacity = 3;//Max number of timestamps we can store
+      const querySet = this.device.createQuerySet({
+        // If timestampWrites is not empty, "timestamp-query" must be enabled for device.
+        type: "timestamp",
+        count: capacity,
+      });
+  
+      const queryBuffer = this.device.createBuffer({
+        size: 8 * capacity,
+        usage: GPUBufferUsage.QUERY_RESOLVE 
+          | GPUBufferUsage.STORAGE
+          | GPUBufferUsage.COPY_SRC
+          | GPUBufferUsage.COPY_DST,
+      });
+      
+    // FIXME: for multisampling
+    const renderTarget = this.device.createTexture({
+      size: [this.canvas.width, this.canvas.height],
+      sampleCount: 4,
+      format: this.format,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+    const renderTargetView = renderTarget.createView();
+
     this.setupBuffer();
     const bindGroup = this.createBindGroup();
     const commandEncoder = this.device.createCommandEncoder();
+
     const textureView = this.ctx.getCurrentTexture().createView();
+
+    commandEncoder.writeTimestamp(querySet, 0);
+    
     const renderPass = commandEncoder.beginRenderPass({
       colorAttachments: [
         {
           view: textureView,
+          // resolveTarget: renderTargetView,
           clearValue: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
           loadOp: "clear",
           storeOp: "store",
@@ -342,6 +365,8 @@ export class Renderer {
       bindGroup,
       commandEncoder,
       renderPass,
+      querySet,
+      queryBuffer,
     };
   }
 
@@ -350,11 +375,39 @@ export class Renderer {
    * @param perFrameData - Data needed for rendering a frame.
    */
   render(perFrameData: PerFrameData) {
-    const { bindGroup, commandEncoder, renderPass } = perFrameData;
+    
+    const { bindGroup, commandEncoder, renderPass, querySet, queryBuffer } = perFrameData;
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, bindGroup);
+    
+    // FIXME: temporary, writeTimestamp
+      
     renderPass.draw(6, 1, 0, 0);
+    
+    
     renderPass.end();
+    
+    commandEncoder.writeTimestamp(querySet, 1);
+    // FIXME: remove submit
     this.device.queue.submit([commandEncoder.finish()]);
+
+    // capacity = 3
+    commandEncoder.resolveQuerySet(querySet, 0, 3, queryBuffer, 0);
+    // Read timestamp results after finishing the command encoder.
+    this.readBuffer(queryBuffer).then(res => {
+      console.log('Read buffer timestamp', res);
+    })
+  }
+
+  // from  https://omar-shehata.medium.com/how-to-use-webgpu-timestamp-query-9bf81fb5344a
+  async readBuffer(buffer: GPUBuffer) {
+    const size = buffer.size;
+    const gpuReadBuffer = this.device.createBuffer({size, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    const copyEncoder = this.device.createCommandEncoder();
+    copyEncoder.copyBufferToBuffer(buffer, 0, gpuReadBuffer, 0, size);
+    const copyCommands = copyEncoder.finish();
+    this.device.queue.submit([copyCommands]);
+    await gpuReadBuffer.mapAsync(GPUMapMode.READ);
+    return gpuReadBuffer.getMappedRange();
   }
 }

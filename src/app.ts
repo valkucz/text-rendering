@@ -44,7 +44,11 @@ export class App {
     }
 
     // Create device
-    const device: GPUDevice = <GPUDevice>await adapter.requestDevice();
+    const device: GPUDevice = <GPUDevice>await adapter.requestDevice({
+      // For timestamp
+      // start chrome --disable-dawn-features=disallow_unsafe_apis
+      requiredFeatures: ["timestamp-query"]
+    });
 
     // Create font parser
     const fontParser: FontParser = await FontParser.initialize(defaultUrl);

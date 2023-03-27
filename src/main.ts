@@ -1,10 +1,8 @@
 import { vec2 } from "gl-matrix";
 import { App } from "./app";
 import "./style.css";
-// import 'bulma/css/bulma.css';
-// set canvas
+
 const canvas = <HTMLCanvasElement>document.getElementById("canvas");
-// const ctx = canvas.getContext("2d");
 
 var dpr = window.devicePixelRatio || 1;
 var rect = canvas.getBoundingClientRect();
