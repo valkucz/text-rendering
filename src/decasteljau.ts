@@ -1,4 +1,4 @@
-import { acos, cos, max, min, sin, sqrt } from "mathjs";
+// import { acos, cos, max, min, sin, sqrt } from "mathjs";
 import { Point } from "./draw";
 const gamma = 0.5;
 
@@ -33,7 +33,7 @@ export function cubicToQuadratic(cubicPoints: Point[]): Point[][] {
   if (cubicPoints.length !== 4) {
     throw new Error(
       "Cubic line needs to have 4 control points, now it has: " +
-        cubicPoints.length.toString()
+      cubicPoints.length.toString()
     );
   }
   // cubic curve is being split to 2 quadratics
@@ -55,11 +55,11 @@ export function cubicToQuadratic(cubicPoints: Point[]): Point[][] {
   return [quadraticPoints1, quadraticPoints2];
 }
 
-export function sdBezier(pos: Point, points: Point[]): number | math.Complex {
+export function sdBezier(pos: Point, points: Point[]): [number, number] {
   if (points.length !== 3) {
     throw new Error(
       " quadratic bezier line needs to have 3 control points, now it has: " +
-        points.length.toString()
+      points.length.toString()
     );
   }
   const a = points[1].substract(points[0]);
@@ -84,19 +84,40 @@ export function sdBezier(pos: Point, points: Point[]): number | math.Complex {
       .sign()
       .multiplyPoint(x.abs().pow(new Point(1.0 / 3.0, 1.0 / 3.0)));
     const t = clamp(uv.x + uv.y - kx, 0.0, 1.0);
-    return sqrt(d.add(c.add(b.multiply(t)).multiply(t)).dot2());
+
+    const q3 = d.add(c.add(b.multiply(t)).multiply(t));
+    const res = q3.dot2();
+    const sign = (c.add(b.multiply(2.0 * t))).cross(q3);
+
+    return [Math.sqrt(res), Math.sign(sign)];
+  } else {
+    const z = Math.sqrt(-p);
+    const v = Math.acos(q / (p * z * 2.0)) / 3.0;
+    const m = Math.cos(v);
+    const n = Math.sin(v) * 1.732050808;
+    const t = new Point(m + m, -n - m).multiply(z).substract(new Point(kx, kx)).clamp(0.0, 1.0);
+
+    const qx = d.add(c.add(b.multiply(t.x)).multiply(t.x));
+    const dx = qx.dot2();
+    const sx = (c.add(b.multiply(2.0 * t.x))).cross(qx);
+
+    const qy = d.add(c.add(b.multiply(t.y)).multiply(t.y));
+    const dy = qy.dot2();
+    const sy = (c.add(b.multiply(2.0 * t.y))).cross(qy);
+
+    let res = 0.0;
+    let sign = 0.0;
+    if (dx < dy) { 
+      res = dx; 
+      sign = sx; 
+    } else { 
+      res = dy; 
+      sign = sy; 
+    }
+
+    return [Math.sqrt(res), Math.sign(sign)];
   }
-  const z = sqrt(-p);
-  const v = acos(q / (p * z * 2.0)) / 3.0;
-  const m = cos(v);
-  const n = sin(v) * 1.732050808;
-  const t = new Point(m + m, -n - m).multiply(z).substract(kx).clamp(0.0, 1.0);
-  return sqrt(
-    min(
-      d.add(c.add(b.multiply(t.x).multiply(t.x))).dot2(),
-      d.add(c.add(b.multiply(t.y).multiply(t.y))).dot2()
-    )
-  );
+
 }
 
 export function sdLine(p: Point, a: Point, b: Point): number {
@@ -109,7 +130,7 @@ export function sdLine(p: Point, a: Point, b: Point): number {
 }
 
 export function clamp(value: number, minimum: number, maximum: number) {
-  return max(min(value, maximum), minimum);
+  return Math.max(Math.min(value, maximum), minimum);
 }
 
 function windingNumberCalculation(points: Point[]): number {

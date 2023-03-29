@@ -32,6 +32,9 @@ export class Point {
   dot(point: Point): number {
     return this.x * point.x + this.y * point.y;
   }
+  cross(point: Point): number {
+    return this.x * point.y - this.y * point.x;
+  }
   dot2(): number {
     return this.dot(this);
   }
