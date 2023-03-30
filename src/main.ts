@@ -20,11 +20,11 @@ const app = await App.initialize(canvas);
 app.run();
 
 // TODO: move to menu controller, rename menu controller?
-var navbar = document.querySelector(".navbar") as HTMLElement;
-var lastScrollTop = 0;
+const navbar = document.querySelector(".navbar") as HTMLElement;
+let lastScrollTop = 0;
 
 document.addEventListener("scroll", function () {
-  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   if (scrollTop > lastScrollTop) {
     navbar.classList.remove("is-visible");
   } else {
@@ -32,3 +32,18 @@ document.addEventListener("scroll", function () {
   }
   lastScrollTop = scrollTop;
 });
+
+const modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
+let isLight = true;
+modeBtn.addEventListener('click', () => {
+  if (isLight) {
+    isLight = false;
+    document.documentElement.classList.add('dark-mode');
+  }
+  else {
+    isLight = true;
+    document.documentElement.classList.remove('dark-mode');
+  }
+
+
+})
