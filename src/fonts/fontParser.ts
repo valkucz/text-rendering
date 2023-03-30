@@ -45,6 +45,8 @@ export class FontParser {
   parseText(text: string): Float32Array {
     const shape = Typr.U.shape(this.font, text, true);
     const path = Typr.U.shapeToPath(this.font, shape);
+    console.log(path.cmds);
+    // return this.debugPoints();
     return this.parseShapeToGlyph(path.cmds, path.crds);
   }
 
@@ -61,6 +63,7 @@ export class FontParser {
   }
 
   // To create Float32Array directly, we need to know length beforehand
+  // FIXME: no need, new Float32Array(points[]) is fine
   calculateLength(cmd: string[]): number {
     let length = 0;
     cmd.forEach((c) => {
@@ -159,5 +162,22 @@ export class FontParser {
     });
     console.log('Vertices:', vertices);
     return vertices;
+  }
+
+  debugPoints() : Float32Array {
+    const bb = this.getBb();
+    console.log(bb);
+    const straightLine = new Float32Array([100, 0, 550, 900, 5000, 1000]);
+    const line = new Float32Array([248, -1600, 944, -1600, 3584, 5936]);
+    const line2 = new Float32Array([6224, 13472, 6224, 13472, 5528, 13472])
+
+
+    const line3 = new Float32Array([-448, -1600, 248, -1600, 944, -1600]);
+    const line4 = new Float32Array([944, -1600, 3584, 5936, 6224, 13472]);
+    const line5 = new Float32Array([6224, 13472, 5528, 13472, 4832, 13472]);
+    const line6 = new Float32Array([4832, 13472, 2192, 5936, -448, -1600]);
+
+    const linex = new Float32Array([944, -1600, 3584, 5936, 6224, 13472, 6224, 13472, 5528, 13472, 4832, 13472]);
+    return line4;
   }
 }
