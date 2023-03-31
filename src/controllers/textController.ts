@@ -1,13 +1,15 @@
 import { Controller } from "./controller";
 import { App, defaultUrl } from "../app";
 import { Glyph } from "../scene/objects/glyph";
-import { hexToRgba } from "../math";
+import { hexToRgba, rgbaToHex } from "../math";
 
 const PREFIX = "./public/";
 
-const defaultColorHex = '#c9ccd5';
+import { colors } from './appController'
 
-const defaultBgColorHex = '#f1e8eb';
+const defaultColorHex = colors['primary'];
+
+const defaultBgColorHex = colors['secondary'];
 
 const defaultText = 'A';
 // FIXME: why is there problem with loading textController.ts
@@ -38,9 +40,9 @@ export class TextController implements Controller {
     this.colorElem = document.getElementById("text-color") as HTMLInputElement;
     this.bgcolorElem = document.getElementById("bgcolor") as HTMLInputElement;
     this.fontElem = document.getElementById("text-font") as HTMLSelectElement;
-    
-    this.defaultColor = this.color = hexToRgba(defaultColorHex);
-    this.defaultBgColor = this.bgColor = hexToRgba(defaultBgColorHex);
+    // TODO: remove defaults, use direct colors
+    this.defaultColor = this.color = defaultColorHex;
+    this.defaultBgColor = this.bgColor = defaultBgColorHex;
     this.glyph = glyph;
 
     this.setup();
@@ -82,14 +84,9 @@ export class TextController implements Controller {
 
     this.resetBtn.addEventListener("click", async () => {
 
+      console.log('Text controller', defaultColorHex, colors['primary']);
       if (this.color != this.defaultColor || this.bgColor != this.defaultBgColor) {
-        this.color = this.defaultColor;
-        this.bgColor = this.defaultBgColor;
-
-        this.glyph.color = this.color;
-        this.glyph.bgColor = this.bgColor;
-        this.bgcolorElem.value = defaultBgColorHex;
-        this.colorElem.value = defaultColorHex;
+        this.updateColors();
 
         
       }
@@ -109,6 +106,17 @@ export class TextController implements Controller {
       await this.glyph.updateFont(url);
       app.notify();
     })   
+  }
+
+  updateColors() {
+    console.log('text controller', this.color);
+    this.color = this.defaultColor;
+    this.bgColor = this.defaultBgColor;
+
+    this.glyph.color = this.color;
+    this.glyph.bgColor = this.bgColor;
+    this.bgcolorElem.value = rgbaToHex(this.bgColor);
+    this.colorElem.value = rgbaToHex(this.color);
   }
 
 }

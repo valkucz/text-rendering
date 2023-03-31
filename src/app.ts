@@ -2,6 +2,7 @@ import { Controller } from "./controllers/controller";
 import { MenuController } from "./controllers/menuController";
 import { SceneController } from "./controllers/sceneController";
 import { TextController } from "./controllers/textController";
+import { AppController } from "./controllers/appController";
 import { FontParser } from "./fonts/fontParser";
 import { hexToRgba } from "./math";
 import { Renderer } from "./rendering/renderer";
@@ -69,11 +70,12 @@ export class App {
     );
 
     // Create controllers
-    
+    const textController = new TextController(glyph);
     const controllers = [
       new SceneController("glyph", glyph),
-      new TextController(glyph),
+      textController,
       new MenuController(),
+      new AppController(textController)
     ];
 
     return new App(renderer, fontParser, controllers);

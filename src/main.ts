@@ -45,5 +45,4 @@ modeBtn.addEventListener('click', () => {
     document.documentElement.classList.remove('dark-mode');
   }
 
-
 })
