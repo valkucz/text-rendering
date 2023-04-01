@@ -88,37 +88,37 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     var x = text_info.bbox.x + (text_info.bbox.z - text_info.bbox.x) * input.uv.x;
     var y = text_info.bbox.y + (text_info.bbox.w  - text_info.bbox.y) * input.uv.y;
 
-    var mindist = 1000000.0;
-    var side = 1.0;
-    for (var i: u32 = 0; i < u32(text_info.glyph_length); i += 3) {
-        var sdist = sdf(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
-        var udist = abs(sdist.x);
+    // var mindist = 1000000.0;
+    // var side = 1.0;
+    // for (var i: u32 = 0; i < u32(text_info.glyph_length); i += 3) {
+    //     var sdist = sdf(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
+    //     var udist = abs(sdist.x);
 
-        if (udist < mindist) {
-            mindist = udist;
-            if (sdist.y > 0.0) {
-                side = -1.0;
-            }
-            else {
-                side = 1.0;
-            }
-        };
-    }
-
-    if (side > 0.0) {
-        return vec4(mindist / 9000, 0.0, 0.0, 1.0);
-    }
-    else {
-        return color.background;
-    }
-
-
-    // let uvint = vec2(x, y);
-
-    // if (is_inside_glyph(vec2<i32>(uvint))){
-    //     return color.glyph;
+    //     if (udist < mindist) {
+    //         mindist = udist;
+    //         if (sdist.y > 0.0) {
+    //             side = -1.0;
+    //         }
+    //         else {
+    //             side = 1.0;
+    //         }
+    //     };
     // }
-    // return color.background;
+
+    // if (side > 0.0) {
+    //     return vec4(mindist / 9000, 0.0, 0.0, 1.0);
+    // }
+    // else {
+    //     return color.background;
+    // }
+
+
+    let uvint = vec2(x, y);
+
+    if (is_inside_glyph(vec2<i32>(uvint))){
+        return color.glyph;
+    }
+    return color.background;
 }
 
 

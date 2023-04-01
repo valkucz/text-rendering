@@ -42,6 +42,9 @@ export class Renderer {
   /** Camera attribute: view matrix */
   view: mat4;
 
+  /** Color of WebGPU Canvas */
+  color: number[];
+
   /** Format of the canvas
    * @default "bgra8unorm"
    */
@@ -64,6 +67,8 @@ export class Renderer {
     glyph: Glyph,
     projection: mat4,
     view: mat4,
+    // TODO: set to default? 
+    color: number[],
     format: GPUTextureFormat = "bgra8unorm"
   ) {
     this.device = device;
@@ -75,6 +80,7 @@ export class Renderer {
     this.glyph = glyph;
     this.projection = projection;
     this.view = view;
+    this.color = color;
     this.format = navigator.gpu.getPreferredCanvasFormat();
 
     this.bindGroupLayout = this.createBindGroupLayout();
@@ -328,11 +334,12 @@ export class Renderer {
     const bindGroup = this.createBindGroup();
     const commandEncoder = this.device.createCommandEncoder();
     const textureView = this.ctx.getCurrentTexture().createView();
+    console.log('Renderer: ', this.color);
     const renderPass = commandEncoder.beginRenderPass({
       colorAttachments: [
         {
           view: textureView,
-          clearValue: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
+          clearValue: { r: this.color[0], g: this.color[1], b: this.color[2], a: this.color[3]},
           loadOp: "clear",
           storeOp: "store",
         },

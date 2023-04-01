@@ -45,6 +45,7 @@ export class TextController implements Controller {
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
     this.glyph = glyph;
 
+    console.log('Text controller', defaultColorHex, colors['primary']);
     this.setup();
     
     
@@ -85,7 +86,7 @@ export class TextController implements Controller {
     this.resetBtn.addEventListener("click", async () => {
 
       console.log('Text controller', defaultColorHex, colors['primary']);
-      if (this.color != this.defaultColor || this.bgColor != this.defaultBgColor) {
+      if (this.color != colors['primary'] || this.bgColor != colors['secondary']) {
         this.updateColors();
 
         
@@ -109,13 +110,19 @@ export class TextController implements Controller {
   }
 
   updateColors() {
+    console.log('updateColors()', this.color, this.defaultColor);
     console.log('text controller', this.color);
-    this.color = this.defaultColor;
-    this.bgColor = this.defaultBgColor;
+    this.color = colors['primary'];
+    this.bgColor = colors['secondary'];
 
+
+  }
+
+  setElemColors() {
     this.glyph.color = this.color;
     this.glyph.bgColor = this.bgColor;
     this.bgcolorElem.value = rgbaToHex(this.bgColor);
+    // console.log('hex', this.bgcolorElem.value);
     this.colorElem.value = rgbaToHex(this.color);
   }
 

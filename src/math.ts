@@ -67,13 +67,10 @@ export function hexToRgba(hex: string): number[] {
 export function rgbaToHex(rgba: number[]): string {
   const [r, g, b] = rgba;
 
-  const red = Math.round(r).toString(16).padStart(2, "0");
-  const green = Math.round(g).toString(16).padStart(2, "0");
-  const blue = Math.round(b).toString(16).padStart(2, "0");
-
-  // const alpha = Math.round(a * 255)
-  //   .toString(16)
-  //   .padStart(2, "0");
+  const red = Math.round(r * 255).toString(16).padStart(2, "0");
+  const green = Math.round(g * 255).toString(16).padStart(2, "0");
+  const blue = Math.round(b * 255).toString(16).padStart(2, "0");
 
   return `#${red}${green}${blue}`;
 }
+

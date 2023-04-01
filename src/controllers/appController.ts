@@ -11,7 +11,8 @@ import { TextController } from "./textController";
     //     Text,
     //     BgImg
     // }
-    
+  
+// TODO: add rgba numbers directly into map
 enum CSSColors {
     '--primary-color',
     '--secondary-color',
@@ -41,7 +42,8 @@ const light = {
 
 export const colors = {
     'primary': hexToRgba(light[0]), 
-    'secondary': hexToRgba(light[1])
+    'secondary': hexToRgba(light[1]),
+    'ternary': hexToRgba(light[3]),
 }
 
 export class AppController implements Controller {
@@ -57,9 +59,9 @@ export class AppController implements Controller {
         this.navbar = document.querySelector(".navbar") as HTMLElement;
         this.modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
 
-        this.textController = textController;
         // Init
         this.setColors(light);
+        this.textController = textController;
     }
 
     addEventListener(app: App) {
@@ -79,6 +81,7 @@ export class AppController implements Controller {
               this.setColors(dark);
               colors['primary'] = hexToRgba(dark[0]);
               colors['secondary'] = hexToRgba(dark[1]);
+              colors['ternary'] = hexToRgba(dark[3]);
               document.documentElement.classList.add('dark-mode');
             }
             else {
@@ -86,12 +89,14 @@ export class AppController implements Controller {
               this.setColors(light);
               colors['primary'] = hexToRgba(light[0]);
               colors['secondary'] = hexToRgba(light[1]);
+              colors['ternary'] = hexToRgba(light[3]);
               document.documentElement.classList.remove('dark-mode');
             }
+            this.textController.color = colors['primary'];
+            this.textController.bgColor = colors['secondary'];
+            this.textController.setElemColors();
+            app.notify();
           })
-          console.log('app controller colors', colors);
-          this.textController.updateColors();
-        app.notify();
     }
 
     setColors(object: Object): void {

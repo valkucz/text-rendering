@@ -8,7 +8,7 @@ import { hexToRgba } from "./math";
 import { Renderer } from "./rendering/renderer";
 import { Camera } from "./scene/camera";
 import { Glyph } from "./scene/objects/glyph";
-
+import { colors } from "./controllers/appController";
 // FIXME: move to fontParser
 export const defaultUrl = "./public/Blogger_Sans.otf";
 
@@ -60,15 +60,6 @@ export class App {
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
     const glyph = new Glyph(device, fontParser, 'Oo');
 
-    // Create renderer
-    const renderer = new Renderer(
-      device,
-      canvas,
-      glyph,
-      camera.projection,
-      camera.view
-    );
-
     // Create controllers
     const textController = new TextController(glyph);
     const controllers = [
@@ -78,11 +69,23 @@ export class App {
       new AppController(textController)
     ];
 
+    // Create renderer
+    const renderer = new Renderer(
+      device,
+      canvas,
+      glyph,
+      camera.projection,
+      camera.view,
+      colors['ternary'],
+    );
+
+
     return new App(renderer, fontParser, controllers);
   }
 
   notify() {
     console.log("notified");
+    this.renderer.color = colors['ternary'];
     const perFrameData = this.renderer.prepare();
     this.renderer.render(perFrameData);
   }
