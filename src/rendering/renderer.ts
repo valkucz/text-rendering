@@ -314,9 +314,13 @@ export class Renderer {
       this.buffers.bb,
       32,
       <ArrayBuffer>(
-        new Float32Array([this.glyph.vertexBuffer.getVertexCount() / 2])
+        new Float32Array([this.glyph.vertexBuffer.getVertexCount()])
       )
     );
+
+    console.log('Renderer, vertex count', this.glyph.vertexBuffer.getVertexCount());
+    console.log('Renderer, vertices', this.glyph.vertexBuffer.vertices);
+
   }
 
   /**

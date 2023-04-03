@@ -126,6 +126,6 @@ export class SceneController implements Controller {
     this.moveY.value = "10";
     this.moveZ.value = "10";
 
-    this.scale.value = "10";
+    this.scale.value = "250";
   }
 }

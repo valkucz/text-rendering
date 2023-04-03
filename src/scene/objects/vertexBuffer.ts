@@ -33,7 +33,7 @@ export class VertexBuffer {
   }
 
   getVertexCount(): number {
-    return this.vertices.length;
+    return this.vertices.length / 2;
   }
 
   // TODO: why is it here, move to glyph?

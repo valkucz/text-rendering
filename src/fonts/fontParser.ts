@@ -2,6 +2,7 @@ import { vec2 } from "gl-matrix";
 import { cubicToQuadratic } from "../approximation";
 import { Typr } from "../Typr";
 import Font from "./font";
+import { vec2ToFloat32 } from "../math";
 
 export class FontParser {
   initFont: Font;
@@ -45,10 +46,12 @@ export class FontParser {
   parseText(text: string): Float32Array {
     const shape = Typr.U.shape(this.font, text, true);
     const path = Typr.U.shapeToPath(this.font, shape);
-    console.log(path.cmds);
+    console.log(path.cmds, path.crds);
+
     // return this.debugPoints();
     return this.parseShapeToGlyph(path.cmds, path.crds);
   }
+
 
   getPosition(pos: number, crds: number[]): vec2 {
     return vec2.fromValues(crds[pos] * 16, crds[pos + 1] * 16);
@@ -98,70 +101,85 @@ export class FontParser {
     });
   }
 
+  middle(a: number, b: number): number {
+    return (a + b) / 2;
+  }
+
   parseShapeToGlyph(cmds: string[], crds: number[]): Float32Array {
-    const vertices = new Float32Array(this.calculateLength(cmds));
-    let points: vec2[] = [];
-
-    let last: vec2 = vec2.create();
-    let first: vec2 = vec2.create();
-    let curr: vec2 = vec2.create();
-
-    let index = 0;
-    let indexArr = 0;
-
-    cmds.forEach((cmd) => {
+    let vertices: vec2[] = [];
+    let pos = 0;
+    let last = vec2.create();
+    let first = this.getPosition(pos, crds);
+    let lastMove = vec2.create();
+    cmds.forEach((cmd, i) => {
       switch (cmd) {
         case "M":
-          first = this.getPosition(index, crds);
-          vec2.copy(last, first);
-          index += 2;
+          // first = this.getPosition(pos, crds);
+          last = vec2.clone(first);
+          lastMove = vec2.clone(first);
+
+          // pos += 2;
           break;
         case "L":
-          curr = this.getPosition(index, crds);
-          this.pushToArray(vertices, indexArr, [
-            last,
-            this.getMiddle(last, curr),
-            curr,
-          ]);
-          vec2.copy(last, curr);
-          indexArr += 6;
-          index += 2;
+          let pt2 = this.getPosition(pos, crds);
+          vertices = vertices.concat([
+           last,
+           this.getMiddle(last, pt2),
+           pt2]);
+          last = vec2.clone(pt2);
+          pos += 2;
           break;
         case "C":
-          for (let i = index - 2; i < index + 6; i += 2) {
+          let points = [last];
+          for (let i = pos; i < pos + 6; i += 2) {
             points.push(this.getPosition(i, crds));
           }
-          vec2.copy(last, points[3]);
           cubicToQuadratic(points).forEach((qpoints) => {
-            this.pushToArray(vertices, indexArr, qpoints);
-            indexArr += 6;
+            vertices = vertices.concat(qpoints);
           });
-          points = [];
-          index += 6;
+          last = vec2.clone(vertices[vertices.length - 1]);
+          pos += 6;
           break;
         case "Q":
-          for (let i = index - 2; i < index + 4; i += 2) {
-            points.push(this.getPosition(i, crds));
-          }
-          this.pushToArray(vertices, indexArr, points);
-          points = [];
-          indexArr += 6;
-          index += 4;
+          vertices = vertices.concat([
+            last,
+            this.getPosition(pos, crds),
+            this.getPosition(pos + 2, crds)]);
+            last = vec2.clone(this.getPosition(pos + 2, crds));
+            pos += 4;
           break;
         case "Z":
-          this.pushToArray(vertices, indexArr, [
-            last,
-            this.getMiddle(last, first),
-            first,
-          ]);
-          indexArr += 6;
+          if (i === cmds.length - 1) {
+            vertices = vertices.concat([
+              last,
+              this.getMiddle(last, first),
+              first]);
+          }
+          // vertices = vertices.concat([
+          //   last,
+          //   this.getMiddle(last, curr),
+          //   first]);
+            last = vec2.clone(first);
+            // pos += 2;
           break;
         default:
           break;
       }
     });
-    console.log('Vertices:', vertices);
-    return vertices;
+    // const flatten = vertices.flat();
+    return vec2ToFloat32(vertices);
+    // return new Float32Array(vertices.flat());
+  }
+
+
+  reversePoints(points: number[]): number[] {
+    const reversed = [];
+
+    for (let i = points.length - 2; i >= 0; i -= 2) {
+      reversed.push(points[i], points[i + 1]);
+    }
+    console.log('Reversed:', reversed);
+    return reversed;
   }
 
   debugPoints() : Float32Array {
@@ -172,12 +190,15 @@ export class FontParser {
     const line2 = new Float32Array([6224, 13472, 6224, 13472, 5528, 13472])
 
 
-    const line3 = new Float32Array([-448, -1600, 248, -1600, 944, -1600]);
-    const line4 = new Float32Array([944, -1600, 3584, 5936, 6224, 13472]);
-    const line5 = new Float32Array([6224, 13472, 5528, 13472, 4832, 13472]);
-    const line6 = new Float32Array([4832, 13472, 2192, 5936, -448, -1600]);
+    const line3 = [-448, -1600, 248, -1600, 944, -1600];
+    // const line4 = [944, -1600, 3584, 5936, 6224, 13472];
+    const line4 = [944, -1600, 3584, 5936, 6224, 13472];
+    const line5 = [6224, 13472, 5528, 13472, 4832, 13472];
+    const line6 = [4832, 13472, 2192, 5936, -448, -1600];
 
-    const linex = new Float32Array([944, -1600, 3584, 5936, 6224, 13472, 6224, 13472, 5528, 13472, 4832, 13472]);
-    return line4;
+
+    const linex = [944, -1600, 3584, 5936, 6224, 13472, 6224, 13472, 5528, 13472, 4832, 13472];
+    const linexx = linex.map(val => val + 1600);
+    return new Float32Array(this.reversePoints(line3.concat(line4).concat(line5).concat(line6)));
   }
 }

@@ -88,29 +88,31 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     var x = text_info.bbox.x + (text_info.bbox.z - text_info.bbox.x) * input.uv.x;
     var y = text_info.bbox.y + (text_info.bbox.w  - text_info.bbox.y) * input.uv.y;
 
-    // var mindist = 1000000.0;
-    // var side = 1.0;
-    // for (var i: u32 = 0; i < u32(text_info.glyph_length); i += 3) {
-    //     var sdist = sdf(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
-    //     var udist = abs(sdist.x);
+    var mindist = 1000000.0;
+    var side = 1.0;
+    var flag = 0;
+    for (var i: u32 = 0; i < u32(text_info.glyph_length); i += 3) {
+        var sdist = sdf(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
+        // var sdist = sdBezier(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
+        var udist = abs(sdist.x);
+        // var sgn = sign_bezier(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
 
-    //     if (udist < mindist) {
-    //         mindist = udist;
-    //         if (sdist.y > 0.0) {
-    //             side = -1.0;
-    //         }
-    //         else {
-    //             side = 1.0;
-    //         }
-    //     };
-    // }
-
-    // if (side > 0.0) {
-    //     return vec4(mindist / 9000, 0.0, 0.0, 1.0);
-    // }
-    // else {
-    //     return color.background;
-    // }
+        if (udist < mindist) {
+            mindist = udist;
+            if (sdist.y > 0.0) {
+                side = -1.0;
+            }
+            else {
+                side = 1.0;
+            }
+        };
+    }
+    if (side > 0.0) {
+        return vec4(mindist / 1000, 0.0, 0.0, 1.0);
+    }
+    else {
+        return color.background;
+    }
 
 
     let uvint = vec2(x, y);
@@ -169,9 +171,63 @@ fn is_inside_glyph(pos: vec2<i32>) -> bool {
 }
 
 
-fn cross_scalar(vec1: vec2<f32>, vec2: vec2<f32>) -> f32 {
-    return vec1.x * vec2.y - vec2.x * vec1.y;
+fn cross_scalar(a: vec2<f32>, b: vec2<f32>) -> f32 {
+    return a.x * b.y - a.y * b.x;
 }
+
+fn solve_cubic(a: f32, b: f32, c: f32) -> vec3<f32> {
+    var p = b - a * a / 3.0;
+    var p3 = p * p * p;
+    var q = a * (2.0*a*a - 9.0*b) / 27.0 + c;
+    var d = q*q + 4.0*p3 / 27.0;
+    var offset = -a / 3.0;
+    if(d >= 0.0) { 
+        var z = sqrt(d);
+        var x = (vec2(z, -z) - q) / 2.0;
+        var uv = sign(x)*pow(abs(x), vec2(1.0/3.0));
+        return vec3(offset + uv.x + uv.y);
+    }
+    var v = acos(-sqrt(-27.0 / p3) * q / 2.0) / 3.0;
+    var m = cos(v);
+    var n = sin(v)*1.732050808;
+    return vec3(m + m, -n - m, n - m) * sqrt(-p / 3.0) + offset;
+}
+
+fn test_cross(a: vec2<f32>, b: vec2<f32>, p: vec2<f32>) -> f32{
+    return sign((b.y-a.y) * (p.x-a.x) - (b.x-a.x) * (p.y-a.y));
+}
+
+fn sign_bezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> f32 {
+
+    var a = p3 - p1;
+    var b = p2 - p1;
+    var c = pos - p1;
+
+    var bary = vec2(cross_scalar(c, b), cross_scalar(a, c)) / cross_scalar(a, b);
+    var d = vec2(bary.y * 0.5, 0.0) + 1.0 - bary.x - bary.y;
+    return mix(sign(d.x * d.x - d.y), mix(-1.0, 1.0, 
+    step(test_cross(p1, p2, pos) * test_cross(p2, p3, pos), 0.0)),
+    step((d.x - d.y), 0.0)) * test_cross(p1, p3, p2);
+}
+
+fn sdBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, p: vec2<f32>) -> f32
+{    
+    var p22 = mix(p2 + vec2(1e-4), p2, abs(sign(p2 * 2.0 - p1 - p3)));
+    var a = p22 - p1;
+    var b = p1 - p22 * 2.0 + p3;
+    var c = a * 2.0;
+    var d = p1 - p;
+    var k = vec3(3.*dot(a,b), 2.*dot(a,a)+dot(d,b),dot(d,a)) / dot(b,b);      
+    var t = saturate(solve_cubic(k.x, k.y, k.z));
+    var pos = p1 + (c + b*t.x)*t.x;
+    var dis = length(pos - p);
+    pos = p1 + (c + b*t.y)*t.y;
+    dis = min(dis, length(pos - p));
+    pos = p1 + (c + b*t.z)*t.z;
+    dis = min(dis, length(pos - p));
+    return dis;
+}
+
 
 fn sdf(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec2<f32> {
     var a = p2 - p1;
