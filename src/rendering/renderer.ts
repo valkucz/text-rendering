@@ -25,8 +25,8 @@ export class Renderer {
   /** WebGPU canvas */
   canvas: HTMLCanvasElement;
 
-  /** Bind group layouts */
-  bindGroupLayouts: GPUBindGroupLayout[];
+  /** Bind group layout */
+  bindGroupLayout: GPUBindGroupLayout;
 
   /** Pipeline used for rendering */
   pipeline: GPURenderPipeline;
@@ -85,7 +85,7 @@ export class Renderer {
     this.format = navigator.gpu.getPreferredCanvasFormat();
 
     this.buffers = this.createBuffers();
-    this.bindGroupLayouts = this.createBindGroupLayouts();
+    this.bindGroupLayout = this.createBindGroupLayout();
     this.pipeline = this.createPipeline();
 
     this.ctx.configure({
@@ -128,7 +128,7 @@ export class Renderer {
    */
   createPipeline(): GPURenderPipeline {
     const pipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: this.bindGroupLayouts,
+      bindGroupLayouts: [this.bindGroupLayout],
     });
 
     return this.device.createRenderPipeline({
@@ -164,8 +164,8 @@ export class Renderer {
    * Basis for bind group.
    * @returns bind group layout
    */
-  createBindGroupLayouts(): GPUBindGroupLayout[] {
-    return [this.device.createBindGroupLayout({
+  createBindGroupLayout(): GPUBindGroupLayout {
+    return this.device.createBindGroupLayout({
       entries: [
         {
           binding: 0,
@@ -174,13 +174,6 @@ export class Renderer {
             type: "uniform",
           },
         },
-        // {
-        //   binding: 1,
-        //   visibility: GPUShaderStage.FRAGMENT,
-        //   buffer: {
-        //     type: "storage",
-        //   },
-        // },
         {
           binding: 1,
           visibility: GPUShaderStage.FRAGMENT,
@@ -190,39 +183,36 @@ export class Renderer {
         },
         {
           binding: 2,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {
+            type: "storage",
+          },
+        },
+        {
+          binding: 3,
           visibility: GPUShaderStage.VERTEX,
           buffer: {
             type: "uniform",
           },
         },
         {
-          binding: 3,
+          binding: 4,
           visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
           buffer: {
             type: "uniform",
           },
         },
       ],
-    }),
-    this.device.createBindGroupLayout({
-      entries: [
-        { 
-          binding: 0,
-          visibility: GPUShaderStage.FRAGMENT,
-          buffer: { type: "storage" }
-        }
-      ]
-    })
-  ];
+    });
   }
 
   /**
    * Creates bind group that provides concrete resource bindings for a pipeline.
    * @returns bind group
    */
-  createBindGroupMain(): GPUBindGroup {
+  createBindGroup(vertexBuffer: GPUBuffer): GPUBindGroup {
     return this.device.createBindGroup({
-      layout: this.bindGroupLayouts[0],
+      layout: this.bindGroupLayout,
       entries: [
         {
           binding: 0,
@@ -230,26 +220,26 @@ export class Renderer {
             buffer: this.buffers.uniform,
           },
         },
-        // {
-        //   binding: 1,
-        //   resource: {
-        //     buffer: vertexBuffer,
-        //   },
-        // },
         {
           binding: 1,
           resource: {
-            buffer: this.textBlock.colorBuffer.buffer,
+            buffer: vertexBuffer,
           },
         },
         {
           binding: 2,
           resource: {
-            buffer: this.buffers.canvas,
+            buffer: this.textBlock.colorBuffer.buffer,
           },
         },
         {
           binding: 3,
+          resource: {
+            buffer: this.buffers.canvas,
+          },
+        },
+        {
+          binding: 4,
           resource: {
             buffer: this.buffers.bb,
           },
@@ -302,17 +292,20 @@ export class Renderer {
 
   }
 
-  private setupGlyphBuffers(): GPUBuffer[] {
-    const buffers: GPUBuffer[] = [];
+  private setupGlyphBuffers(): GPUBindGroup[] {
+    const bindGroups: GPUBindGroup[] = [];
+
     this.textBlock.glyphs.forEach((glyph) => {
       // Vertex buffer
+      // let vertexBuffer = ;
+      // vertexBuffer.unmap();
       let vertexBuffer = this.device.createBuffer({
         size: glyph.vertices.byteLength * 4,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-        mappedAtCreation: true,
+        mappedAtCreation: false,
       });
-      vertexBuffer.unmap();
-      buffers.push(vertexBuffer);
+
+      bindGroups.push(this.createBindGroup(vertexBuffer));
 
       // Vertices
       this.device.queue.writeBuffer(
@@ -346,7 +339,7 @@ export class Renderer {
       );
 
     });
-    return buffers;
+    return bindGroups;
   }
 
   /**
@@ -363,7 +356,7 @@ export class Renderer {
     this.setupBuffer();
     const glyphBuffers = this.setupGlyphBuffers();
 
-    const bindGroup = this.createBindGroupMain();
+    const bindGroups = this.setupGlyphBuffers();
     const commandEncoder = this.device.createCommandEncoder();
     const textureView = this.ctx.getCurrentTexture().createView();
     console.log('Renderer: ', this.color);
@@ -378,10 +371,9 @@ export class Renderer {
       ],
     });
     return {
-      bindGroup,
+      bindGroups,
       commandEncoder,
-      renderPass,
-      glyphBuffers
+      renderPass
     };
   }
 
@@ -390,22 +382,11 @@ export class Renderer {
    * @param perFrameData - Data needed for rendering a frame.
    */
   render(perFrameData: PerFrameData) {
-    const { bindGroup, commandEncoder, renderPass, glyphBuffers } = perFrameData;
+    // kaslat na groups, zoznam bindgroups....
+    const { bindGroups, commandEncoder, renderPass } = perFrameData;
     renderPass.setPipeline(this.pipeline);
-    renderPass.setBindGroup(0, bindGroup);
-  
-    glyphBuffers.forEach((glyphBuffer) => {
-      renderPass.setBindGroup(1, this.device.createBindGroup({
-        layout: this.bindGroupLayouts[1],
-        entries: [
-          {
-            binding: 0,
-            resource: {
-              buffer: glyphBuffer,
-            },
-          }
-        ]
-      }));
+    bindGroups.forEach((bindGroup) => {
+      renderPass.setBindGroup(0, bindGroup);
       renderPass.draw(6, 1, 0, 0);
     });
     
