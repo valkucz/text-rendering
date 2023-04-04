@@ -110,15 +110,13 @@ export class FontParser {
     let pos = 0;
     let last = vec2.create();
     let first = this.getPosition(pos, crds);
-    let lastMove = vec2.create();
     cmds.forEach((cmd, i) => {
       switch (cmd) {
         case "M":
-          // first = this.getPosition(pos, crds);
+          first = this.getPosition(pos, crds);
           last = vec2.clone(first);
-          lastMove = vec2.clone(first);
 
-          // pos += 2;
+          pos += 2;
           break;
         case "L":
           let pt2 = this.getPosition(pos, crds);
@@ -149,17 +147,18 @@ export class FontParser {
             pos += 4;
           break;
         case "Z":
-          if (i === cmds.length - 1) {
-            vertices = vertices.concat([
-              last,
-              this.getMiddle(last, first),
-              first]);
-          }
+          vertices = vertices.concat([
+            last,
+            this.getMiddle(last, first),
+            first]);
+          // if (i === cmds.length - 1) {
+
+          // }
           // vertices = vertices.concat([
           //   last,
           //   this.getMiddle(last, curr),
           //   first]);
-            last = vec2.clone(first);
+            // last = vec2.clone(first);
             // pos += 2;
           break;
         default:

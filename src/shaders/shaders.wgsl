@@ -35,10 +35,11 @@ struct TextInfo  {
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
-@binding(1) @group(0) var<storage, read_write> object: SceneObject;
-@binding(2) @group(0) var<storage, read_write> color: Color;
-@binding(3) @group(0) var<uniform> canvas: Canvas;
-@binding(4) @group(0) var<uniform> text_info: TextInfo;
+@binding(1) @group(0) var<storage, read_write> color: Color;
+@binding(2) @group(0) var<uniform> canvas: Canvas;
+@binding(3) @group(0) var<uniform> text_info: TextInfo;
+
+@binding(0) @group(1) var<storage, read_write> object: SceneObject;
 // TODO: split vertex and fragment into separate files
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
@@ -107,12 +108,12 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             }
         };
     }
-    if (side > 0.0) {
-        return vec4(mindist / 1000, 0.0, 0.0, 1.0);
-    }
-    else {
-        return color.background;
-    }
+    // if (side > 0.0) {
+    //     return vec4(mindist / 1000, 0.0, 0.0, 1.0);
+    // }
+    // else {
+    //     return color.background;
+    // }
 
 
     let uvint = vec2(x, y);

@@ -3,6 +3,7 @@ import { Glyph } from "../scene/objects/glyph";
 import { PerFrameData } from "./perFrameData";
 import { mat4 } from "gl-matrix";
 import { RendererBuffers } from "./rendererBuffers";
+import { TextBlock } from "../scene/objects/textBlock";
 
 /** Length of the matrix in bytes
  * the matrix is 4x4 and each element is 4 bytes => 4 * 4 * 4 = 64
@@ -24,17 +25,17 @@ export class Renderer {
   /** WebGPU canvas */
   canvas: HTMLCanvasElement;
 
+  /** Bind group layouts */
+  bindGroupLayouts: GPUBindGroupLayout[];
+
   /** Pipeline used for rendering */
   pipeline: GPURenderPipeline;
-
-  /** Bind group layout used for rendering */
-  bindGroupLayout: GPUBindGroupLayout;
 
   /** Buffers */
   buffers: RendererBuffers;
 
-  /** Glyph to renderer */
-  glyph: Glyph;
+  /** Block of text to render. */
+  textBlock: TextBlock;
 
   /** Camera attribute: projection matrix */
   projection: mat4;
@@ -54,7 +55,7 @@ export class Renderer {
    * Creates a new Renderer instance.
    * @param device - GPU device used for rendering
    * @param canvas - WebGPU canvas
-   * @param glyph - Glyph to renderer
+   * @param textBlock - BLock of text to render
    * @param projection - Camera attribute: projection matrix
    * @param view - Camera attribute: view matrix
    * @param format - Format of the canvas
@@ -64,7 +65,7 @@ export class Renderer {
   constructor(
     device: GPUDevice,
     canvas: HTMLCanvasElement,
-    glyph: Glyph,
+    textBlock: TextBlock,
     projection: mat4,
     view: mat4,
     // TODO: set to default? 
@@ -77,14 +78,14 @@ export class Renderer {
     if (!this.ctx) {
       throw new Error("Context is null or undefined");
     }    
-    this.glyph = glyph;
+    this.textBlock = textBlock;
     this.projection = projection;
     this.view = view;
     this.color = color;
     this.format = navigator.gpu.getPreferredCanvasFormat();
 
-    this.bindGroupLayout = this.createBindGroupLayout();
     this.buffers = this.createBuffers();
+    this.bindGroupLayouts = this.createBindGroupLayouts();
     this.pipeline = this.createPipeline();
 
     this.ctx.configure({
@@ -127,7 +128,7 @@ export class Renderer {
    */
   createPipeline(): GPURenderPipeline {
     const pipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [this.bindGroupLayout],
+      bindGroupLayouts: this.bindGroupLayouts,
     });
 
     return this.device.createRenderPipeline({
@@ -163,8 +164,8 @@ export class Renderer {
    * Basis for bind group.
    * @returns bind group layout
    */
-  createBindGroupLayout(): GPUBindGroupLayout {
-    return this.device.createBindGroupLayout({
+  createBindGroupLayouts(): GPUBindGroupLayout[] {
+    return [this.device.createBindGroupLayout({
       entries: [
         {
           binding: 0,
@@ -173,6 +174,13 @@ export class Renderer {
             type: "uniform",
           },
         },
+        // {
+        //   binding: 1,
+        //   visibility: GPUShaderStage.FRAGMENT,
+        //   buffer: {
+        //     type: "storage",
+        //   },
+        // },
         {
           binding: 1,
           visibility: GPUShaderStage.FRAGMENT,
@@ -182,36 +190,39 @@ export class Renderer {
         },
         {
           binding: 2,
-          visibility: GPUShaderStage.FRAGMENT,
-          buffer: {
-            type: "storage",
-          },
-        },
-        {
-          binding: 3,
           visibility: GPUShaderStage.VERTEX,
           buffer: {
             type: "uniform",
           },
         },
         {
-          binding: 4,
+          binding: 3,
           visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
           buffer: {
             type: "uniform",
           },
         },
       ],
-    });
+    }),
+    this.device.createBindGroupLayout({
+      entries: [
+        { 
+          binding: 0,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: { type: "storage" }
+        }
+      ]
+    })
+  ];
   }
 
   /**
    * Creates bind group that provides concrete resource bindings for a pipeline.
    * @returns bind group
    */
-  createBindGroup(): GPUBindGroup {
+  createBindGroupMain(): GPUBindGroup {
     return this.device.createBindGroup({
-      layout: this.bindGroupLayout,
+      layout: this.bindGroupLayouts[0],
       entries: [
         {
           binding: 0,
@@ -219,26 +230,26 @@ export class Renderer {
             buffer: this.buffers.uniform,
           },
         },
+        // {
+        //   binding: 1,
+        //   resource: {
+        //     buffer: vertexBuffer,
+        //   },
+        // },
         {
           binding: 1,
           resource: {
-            buffer: this.glyph.vertexBuffer.buffer,
+            buffer: this.textBlock.colorBuffer.buffer,
           },
         },
         {
           binding: 2,
           resource: {
-            buffer: this.glyph.colorBuffer.buffer,
-          },
-        },
-        {
-          binding: 3,
-          resource: {
             buffer: this.buffers.canvas,
           },
         },
         {
-          binding: 4,
+          binding: 3,
           resource: {
             buffer: this.buffers.bb,
           },
@@ -265,25 +276,11 @@ export class Renderer {
       <ArrayBuffer>this.view
     );
 
-    // Glyph model matrix
-    this.device.queue.writeBuffer(
-      this.buffers.uniform,
-      0,
-      <ArrayBuffer>this.glyph.model
-    );
-
-    // Vertices
-    this.device.queue.writeBuffer(
-      this.glyph.vertexBuffer.buffer,
-      0,
-      this.glyph.vertexBuffer.vertices.buffer
-    );
-
     // Color
     this.device.queue.writeBuffer(
-      this.glyph.colorBuffer.buffer,
+      this.textBlock.colorBuffer.buffer,
       0,
-      this.glyph.colorBuffer.vertices.buffer
+      this.textBlock.colorBuffer.vertices.buffer
     );
 
     // Canvas 
@@ -294,33 +291,62 @@ export class Renderer {
     );
     console.log('canvas', this.canvas.width, this.canvas.height);
 
-    // Bounding box
-    this.device.queue.writeBuffer(
-      this.buffers.bb,
-      0,
-      <ArrayBuffer>this.glyph.vertexBuffer.getBoundingBox()
-    );
-    console.log('bb', this.glyph.vertexBuffer.getBoundingBox());
+
 
     // Bounding box of font coordinate system
     this.device.queue.writeBuffer(
       this.buffers.bb,
       16,
-      <ArrayBuffer>new Float32Array(this.glyph.fontParser.getBb())
+      <ArrayBuffer>new Float32Array(this.textBlock.fontParser.getBb())
     );
 
-    // Vertices length
-    this.device.queue.writeBuffer(
-      this.buffers.bb,
-      32,
-      <ArrayBuffer>(
-        new Float32Array([this.glyph.vertexBuffer.getVertexCount()])
-      )
-    );
+  }
 
-    console.log('Renderer, vertex count', this.glyph.vertexBuffer.getVertexCount());
-    console.log('Renderer, vertices', this.glyph.vertexBuffer.vertices);
+  private setupGlyphBuffers(): GPUBuffer[] {
+    const buffers: GPUBuffer[] = [];
+    this.textBlock.glyphs.forEach((glyph) => {
+      // Vertex buffer
+      let vertexBuffer = this.device.createBuffer({
+        size: glyph.vertices.byteLength * 4,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        mappedAtCreation: true,
+      });
+      vertexBuffer.unmap();
+      buffers.push(vertexBuffer);
 
+      // Vertices
+      this.device.queue.writeBuffer(
+        vertexBuffer,
+        0,
+        glyph.vertices.buffer
+      );
+
+      // Glyph model matrix
+      this.device.queue.writeBuffer(
+        this.buffers.uniform,
+        0,
+        <ArrayBuffer>glyph.model
+      );
+
+      // Vertices length
+      // TODO: Or add it to vertexBuffer?
+      this.device.queue.writeBuffer(
+        this.buffers.bb,
+        32,
+        <ArrayBuffer>(
+          new Float32Array([glyph.vertices.length / 2])
+        )
+      );
+
+      // Glyph Bounding box
+      this.device.queue.writeBuffer(
+        this.buffers.bb,
+        0,
+        <ArrayBuffer>glyph.bb
+      );
+
+    });
+    return buffers;
   }
 
   /**
@@ -335,7 +361,9 @@ export class Renderer {
     // });
     // const renderTargetView = renderTarget.createView();
     this.setupBuffer();
-    const bindGroup = this.createBindGroup();
+    const glyphBuffers = this.setupGlyphBuffers();
+
+    const bindGroup = this.createBindGroupMain();
     const commandEncoder = this.device.createCommandEncoder();
     const textureView = this.ctx.getCurrentTexture().createView();
     console.log('Renderer: ', this.color);
@@ -353,6 +381,7 @@ export class Renderer {
       bindGroup,
       commandEncoder,
       renderPass,
+      glyphBuffers
     };
   }
 
@@ -361,10 +390,25 @@ export class Renderer {
    * @param perFrameData - Data needed for rendering a frame.
    */
   render(perFrameData: PerFrameData) {
-    const { bindGroup, commandEncoder, renderPass } = perFrameData;
+    const { bindGroup, commandEncoder, renderPass, glyphBuffers } = perFrameData;
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, bindGroup);
-    renderPass.draw(6, 1, 0, 0);
+  
+    glyphBuffers.forEach((glyphBuffer) => {
+      renderPass.setBindGroup(1, this.device.createBindGroup({
+        layout: this.bindGroupLayouts[1],
+        entries: [
+          {
+            binding: 0,
+            resource: {
+              buffer: glyphBuffer,
+            },
+          }
+        ]
+      }));
+      renderPass.draw(6, 1, 0, 0);
+    });
+    
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
   }

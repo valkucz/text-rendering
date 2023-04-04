@@ -9,6 +9,7 @@ import { Renderer } from "./rendering/renderer";
 import { Camera } from "./scene/camera";
 import { Glyph } from "./scene/objects/glyph";
 import { colors } from "./controllers/appController";
+import { TextBlock } from "./scene/objects/textBlock";
 // FIXME: move to fontParser
 export const defaultUrl = "./public/Blogger_Sans.otf";
 
@@ -58,22 +59,23 @@ export class App {
     // Create object
   
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
-    const glyph = new Glyph(device, fontParser, 'Oo');
+    // const glyph = new Glyph(device, fontParser, 'Oo');
+    const textBlock = new TextBlock(device, 'Ab', fontParser);
 
     // Create controllers
-    const textController = new TextController(glyph);
+    // const textController = new TextController(glyph);
     const controllers = [
-      new SceneController("glyph", glyph),
-      textController,
+      // new SceneController("glyph", glyph),
+      // textController,
       new MenuController(),
-      new AppController(textController)
+      // new AppController(textController)
     ];
 
     // Create renderer
     const renderer = new Renderer(
       device,
       canvas,
-      glyph,
+      textBlock,
       camera.projection,
       camera.view,
       colors['ternary'],

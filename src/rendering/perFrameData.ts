@@ -7,9 +7,12 @@
  *
  */
 export interface PerFrameData {
+  
   bindGroup: GPUBindGroup;
 
   commandEncoder: GPUCommandEncoder;
 
   renderPass: GPURenderPassEncoder;
+
+  glyphBuffers: GPUBuffer[];
 }
