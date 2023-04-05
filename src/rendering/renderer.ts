@@ -10,6 +10,8 @@ import { TextBlock } from "../scene/objects/textBlock";
  */
 const MAT4LENGTH = 64;
 
+const OFFSET = 256;
+
 /**
  * Represents a GPU Renderer that is responsible for rendering objects
  * on the WebGPU canvas using specified context and device.
@@ -179,6 +181,9 @@ export class Renderer {
           visibility: GPUShaderStage.FRAGMENT,
           buffer: {
             type: "storage",
+            hasDynamicOffset: true,
+            // minBindingSize: 0
+
           },
         },
         {
@@ -210,7 +215,7 @@ export class Renderer {
    * Creates bind group that provides concrete resource bindings for a pipeline.
    * @returns bind group
    */
-  createBindGroup(vertexBuffer: GPUBuffer): GPUBindGroup {
+  createBindGroup(vertexBuffer: GPUBuffer, offset: number, size: number): GPUBindGroup {
     return this.device.createBindGroup({
       layout: this.bindGroupLayout,
       entries: [
@@ -223,6 +228,8 @@ export class Renderer {
         {
           binding: 1,
           resource: {
+            // offset: offset,
+            // size: size,
             buffer: vertexBuffer,
           },
         },
@@ -292,21 +299,26 @@ export class Renderer {
 
   }
 
-  private setupGlyphBuffers(): GPUBindGroup[] {
+  private setupGlyphBuffers(): any {
     const bindGroups: GPUBindGroup[] = [];
-
-    this.textBlock.glyphs.forEach((glyph) => {
+    let last = 0;
+    let size = 0;
+    const offsets: number[] = [];
+    this.textBlock.glyphs.forEach((glyph, i) => {
       // Vertex buffer
       // let vertexBuffer = ;
       // vertexBuffer.unmap();
+      size = glyph.vertices.byteLength * 4;
+      offsets.push(size);
       let vertexBuffer = this.device.createBuffer({
-        size: glyph.vertices.byteLength * 4,
+        size: size,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         mappedAtCreation: false,
       });
 
-      bindGroups.push(this.createBindGroup(vertexBuffer));
+      bindGroups.push(this.createBindGroup(vertexBuffer, last, size));
 
+      last = size;
       // Vertices
       this.device.queue.writeBuffer(
         vertexBuffer,
@@ -339,7 +351,7 @@ export class Renderer {
       );
 
     });
-    return bindGroups;
+    return { bindGroups, offsets };
   }
 
   /**
@@ -354,12 +366,12 @@ export class Renderer {
     // });
     // const renderTargetView = renderTarget.createView();
     this.setupBuffer();
-    const glyphBuffers = this.setupGlyphBuffers();
+    // const glyphBuffers = this.setupGlyphBuffers();
 
-    const bindGroups = this.setupGlyphBuffers();
+    const { bindGroups, offsets } = this.setupGlyphBuffers();
     const commandEncoder = this.device.createCommandEncoder();
     const textureView = this.ctx.getCurrentTexture().createView();
-    console.log('Renderer: ', this.color);
+    // console.log('Renderer: ', this.color);
     const renderPass = commandEncoder.beginRenderPass({
       colorAttachments: [
         {
@@ -371,6 +383,7 @@ export class Renderer {
       ],
     });
     return {
+      offsets,
       bindGroups,
       commandEncoder,
       renderPass
@@ -382,14 +395,13 @@ export class Renderer {
    * @param perFrameData - Data needed for rendering a frame.
    */
   render(perFrameData: PerFrameData) {
-    // kaslat na groups, zoznam bindgroups....
-    const { bindGroups, commandEncoder, renderPass } = perFrameData;
+    const { offsets, bindGroups, commandEncoder, renderPass } = perFrameData;
     renderPass.setPipeline(this.pipeline);
-    bindGroups.forEach((bindGroup) => {
-      renderPass.setBindGroup(0, bindGroup);
-      renderPass.draw(6, 1, 0, 0);
+    bindGroups.forEach((bindGroup, i) => {
+      renderPass.setBindGroup(0, bindGroup, [offsets[i]]);
     });
     
+    renderPass.draw(6, 1, 0, 0);
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
   }

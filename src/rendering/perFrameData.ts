@@ -7,6 +7,7 @@
  *
  */
 export interface PerFrameData {
+  offsets: number[],
   
   bindGroups: GPUBindGroup[];
 

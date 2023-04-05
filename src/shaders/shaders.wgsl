@@ -65,21 +65,21 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
 
 
 fn get_rectangle() -> array<vec3<f32>, 6> {
-    var min_x = text_info.bbox.x;
-    var max_x = text_info.bbox.z;
+    // var min_x = text_info.bbox.x;
+    // var max_x = text_info.bbox.z;
 
-    var canvas_wdith = text_info.canvas_bbox.z - text_info.canvas_bbox.x;
-    var canvas_min_x = text_info.canvas_bbox.x;
+    // var canvas_wdith = text_info.canvas_bbox.z - text_info.canvas_bbox.x;
+    // var canvas_min_x = text_info.canvas_bbox.x;
 
-    var norm_min_x = ((2 * (min_x - canvas_min_x)) / canvas_wdith) - 1.0;
-    var norm_max_x = ((2 * (max_x - canvas_min_x)) / canvas_wdith) - 1.0;
+    // var norm_min_x = ((2 * (min_x - canvas_min_x)) / canvas_wdith) - 1.0;
+    // var norm_max_x = ((2 * (max_x - canvas_min_x)) / canvas_wdith) - 1.0;
     return array<vec3<f32>, 6>(
-        vec3(norm_min_x, -0.5, 0.0),
-        vec3(norm_min_x, 0.5, 0.0),
-        vec3(norm_max_x, -0.5, 0.0),
-        vec3(norm_max_x, -0.5, 0.0),
-        vec3(norm_min_x, 0.5, 0.0),
-        vec3(norm_max_x, 0.5, 0.0)
+        vec3(-0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, 0.5, 0.0)
     );
 }
 
