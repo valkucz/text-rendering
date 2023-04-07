@@ -7,9 +7,10 @@
  *
  */
 export interface PerFrameData {
-  offsets: number[],
+
+  uniformBindGroup: GPUBindGroup;
   
-  bindGroups: GPUBindGroup[];
+  glyphBindGroups: GPUBindGroup[];
 
   commandEncoder: GPUCommandEncoder;
 

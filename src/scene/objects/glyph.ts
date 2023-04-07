@@ -112,6 +112,9 @@ export interface Glyph {
     vertices: Float32Array;
     model: mat4;
     bb: vec4;
+    length: number;
+    size: number;
+    offset: number;
 }
 
 
