@@ -107,27 +107,19 @@ export class Renderer {
       size: MAT4LENGTH * 2,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-
-    // const canvasBuffer = this.device.createBuffer({
-    //   size: 16,
-    //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    // });
-
-    // const bbBuffer = this.device.createBuffer({
-    //   size: 16 * 3,
-    //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    // });
-
-    const alignment = this.device.limits.minStorageBufferOffsetAlignment;
-    const size = Math.ceil((this.textBlock.size )/ alignment) * alignment;
-    console.log('Buffer size: ', this.textBlock.size * 4);
     const glyphBuffer = this.device.createBuffer({
-      size: this.textBlock.size * 4,
+      size: this.textBlock.verticesSize * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     })
+    const transformBuffer = this.device.createBuffer({
+      size: this.textBlock.transformsSize * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    })
+
     return {
       uniform: uniformBuffer,
       glyph: glyphBuffer,
+      transforms: transformBuffer,
     };
   }
   /**
@@ -202,7 +194,15 @@ export class Renderer {
           buffer: {
             type: "storage",
           },
-        }]
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
+          buffer: {
+            type: "uniform",
+          },
+        },
+      ]
     }),
   ];
   }
@@ -238,10 +238,7 @@ export class Renderer {
    */
   createGlyphBindGroups(): GPUBindGroup[] {
     const bindGroups: GPUBindGroup[] = [];
-    const alignment = this.device.limits.minStorageBufferOffsetAlignment;
-    
     for (let i = 0; i < this.textBlock.glyphs.length; i++) {
-      console.log('Bind groups, offsets', Math.ceil(this.textBlock.glyphs[i].offset / alignment) * alignment);
       bindGroups.push(this.device.createBindGroup({
         layout: this.bindGroupLayouts[1],
         entries: [
@@ -249,8 +246,16 @@ export class Renderer {
             binding: 0,
             resource: {
               buffer: this.buffers.glyph,
-              size: this.textBlock.glyphs[i].size * 4,
-              offset: this.textBlock.glyphs[i].offset * 4
+              size: this.textBlock.glyphs[i].verticesSize * 4,
+              offset: this.textBlock.glyphs[i].verticesOffset * 4
+            },
+          },
+          {
+            binding: 1,
+            resource: {
+              buffer: this.buffers.transforms,
+              size: this.textBlock.glyphs[i].transformsSize * 4,
+              offset: this.textBlock.glyphs[i].transformsOffset * 4
             },
           },
         ],
@@ -287,32 +292,17 @@ export class Renderer {
     );
 
     // Glyph
-    const glyphBuffer = this.textBlock.getBuffer();
     this.device.queue.writeBuffer(
       this.buffers.glyph,
       0,
-      glyphBuffer
+      this.textBlock.verticesBuffer
     );
-    
-    console.log('Glyph buffer,', glyphBuffer);
 
-    // Canvas 
-    // this.device.queue.writeBuffer(
-    //   this.buffers.canvas,
-    //   0,
-    //   <ArrayBuffer>(new Float32Array([this.canvas.width, this.canvas.height]))
-    // );
-    // console.log('canvas', this.canvas.width, this.canvas.height);
-
-
-
-    // Bounding box of font coordinate system
-    // this.device.queue.writeBuffer(
-    //   this.buffers.bb,
-    //   16,
-    //   <ArrayBuffer>new Float32Array(this.textBlock.fontParser.getBb())
-    // );
-
+    this.device.queue.writeBuffer(
+      this.buffers.transforms,
+      0,
+      this.textBlock.transformsBuffer
+    );
   }
 
   /**
@@ -326,6 +316,7 @@ export class Renderer {
     //   usage: GPUTextureUsage.RENDER_ATTACHMENT,
     // });
     // const renderTargetView = renderTarget.createView();
+    this.buffers = this.createBuffers();
     this.setupBuffer();
     // const glyphBuffers = this.setupGlyphBuffers();
 
@@ -362,15 +353,6 @@ export class Renderer {
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, uniformBindGroup);
     glyphBindGroups.forEach((bindGroup, i) => {
-      console.log('bind group', bindGroup);
-      // Vertices
-      // this.device.queue.writeBuffer(
-      //   buffers[i],
-      //   0,
-      //   this.textBlock.glyphs[i].vertices.buffer
-      // );
-      // renderPass.
-      // renderPass.setVertexBuffer(0, buffers[i]);
       renderPass.setBindGroup(1, bindGroup);
       renderPass.draw(6, 1, 0, 0);
     });

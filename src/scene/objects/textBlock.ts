@@ -5,17 +5,18 @@ import { VertexBuffer } from "./vertexBuffer";
 
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
 const defaultBgColor = [1.0, 1.0, 1.0, 0.0];
-const MAT4LENGTH = 64;
-const VEC4LENGTH = 16;
 export class TextBlock {
   device: GPUDevice;
-  private _size: number;
+  private _verticesSize: number;
+  private _transformsSize: number;
   private _text: string;
-  private _color: number[];
-  private _bgColor: number[];
+  color: number[];
+  bgColor: number[];
   private _glyphs: Glyph[];
   private _colorBuffer: VertexBuffer;
   fontParser: FontParser;
+  private _verticesBuffer: Float32Array;
+  private _transformsBuffer: Float32Array;
 
   constructor(
     device: GPUDevice,
@@ -27,29 +28,35 @@ export class TextBlock {
     this.device = device;
     this._text = text;
     this.fontParser = fontParser;
-    this._color = color ?? defaultColor;
-    this._bgColor = backgroundColor ?? defaultBgColor;
+    this.color = color ?? defaultColor;
+    this.bgColor = backgroundColor ?? defaultBgColor;
     this._colorBuffer = this.createVertexBuffer(device, this.getColorArray());
 
-    this._size = 0;
+    this._verticesSize = 0;
+    this._transformsSize = 0;
     this._glyphs = this.createGlyphs();
+    this._verticesBuffer = this.createVerticesBuffer();
+    this._transformsBuffer = this.createTransformsBuffer();
   }
 
-  public get size(): number {
-    return this._size;
+  public get verticesBuffer() {
+    return this._verticesBuffer;
+  }
+
+  public get transformsBuffer() {
+    return this._transformsBuffer;
+  }
+
+  public get verticesSize(): number {
+    return this._verticesSize;
+  }
+
+  public get transformsSize(): number {
+    return this._transformsSize;
   }
 
   public get text(): string {
     return this._text;
-  }
-
-  public get color(): number[] {
-    return this._color;
-  }
-
-  // TODO: remove bg color
-  public get bgColor(): number[] {
-    return this._bgColor;
   }
 
   public get glyphs(): Glyph[] {
@@ -60,7 +67,7 @@ export class TextBlock {
     return this._colorBuffer;
   }
   private getColorArray(): Float32Array {
-    return new Float32Array(this._color.concat(this._bgColor));
+    return new Float32Array(this.color.concat(this.bgColor));
   }
   private createVertexBuffer(
     device: GPUDevice,
@@ -71,76 +78,68 @@ export class TextBlock {
   private createGlyphs(): Glyph[] {
     const alignment = this.device.limits.minStorageBufferOffsetAlignment;
     const glyphs = [];
-    let offset = 0;
+    let transformsOffset = 0;
+    let verticesOffset = 0;
     for (let i = 0; i < this._text.length; i++) {
       let vertices = this.fontParser.parseText(this._text[i]);
-      let size = Math.ceil ((vertices.length + 16 + 4 + 1) / alignment) * alignment;
+      let transformsSize = Math.ceil(21 / alignment) * alignment;
+      let verticesSize = Math.ceil(vertices.length / alignment) * alignment;
   
       glyphs.push({
         vertices: vertices,
         model: this.setModel(i),
         bb: this.getBoundingBox(vertices),
         length: vertices.length / 2,
-        size: size,
-        offset: offset,
+        transformsSize: transformsSize,
+        verticesSize: verticesSize,
+        transformsOffset: transformsOffset,
+        verticesOffset: verticesOffset
       });
-      offset += size;
+
+      console.log('Glyph iteration', i, 'vertices', vertices.length, 'transforms', transformsSize, 'vertices', verticesSize, 'offset', transformsOffset, verticesOffset)
+      transformsOffset += transformsSize;
+      verticesOffset += verticesSize;
     }
     
     // offset = Math.ceil(offset / alignment) * alignment;156*4
-    this._size = offset;
+    this._verticesSize = verticesOffset;
+    this._transformsSize = transformsOffset;
+    console.log('Vertices, transform size', this._verticesSize, this._transformsSize);
     return glyphs;
   }
 
-    // Buffer
+  createTransformsBuffer() {
+    const buffer = new Float32Array(this._transformsSize);
+    let offset = 0;
+    for (let i = 0; i < this._glyphs.length; i++) {
+      const glyph = this._glyphs[i];
+      offset = glyph.transformsOffset;
+      const model = glyph.model;
+      const bb = glyph.bb;
 
-    getBuffer() {
-      // vertices, model, bb
+      buffer.set([glyph.length], offset);
+      offset += 4;
 
-      const buffer = new Float32Array(this._size);
-      
+      buffer.set(model, offset);
+      offset += 16;
+
+      buffer.set(bb, offset);
+      offset += 4;
+    }
+    return buffer;
+  }
+
+    createVerticesBuffer() {
+      const buffer = new Float32Array(this._verticesSize);
       let offset = 0;
-
-      console.log(this._size);
-      console.log(this._glyphs);
-      const alignment = this.device.limits.minStorageBufferOffsetAlignment;
       for (let i = 0; i < this._glyphs.length; i++) {
         const glyph = this._glyphs[i];
-        offset = glyph.offset;
+        offset = glyph.verticesOffset;
         const vertices = glyph.vertices;
-        const model = glyph.model;
-        const bb = glyph.bb;
-
-        buffer.set([glyph.length], offset);
-        offset += 4;
-
-        buffer.set(model, offset);
-
-        // const modelView = new Float32Array(buffer, offset, 16);
-        // modelView.set(model);
-        offset += 16;
-
-        // const bbView = new Float32Array(buffer, offset, 4);
-        // bbView.set(bb);
-        buffer.set(bb, offset);
-        offset += 4;
-
-        // const lengthView = new Float32Array(buffer, offset, 1);
-        // lengthView.set([glyph.length]);
-        console.log(vertices.length / 2, glyph.length);
-
-        console.log(vertices.byteLength)
-
-        // const verticesView = new Float32Array(buffer, offset);
-        // verticesView.set(vertices);
-
+        console.log('Offset', offset, vertices.length);
         buffer.set(vertices, offset);
-        offset += vertices.length;
-        console.log('last offset glyph', offset);
-        // offset += 
       }
       return buffer;
-
     }
 
   private getBoundingBox(vertices: Float32Array): vec4 {
@@ -168,5 +167,23 @@ export class TextBlock {
     mat4.scale(model, model, [0.5, 0.5, 0.5]);
     mat4.translate(model, model, [shift, 0, 0])
     return model;
+  }
+
+  updateText(text: string) {
+    this._text = text;
+    this._glyphs = this.createGlyphs();
+    this._verticesBuffer = this.createVerticesBuffer();
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
+
+  async updateFont(font: string) {
+    await this.fontParser.changeFont(font);
+    this._glyphs = this.createGlyphs();
+    this._verticesBuffer = this.createVerticesBuffer();
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
+
+  resetText() {
+    this.fontParser.reset();
   }
 }

@@ -113,8 +113,12 @@ export interface Glyph {
     model: mat4;
     bb: vec4;
     length: number;
-    size: number;
-    offset: number;
+    // size: number;
+    transformsSize: number;
+    verticesSize: number;
+    // offset: number;
+    verticesOffset: number;
+    transformsOffset: number;
 }
 
 

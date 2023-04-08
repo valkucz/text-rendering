@@ -6,4 +6,5 @@
 export interface RendererBuffers {
     uniform: GPUBuffer;
     glyph: GPUBuffer;
+    transforms: GPUBuffer;
 }

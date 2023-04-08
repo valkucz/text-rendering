@@ -3,6 +3,7 @@ import { App } from "../app";
 import { Glyph } from "../scene/objects/glyph";
 import { SceneObject } from "../scene/objects/sceneObject";
 import { Controller } from "./controller";
+import { Camera } from "../scene/camera";
 
 export class SceneController implements Controller {
   // TODO: remove duplicity
@@ -27,11 +28,10 @@ export class SceneController implements Controller {
   moveZvalue: number;
 
   scaleValue: number;
+;
+  camera: Camera;
 
-  object: SceneObject;
-
-  // TODO: remove id, it's only for glyph now?
-  constructor(id: string, object: Glyph) {
+  constructor(id: string, camera: Camera) {
     this.rotateX = document.getElementById(
       id + "-rotate-x"
     ) as HTMLInputElement;
@@ -61,42 +61,42 @@ export class SceneController implements Controller {
 
     this.scaleValue = parseInt(this.scale.value);
 
-    this.object = object;
+    this.camera = camera;
   }
   addEventListener(app: App): void {
     // TODO: remove duplicity
     this.rotateX.addEventListener("input", () => {
-      this.object.rotateX(parseInt(this.rotateX.value) - this.rotateXvalue);
+      this.camera.rotateX(parseInt(this.rotateX.value) - this.rotateXvalue);
       this.rotateXvalue = parseInt(this.rotateX.value);
       app.notify();
     });
     this.rotateY.addEventListener("input", () => {
-      this.object.rotateY(parseInt(this.rotateY.value) - this.rotateYvalue);
+      this.camera.rotateY(parseInt(this.rotateY.value) - this.rotateYvalue);
       this.rotateYvalue = parseInt(this.rotateY.value);
       app.notify();
     });
     this.rotateZ.addEventListener("input", () => {
-      this.object.rotateZ(parseInt(this.rotateZ.value) - this.rotateZvalue);
+      this.camera.rotateZ(parseInt(this.rotateZ.value) - this.rotateZvalue);
       this.rotateZvalue = parseInt(this.rotateZ.value);
       app.notify();
     });
 
     this.moveX.addEventListener("input", () => {
-      this.object.move(
+      this.camera.move(
         vec3.fromValues(parseInt(this.moveX.value) - this.moveXvalue, 0, 0)
       );
       this.moveXvalue = parseInt(this.moveX.value);
       app.notify();
     });
     this.moveY.addEventListener("input", () => {
-      this.object.move(
+      this.camera.move(
         vec3.fromValues(0, parseInt(this.moveY.value) - this.moveYvalue, 0)
       );
       this.moveYvalue = parseInt(this.moveY.value);
       app.notify();
     });
     this.moveZ.addEventListener("input", () => {
-      this.object.move(
+      this.camera.move(
         vec3.fromValues(0, 0, parseInt(this.moveZ.value) - this.moveZvalue)
       );
       this.moveZvalue = parseInt(this.moveZ.value);
@@ -105,14 +105,14 @@ export class SceneController implements Controller {
 
     this.scale.addEventListener("input", () => {
       console.log('scaling');
-      this.object.scale(parseInt(this.scale.value) - this.scaleValue);
+      this.camera.scale(parseInt(this.scale.value) - this.scaleValue);
       this.scaleValue = parseInt(this.scale.value);
       app.notify();
     });
 
     this.resetBtn.addEventListener("click", () => {
       this.reset();
-      this.object.reset();
+      this.camera.reset();
       app.notify();
     });
   }

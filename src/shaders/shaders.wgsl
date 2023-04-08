@@ -5,39 +5,30 @@ struct Uniforms {
 
 };
 
-// TODO: rename
-struct SceneObject {
-    glyph: array<vec2<f32>>,
-}
-
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
 }
-// TODO:
-// struct color bg, text
+
 struct Color {
     glyph: vec4<f32>,
     background: vec4<f32>,
 }
 
-
-struct TextInfo  {
-    bbox: vec4<f32>,
-    canvas_bbox: vec4<f32>,
-    glyph_length: f32,
+struct Glyph {
+    points: array<vec2<f32>>,
 }
 
-struct Glyph {
+struct GlyphTransform {
     length: f32,
     model: mat4x4<f32>,
     bbox: vec4<f32>,
-    points: array<vec2<f32>>,
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
 @binding(1) @group(0) var<storage, read_write> color: Color;
 @binding(0) @group(1) var<storage, read_write> glyph: Glyph;
+@binding(1) @group(1) var<uniform> glyph_transform: GlyphTransform;
 // @binding(3) @group(0) var<uniform> text_info: TextInfo;
 
 // TODO: split vertex and fragment into separate files
@@ -58,7 +49,7 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
     var output: vec4<f32>;
 
      return VertexOutput(
-        vec4<f32>(rectangle[VertexIndex].xyz, 1.0),
+        uniforms.projection * uniforms.view * glyph_transform.model * vec4<f32>(rectangle[VertexIndex].xyz, 1.0),
         squareUV[VertexIndex],
     );
 };
@@ -86,13 +77,13 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    var x = glyph.bbox.x + (glyph.bbox.z - glyph.bbox.x) * input.uv.x;
-    var y = glyph.bbox.y + (glyph.bbox.w  - glyph.bbox.y) * input.uv.y;
+    var x = glyph_transform.bbox.x + (glyph_transform.bbox.z - glyph_transform.bbox.x) * input.uv.x;
+    var y = glyph_transform.bbox.y + (glyph_transform.bbox.w  - glyph_transform.bbox.y) * input.uv.y;
 
     var mindist = 1000000.0;
     var side = 1.0;
     var flag = 0;
-    for (var i: u32 = 0; i < u32(glyph.length); i += 3) {
+    for (var i: u32 = 0; i < u32(glyph_transform.length); i += 3) {
         var sdist = sdf(glyph.points[i], glyph.points[i + 1], glyph.points[i + 2], vec2<f32>(x, y));
         // var sdist = sdBezier(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
         var udist = abs(sdist.x);
@@ -167,7 +158,7 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
 
 fn is_inside_glyph(pos: vec2<i32>) -> bool {
     var windingNumber: i32 = 0;
-    for (var i: u32 = 0; i < u32(glyph.length) - 2; i += 3) {
+    for (var i: u32 = 0; i < u32(glyph_transform.length) - 2; i += 3) {
         windingNumber += winding_number_calculation(vec2<i32>(glyph.points[i]), vec2<i32>(glyph.points[i + 1]), vec2<i32>(glyph.points[i + 2]), pos);
     }
     return windingNumber != 0;
