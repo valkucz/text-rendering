@@ -20,15 +20,18 @@ export class App {
   fontParser: FontParser;
   renderer: Renderer;
   controllers: Controller[];
+  camera: Camera;
 
   constructor(
     renderer: Renderer,
     fontParser: FontParser,
-    controllers: Controller[]
+    controllers: Controller[],
+    camera: Camera
   ) {
     this.renderer = renderer;
     this.fontParser = fontParser;
     this.controllers = controllers;
+    this.camera = camera;
   }
   // TODO: upravit OOP
   static async initialize(canvas: HTMLCanvasElement): Promise<App> {
@@ -60,15 +63,15 @@ export class App {
   
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
     // const glyph = new Glyph(device, fontParser, 'Oo');
-    const textBlock = new TextBlock(device, 'oa', fontParser);
+    const textBlock = new TextBlock(device, 'ab', fontParser);
 
     // Create controllers
-    // const textController = new TextController(glyph);
+    const textController = new TextController(textBlock);
     const controllers = [
-      // new SceneController("glyph", glyph),
-      // textController,
+      new SceneController("glyph", camera),
+      textController,
       new MenuController(),
-      // new AppController(textController)
+      new AppController(textController)
     ];
 
     // Create renderer
@@ -82,12 +85,13 @@ export class App {
     );
 
 
-    return new App(renderer, fontParser, controllers);
+    return new App(renderer, fontParser, controllers, camera);
   }
 
   notify() {
     console.log("notified");
     this.renderer.color = colors['ternary'];
+    this.renderer.view = this.camera.view;
     const perFrameData = this.renderer.prepare();
     this.renderer.render(perFrameData);
   }
