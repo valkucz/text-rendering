@@ -118,10 +118,12 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
     let uvint = vec2(x, y);
 
-    if (is_inside_glyph(vec2<i32>(uvint))){
-        return color.glyph;
+    if (!is_inside_glyph(vec2<i32>(uvint))){
+        discard;
     }
-    return color.background;
+
+    return color.glyph;
+    // return vec4(0, 0, 0, 0);
 }
 
 
