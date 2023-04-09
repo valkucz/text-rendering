@@ -34,7 +34,7 @@ export class Camera {
     // TODO: remove global conversion factor, only as constructor parameter
     mat4.perspective(
       this.projection,
-      Math.PI / 4,
+      Math.PI / 2,
       conversionFactor[0] / conversionFactor[1],
       0.1,
       10
@@ -86,7 +86,7 @@ export class Camera {
     vec3.normalize(this.up, this.up);
 
     // because it was in different direction idk why
-    vec3.negate(this.up, this.up);
+    // vec3.negate(this.up, this.up);
 
     vec3.add(this.center, this.eye, this.front);
 
@@ -122,16 +122,16 @@ export class Camera {
     mat4.scale(this.view, this.view, vec);
   }
 
-  setModel() {
-    // for default setting, use fromXRotation?
-    // https://glmatrix.net/docs/module-mat4.html
-    mat4.rotateY(this.view, this.view, Math.PI / 2);
-    // mat4.rotateZ(this.model, this.model, -Math.PI);
-    mat4.scale(this.view, this.view, [0.5, 0.5, 0.5]);
-  }
+  // setModel() {
+  //   // for default setting, use fromXRotation?
+  //   // https://glmatrix.net/docs/module-mat4.html
+  //   mat4.rotateY(this.view, this.view, Math.PI / 2);
+  //   // mat4.rotateZ(this.model, this.model, -Math.PI);
+  //   mat4.scale(this.view, this.view, [0.5, 0.5, 0.5]);
+  // }
 
   // TOO: rename
   reset() {
-    this.view = mat4.create();
+    // this.view = mat4.create();
     this.updateView();  }
 }

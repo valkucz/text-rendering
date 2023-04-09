@@ -1,8 +1,7 @@
-import { vec2 } from "gl-matrix";
+import { vec2, vec4 } from "gl-matrix";
 import { cubicToQuadratic } from "../approximation";
-import { Typr } from "../Typr";
-import Font from "./font";
 import { vec2ToFloat32 } from "../math";
+import opentype, { Font, PathCommand } from 'opentype.js'
 
 export class FontParser {
   initFont: Font;
@@ -23,38 +22,29 @@ export class FontParser {
   }
 
   static async loadFont(url: string): Promise<Font> {
-    // TODO: catch error?
-    const response: Response = await fetch(url);
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
-    const tables = Typr.parse(arrayBuffer);
-
-    return tables[0];
+    const opentypeFont = await opentype.load(url);
+    return opentypeFont;
   }
 
-  getBb(): number[] {
-    return [
-      this.font.head.xMin * 16, this.font.head.yMin * 16, 
-      this.font.head.xMax * 16, this.font.head.yMax * 16];
-  }
 
   async changeFont(url: string): Promise<void> {
     console.log(url);
     this.font = await FontParser.loadFont(url);
   }
 
-  parseText(text: string): Float32Array {
-    const shape = Typr.U.shape(this.font, text, true);
-    const path = Typr.U.shapeToPath(this.font, shape);
-    console.log(path.cmds, path.crds);
+  parseText(text: string) {
+    const path = this.font.getPath(text, 0, 0, 5000, { kerning: true });
+    const path2 = this.font.getPath('Ap', 0, 0, 5000, { kerning: false });
+    const advWidth = this.font.getAdvanceWidth('Ap', 5000);
+    console.log('ADVANCE WIDTH', advWidth);
+    console.log('Shape kerning', path);
+    console.log('SHAPE NO KERNING', path2);
+    const bb = path.getBoundingBox();
+    console.log('BB', bb);
 
+    
     // return this.debugPoints();
-    return this.parseShapeToGlyph(path.cmds, path.crds);
-  }
-
-
-  getPosition(pos: number, crds: number[]): vec2 {
-    return vec2.fromValues(crds[pos] * 16, crds[pos + 1] * 16);
+    return { bb, vertices: this.parseShapeToGlyph(path.commands) };
   }
 
   getMiddle(point1: vec2, point2: vec2): vec2 {
@@ -63,34 +53,6 @@ export class FontParser {
     vec2.add(res, point1, point2);
     vec2.scale(res, res, 0.5);
     return res;
-  }
-
-  // To create Float32Array directly, we need to know length beforehand
-  // FIXME: no need, new Float32Array(points[]) is fine
-  calculateLength(cmd: string[]): number {
-    let length = 0;
-    cmd.forEach((c) => {
-      switch (c) {
-        case "M":
-          break;
-        case "L":
-          length += 6;
-          break;
-        case "C":
-          length += 12;
-          break;
-        case "Q":
-          length += 6;
-          break;
-        case "Z":
-          length += 6;
-          break;
-        default:
-          break;
-      }
-    });
-    console.log("Length:", length);
-    return length;
   }
 
   pushToArray(arr: Float32Array, index: number, points: vec2[]): void {
@@ -105,71 +67,49 @@ export class FontParser {
     return (a + b) / 2;
   }
 
-  parseShapeToGlyph(cmds: string[], crds: number[]): Float32Array {
+  parseShapeToGlyph(cmds: PathCommand[]): Float32Array {
     let vertices: vec2[] = [];
-    let pos = 0;
     let last = vec2.create();
-    let first = this.getPosition(pos, crds);
-    cmds.forEach((cmd, i) => {
-      switch (cmd) {
-        case "M":
-          first = this.getPosition(pos, crds);
-          last = vec2.clone(first);
+    let first = vec2.create();
 
-          pos += 2;
+    cmds.forEach((cmd) => {
+      switch (cmd.type) {
+        case "M":
+          first = vec2.fromValues(cmd.x, cmd.y);
+          last = vec2.clone(first);
           break;
         case "L":
-          let pt2 = this.getPosition(pos, crds);
-          vertices = vertices.concat([
-           last,
-           this.getMiddle(last, pt2),
-           pt2]);
-          last = vec2.clone(pt2);
-          pos += 2;
+          let curr = vec2.fromValues(cmd.x, cmd.y);
+          vertices.push(last);
+          vertices.push(this.getMiddle(last, curr));
+          vertices.push(curr);
+          last = vec2.clone(curr);
           break;
         case "C":
-          let points = [last];
-          for (let i = pos; i < pos + 6; i += 2) {
-            points.push(this.getPosition(i, crds));
-          }
+          let points = [last, vec2.fromValues(cmd.x1, cmd.y1), vec2.fromValues(cmd.x2, cmd.y2), vec2.fromValues(cmd.x, cmd.y)];
           cubicToQuadratic(points).forEach((qpoints) => {
             vertices = vertices.concat(qpoints);
           });
           last = vec2.clone(vertices[vertices.length - 1]);
-          pos += 6;
           break;
         case "Q":
-          vertices = vertices.concat([
-            last,
-            this.getPosition(pos, crds),
-            this.getPosition(pos + 2, crds)]);
-            last = vec2.clone(this.getPosition(pos + 2, crds));
-            pos += 4;
+          vertices.push(last);
+          vertices.push(vec2.fromValues(cmd.x, cmd.y));
+          vertices.push(vec2.fromValues(cmd.x1, cmd.y1));
+          last = vec2.clone(vec2.fromValues(cmd.x1, cmd.y1));
           break;
         case "Z":
-          vertices = vertices.concat([
-            last,
-            this.getMiddle(last, first),
-            first]);
-          // if (i === cmds.length - 1) {
-
-          // }
-          // vertices = vertices.concat([
-          //   last,
-          //   this.getMiddle(last, curr),
-          //   first]);
-            // last = vec2.clone(first);
-            // pos += 2;
+          vertices.push(last);
+          vertices.push(this.getMiddle(last, first));
+          vertices.push(first);
+          // last = vec2.clone(first);
           break;
         default:
           break;
       }
     });
-    // const flatten = vertices.flat();
     return vec2ToFloat32(vertices);
-    // return new Float32Array(vertices.flat());
   }
-
 
   reversePoints(points: number[]): number[] {
     const reversed = [];
@@ -182,8 +122,6 @@ export class FontParser {
   }
 
   debugPoints() : Float32Array {
-    const bb = this.getBb();
-    console.log(bb);
     const straightLine = new Float32Array([100, 0, 550, 900, 5000, 1000]);
     const line = new Float32Array([248, -1600, 944, -1600, 3584, 5936]);
     const line2 = new Float32Array([6224, 13472, 6224, 13472, 5528, 13472])

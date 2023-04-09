@@ -18,6 +18,8 @@ export class TextBlock {
   private _verticesBuffer: Float32Array;
   private _transformsBuffer: Float32Array;
 
+  bb: vec4;
+
   constructor(
     device: GPUDevice,
     text: string,
@@ -37,6 +39,8 @@ export class TextBlock {
     this._glyphs = this.createGlyphs();
     this._verticesBuffer = this.createVerticesBuffer();
     this._transformsBuffer = this.createTransformsBuffer();
+
+    this.bb = vec4.create();
   }
 
   public get verticesBuffer() {
@@ -80,15 +84,16 @@ export class TextBlock {
     const glyphs = [];
     let transformsOffset = 0;
     let verticesOffset = 0;
+    const bbs = [];
+    // const { bb } = this.fontParser.parseText(this._text);
     for (let i = 0; i < this._text.length; i++) {
-      let vertices = this.fontParser.parseText(this._text[i]);
+      const { bb, vertices }= this.fontParser.parseText(this._text[i]);
       let transformsSize = Math.ceil(21 / alignment) * alignment;
       let verticesSize = Math.ceil(vertices.length / alignment) * alignment;
-  
+      bbs.push(bb);
       glyphs.push({
         vertices: vertices,
         model: this.setModel(i),
-        bb: this.getBoundingBox(vertices),
         length: vertices.length / 2,
         transformsSize: transformsSize,
         verticesSize: verticesSize,
@@ -96,16 +101,43 @@ export class TextBlock {
         verticesOffset: verticesOffset
       });
 
+      this.bb = this.maximBb(bbs);
+
       console.log('Glyph iteration', i, 'vertices', vertices.length, 'transforms', transformsSize, 'vertices', verticesSize, 'offset', transformsOffset, verticesOffset)
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
     }
-    
     // offset = Math.ceil(offset / alignment) * alignment;156*4
     this._verticesSize = verticesOffset;
+    // let allvertices = new Float32Array(this._verticesSize);
+    // let offset = 0;
+    // for (let i = 1; i < this._text.length; i++) {
+    //   let vertices = this.fontParser.parseText(this._text[i]);
+    //   allvertices.set(vertices, offset);
+    //   offset += vertices.length;
+    // }
+    // let bb = this.getBoundingBox(allvertices);
+
+    // glyphs.map((glyph) => {
+    //   glyph.bb = bb;
+    // })
     this._transformsSize = transformsOffset;
     console.log('Vertices, transform size', this._verticesSize, this._transformsSize);
     return glyphs;
+  }
+
+  maximBb(bbs): vec4 {
+
+    const min = vec2.fromValues(Infinity, Infinity);
+    const max = vec2.fromValues(-Infinity, -Infinity);
+
+    bbs.forEach((bb) => {
+      const minX = vec2.fromValues(bb.x1, bb.y1);
+      const maxX = vec2.fromValues(bb.x2, bb.y2);
+      vec2.min(min, min, minX);
+      vec2.max(max, max, maxX);
+    })
+    return vec4.fromValues(min[0], min[1], max[0], max[1]);
   }
 
   createTransformsBuffer() {
@@ -115,7 +147,6 @@ export class TextBlock {
       const glyph = this._glyphs[i];
       offset = glyph.transformsOffset;
       const model = glyph.model;
-      const bb = glyph.bb;
 
       buffer.set([glyph.length], offset);
       offset += 4;
@@ -123,8 +154,6 @@ export class TextBlock {
       buffer.set(model, offset);
       offset += 16;
 
-      buffer.set(bb, offset);
-      offset += 4;
     }
     return buffer;
   }
@@ -159,12 +188,7 @@ export class TextBlock {
 
   private setModel(shift: number): mat4 {
     const model = mat4.create();
-    // for default setting, use fromXRotation?
-    // https://glmatrix.net/docs/module-mat4.html
-    mat4.rotateY(model, model, Math.PI / 2);
-    // mat4.rotateZ(this.model, this.model, -Math.PI);
-    // TODO: customize translation
-    mat4.scale(model, model, [0.5, 0.5, 0.5]);
+    mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [shift, 0, 0])
     return model;
   }

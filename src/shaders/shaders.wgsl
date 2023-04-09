@@ -2,6 +2,7 @@
 struct Uniforms {
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
+    bbox: vec4<f32>,
 
 };
 
@@ -77,8 +78,8 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    var x = glyph_transform.bbox.x + (glyph_transform.bbox.z - glyph_transform.bbox.x) * input.uv.x;
-    var y = glyph_transform.bbox.y + (glyph_transform.bbox.w  - glyph_transform.bbox.y) * input.uv.y;
+    var x = uniforms.bbox.x + (uniforms.bbox.z - uniforms.bbox.x) * input.uv.x;
+    var y = uniforms.bbox.y + (uniforms.bbox.w  - uniforms.bbox.y) * input.uv.y;
 
     var mindist = 1000000.0;
     var side = 1.0;

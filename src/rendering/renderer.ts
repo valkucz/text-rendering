@@ -104,7 +104,7 @@ export class Renderer {
   createBuffers(): RendererBuffers {
     const uniformBuffer = this.device.createBuffer({
       // + 16 = 4 * 4;
-      size: MAT4LENGTH * 2,
+      size: MAT4LENGTH * 2 + 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const glyphBuffer = this.device.createBuffer({
@@ -284,6 +284,12 @@ export class Renderer {
       <ArrayBuffer>this.view
     );
 
+    this.device.queue.writeBuffer(
+      this.buffers.uniform,
+      128,
+      <ArrayBuffer>this.textBlock.bb
+    )
+    console.log('bb', this.textBlock.bb);
     // Color
     this.device.queue.writeBuffer(
       this.textBlock.colorBuffer.buffer,
@@ -352,7 +358,7 @@ export class Renderer {
     const { uniformBindGroup, glyphBindGroups, commandEncoder, renderPass } = perFrameData;
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, uniformBindGroup);
-    glyphBindGroups.forEach((bindGroup, i) => {
+    glyphBindGroups.forEach((bindGroup) => {
       renderPass.setBindGroup(1, bindGroup);
       renderPass.draw(6, 1, 0, 0);
     });
