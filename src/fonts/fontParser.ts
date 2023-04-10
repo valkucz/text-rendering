@@ -44,7 +44,7 @@ export class FontParser {
 
     
     // return this.debugPoints();
-    return { bb, vertices: this.parseShapeToGlyph(path.commands) };
+    return { bb, vertices: this.parseShapeToGlyphSdf(path.commands) };
   }
 
   getMiddle(point1: vec2, point2: vec2): vec2 {
@@ -110,6 +110,55 @@ export class FontParser {
     });
     return vec2ToFloat32(vertices);
   }
+
+
+  parseShapeToGlyphSdf(cmds: PathCommand[]): Float32Array {
+    let vertices: vec2[] = [];
+    let last = vec2.create();
+    let first = vec2.create();
+
+    cmds.forEach((cmd) => {
+      switch (cmd.type) {
+        case "M":
+          first = vec2.fromValues(cmd.x, cmd.y);
+          last = vec2.clone(first);
+          break;
+        case "L":
+          let curr = vec2.fromValues(cmd.x, cmd.y);
+          vertices.push(vec2.fromValues(-1, -1));
+          vertices.push(last);
+          vertices.push(this.getMiddle(last, curr));
+          vertices.push(curr);
+          last = vec2.clone(curr);
+          break;
+        case "C":
+          let points = [last, vec2.fromValues(cmd.x1, cmd.y1), vec2.fromValues(cmd.x2, cmd.y2), vec2.fromValues(cmd.x, cmd.y)];
+          cubicToQuadratic(points).forEach((qpoints) => {
+            vertices = vertices.concat([vec2.fromValues(1, 1)].concat(qpoints));
+          });
+          last = vec2.clone(vertices[vertices.length - 1]);
+          break;
+        case "Q":
+          vertices.push(vec2.fromValues(1, 1));
+          vertices.push(last);
+          vertices.push(vec2.fromValues(cmd.x1, cmd.y1));
+          vertices.push(vec2.fromValues(cmd.x, cmd.y));
+          last = vec2.fromValues(cmd.x, cmd.y);
+          break;
+        case "Z":
+          vertices.push(vec2.fromValues(-1, -1));
+          vertices.push(last);
+          vertices.push(this.getMiddle(last, first));
+          vertices.push(first);
+          last = vec2.clone(first);
+          break;
+        default:
+          break;
+      }
+    });
+    return vec2ToFloat32(vertices);
+  }
+
 
   reversePoints(points: number[]): number[] {
     const reversed = [];

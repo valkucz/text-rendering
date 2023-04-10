@@ -1,4 +1,3 @@
-// FIXME: premenovat
 struct Uniforms {
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
@@ -25,6 +24,7 @@ struct GlyphTransform {
     model: mat4x4<f32>,
     bbox: vec4<f32>,
 }
+
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
 @binding(1) @group(0) var<storage, read_write> color: Color;
@@ -80,42 +80,58 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     var x = uniforms.bbox.x + (uniforms.bbox.z - uniforms.bbox.x) * input.uv.x;
     var y = uniforms.bbox.y + (uniforms.bbox.w  - uniforms.bbox.y) * input.uv.y;
+    return fill_sdf(vec2<f32>(x, y));
+}
 
+fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
     var mindist = 1000000.0;
     var side = 1.0;
     var flag = 0;
-    for (var i: u32 = 0; i < u32(glyph_transform.length); i += 3) {
-        var sdist = sdf(glyph.points[i], glyph.points[i + 1], glyph.points[i + 2], vec2<f32>(x, y));
-        // var sdist = sdBezier(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
-        var udist = abs(sdist.x);
-        // var sgn = sign_bezier(object.glyph[i], object.glyph[i + 1], object.glyph[i + 2], vec2<f32>(x, y));
+    for (var i: u32 = 0; i < u32(glyph_transform.length); i += 4) {
+        if (glyph.points[i].x < 0.0) {
+            // Line
+            var sdist = sdfLine(glyph.points[i + 1], glyph.points[i + 3], pos);
+            var udist = abs(sdist);
+            var sgn = signSdfLine(glyph.points[i + 1], glyph.points[i + 3], pos);
+            if (udist < mindist) {
+                mindist = udist;
+                if (sgn < 0.0) {
+                    side = -1.0;
+                }
+                else {
+                    side = 1.0;
+                }
+            }
+        }
+        else {
+            // Curve
+            var sdist = sdfBezier(glyph.points[i + 1], glyph.points[i + 2], glyph.points[i + 3], pos);
+            var udist = abs(sdist.x);
 
-        if (udist < mindist) {
-            mindist = udist;
-            if (sdist.y > 0.0) {
-                side = -1.0;
-            }
-            else {
-                side = 1.0;
-            }
-        };
+            if (udist < mindist) {
+                mindist = udist;
+                if (sdist.y > 0.0) {
+                    side = -1.0;
+                }
+                else {
+                    side = 1.0;
+                }
+            };
+        }
+
     }
-    // if (side > 0.0) {
-    //     return vec4(mindist / 1000, 0.0, 0.0, 1.0);
-    // }
-    // else {
-    //     return color.background;
-    // }
-
-
-    let uvint = vec2(x, y);
-
-    if (!is_inside_glyph(vec2<i32>(uvint))){
+    if ((side > 0.0)) {
         discard;
     }
+    return vec4(mindist / 1000, 0.0, 0.0, 1.0);
 
+}
+
+fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
+    if (!is_inside_glyph(vec2<i32>(pos))){
+        discard;
+    }
     return color.glyph;
-    // return vec4(0, 0, 0, 0);
 }
 
 
@@ -224,7 +240,7 @@ fn sdBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, p: vec2<f32>) -> f32
 }
 
 
-fn sdf(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec2<f32> {
+fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec2<f32> {
     var a = p2 - p1;
     var b = p1 - 2.0 * p2 + p3;
     var c = a * 2.0;
@@ -286,4 +302,18 @@ fn sdf(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec2<f32>
         }
     }
     return vec2(sqrt(res), sign(sgn));
+}
+
+fn sdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> f32 {
+    var pa = pos - a;
+    var ba = b - a;
+    var h = saturate(dot(pa, ba) / dot(ba, ba));
+    return length(pa - ba * h);
+}
+
+fn signSdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> f32 {
+    var pa = pos - a;
+    var ba = b - a;
+    var h = saturate(dot(pa, ba) / dot(ba, ba));
+    return sign(cross_scalar(ba, pa));
 }

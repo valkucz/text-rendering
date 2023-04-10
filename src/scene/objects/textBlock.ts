@@ -107,20 +107,7 @@ export class TextBlock {
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
     }
-    // offset = Math.ceil(offset / alignment) * alignment;156*4
     this._verticesSize = verticesOffset;
-    // let allvertices = new Float32Array(this._verticesSize);
-    // let offset = 0;
-    // for (let i = 1; i < this._text.length; i++) {
-    //   let vertices = this.fontParser.parseText(this._text[i]);
-    //   allvertices.set(vertices, offset);
-    //   offset += vertices.length;
-    // }
-    // let bb = this.getBoundingBox(allvertices);
-
-    // glyphs.map((glyph) => {
-    //   glyph.bb = bb;
-    // })
     this._transformsSize = transformsOffset;
     console.log('Vertices, transform size', this._verticesSize, this._transformsSize);
     return glyphs;
