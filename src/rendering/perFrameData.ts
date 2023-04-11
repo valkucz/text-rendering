@@ -7,12 +7,11 @@
  *
  */
 export interface PerFrameData {
-
   uniformBindGroup: GPUBindGroup;
-  
   glyphBindGroups: GPUBindGroup[];
-
   commandEncoder: GPUCommandEncoder;
-
   renderPass: GPURenderPassEncoder;
+  // Timestamps:
+  querySet: GPUQuerySet;
+  queryBuffer: GPUBuffer;
 }

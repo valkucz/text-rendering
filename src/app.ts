@@ -49,21 +49,25 @@ export class App {
     }
 
     // Create device
-    const device: GPUDevice = <GPUDevice>await adapter.requestDevice();
+    const device: GPUDevice = <GPUDevice>await adapter.requestDevice({
+      // For timestamp
+      // start chrome --disable-dawn-features=disallow_unsafe_apis
+      requiredFeatures: ["timestamp-query"],
+    });
 
     // Create font parser
     const fontParser: FontParser = await FontParser.initialize(defaultUrl);
-
 
     // Create camera
     // camera bf initialization error - await.
     const camera: Camera = new Camera();
 
     // Create object
-  
+
     // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
     // const glyph = new Glyph(device, fontParser, 'Oo');
-    const textBlock = new TextBlock(device, 'A', fontParser);
+    // const txt = ['A']
+    const textBlock = new TextBlock(device, "A", fontParser);
 
     // Create controllers
     const textController = new TextController(textBlock);
@@ -71,7 +75,7 @@ export class App {
       new SceneController("glyph", camera),
       textController,
       new MenuController(),
-      new AppController(textController)
+      new AppController(textController),
     ];
 
     // Create renderer
@@ -81,9 +85,8 @@ export class App {
       textBlock,
       camera.projection,
       camera.view,
-      colors['ternary'],
+      colors["ternary"]
     );
-
 
     return new App(renderer, fontParser, controllers, camera);
   }

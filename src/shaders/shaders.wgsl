@@ -47,8 +47,6 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
     );
 
 
-    var output: vec4<f32>;
-
      return VertexOutput(
         uniforms.projection * uniforms.view * glyph_transform.model * vec4<f32>(rectangle[VertexIndex].xyz, 1.0),
         squareUV[VertexIndex],
@@ -57,14 +55,6 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
 
 
 fn get_rectangle() -> array<vec3<f32>, 6> {
-    // var min_x = text_info.bbox.x;
-    // var max_x = text_info.bbox.z;
-
-    // var canvas_wdith = text_info.canvas_bbox.z - text_info.canvas_bbox.x;
-    // var canvas_min_x = text_info.canvas_bbox.x;
-
-    // var norm_min_x = ((2 * (min_x - canvas_min_x)) / canvas_wdith) - 1.0;
-    // var norm_max_x = ((2 * (max_x - canvas_min_x)) / canvas_wdith) - 1.0;
     return array<vec3<f32>, 6>(
         vec3(-0.5, -0.5, 0.0),
         vec3(-0.5, 0.5, 0.0),
@@ -78,8 +68,13 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // var glyphSize = vec2(10.0, 20.0);
+    // var textCoord = vec2()
+
     var x = uniforms.bbox.x + (uniforms.bbox.z - uniforms.bbox.x) * input.uv.x;
     var y = uniforms.bbox.y + (uniforms.bbox.w  - uniforms.bbox.y) * input.uv.y;
+
+
     return fill_sdf(vec2<f32>(x, y));
 }
 
@@ -95,7 +90,7 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
             var sgn = signSdfLine(glyph.points[i + 1], glyph.points[i + 3], pos);
             if (udist < mindist) {
                 mindist = udist;
-                if (sgn < 0.0) {
+                if (sgn <= 0.0) {
                     side = -1.0;
                 }
                 else {
@@ -314,6 +309,17 @@ fn sdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> f32 {
 fn signSdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> f32 {
     var pa = pos - a;
     var ba = b - a;
-    var h = saturate(dot(pa, ba) / dot(ba, ba));
-    return sign(cross_scalar(ba, pa));
+    var h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0);
+
+
+    var d = cross(vec3(ba, 0.0), vec3(pa, 0.0));
+    return sign(d).z;
+
+    // return 
+    // var d = cross_scalar(ba, pa);
+    // var eps = 80000.0;
+    // if (abs(d) < eps) {
+    //     return 0.0;
+    // }
+    // return sign(d);
 }

@@ -80,6 +80,7 @@ export class TextBlock {
     return new VertexBuffer(device, vertices);
   }
   private createGlyphs(): Glyph[] {
+    console.log(this._text);
     const alignment = this.device.limits.minStorageBufferOffsetAlignment;
     const glyphs = [];
     let transformsOffset = 0;
@@ -94,6 +95,7 @@ export class TextBlock {
       glyphs.push({
         vertices: vertices,
         model: this.setModel(i),
+        bb: vec4.fromValues(bb.x1, bb.y1, bb.x2, bb.y2),
         length: vertices.length / 2,
         transformsSize: transformsSize,
         verticesSize: verticesSize,
@@ -110,6 +112,7 @@ export class TextBlock {
     this._verticesSize = verticesOffset;
     this._transformsSize = transformsOffset;
     console.log('Vertices, transform size', this._verticesSize, this._transformsSize);
+
     return glyphs;
   }
 
@@ -127,6 +130,20 @@ export class TextBlock {
     return vec4.fromValues(min[0], min[1], max[0], max[1]);
   }
 
+
+  computeGlyphSize(glyph: Glyph, advWidth: number): vec2 {
+    const glyphSize = 5000;
+    const glyphWidth = advWidth * glyphSize;
+    const glyphHeight = glyphSize;
+
+    // return vec4.fromValues();
+    // const { width, height } = glyph;
+    // const scale = advWidth / width;
+    // return vec2.fromValues(width * scale, height * scale);
+  }
+
+
+
   createTransformsBuffer() {
     const buffer = new Float32Array(this._transformsSize);
     let offset = 0;
@@ -140,6 +157,8 @@ export class TextBlock {
 
       buffer.set(model, offset);
       offset += 16;
+
+      buffer.set(glyph.bb, offset);
 
     }
     return buffer;

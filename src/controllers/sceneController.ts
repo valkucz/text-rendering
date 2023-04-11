@@ -122,9 +122,9 @@ export class SceneController implements Controller {
     this.rotateY.value = "180";
     this.rotateZ.value = "180";
 
-    this.moveX.value = "10";
-    this.moveY.value = "10";
-    this.moveZ.value = "10";
+    this.moveX.value = "250";
+    this.moveY.value = "250";
+    this.moveZ.value = "250";
 
     this.scale.value = "250";
   }

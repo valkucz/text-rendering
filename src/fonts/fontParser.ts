@@ -34,17 +34,13 @@ export class FontParser {
 
   parseText(text: string) {
     const path = this.font.getPath(text, 0, 0, 5000, { kerning: true });
-    const path2 = this.font.getPath('Ap', 0, 0, 5000, { kerning: false });
-    const advWidth = this.font.getAdvanceWidth('Ap', 5000);
+    const advWidth = this.font.getAdvanceWidth(text, 5000);
     console.log('ADVANCE WIDTH', advWidth);
-    console.log('Shape kerning', path);
-    console.log('SHAPE NO KERNING', path2);
+    console.log('Path', path);
     const bb = path.getBoundingBox();
     console.log('BB', bb);
 
-    
-    // return this.debugPoints();
-    return { bb, vertices: this.parseShapeToGlyphSdf(path.commands) };
+    return { bb, advWidth, vertices: this.parseShapeToGlyphSdf(path.commands) };
   }
 
   getMiddle(point1: vec2, point2: vec2): vec2 {
@@ -157,34 +153,5 @@ export class FontParser {
       }
     });
     return vec2ToFloat32(vertices);
-  }
-
-
-  reversePoints(points: number[]): number[] {
-    const reversed = [];
-
-    for (let i = points.length - 2; i >= 0; i -= 2) {
-      reversed.push(points[i], points[i + 1]);
-    }
-    console.log('Reversed:', reversed);
-    return reversed;
-  }
-
-  debugPoints() : Float32Array {
-    const straightLine = new Float32Array([100, 0, 550, 900, 5000, 1000]);
-    const line = new Float32Array([248, -1600, 944, -1600, 3584, 5936]);
-    const line2 = new Float32Array([6224, 13472, 6224, 13472, 5528, 13472])
-
-
-    const line3 = [-448, -1600, 248, -1600, 944, -1600];
-    // const line4 = [944, -1600, 3584, 5936, 6224, 13472];
-    const line4 = [944, -1600, 3584, 5936, 6224, 13472];
-    const line5 = [6224, 13472, 5528, 13472, 4832, 13472];
-    const line6 = [4832, 13472, 2192, 5936, -448, -1600];
-
-
-    const linex = [944, -1600, 3584, 5936, 6224, 13472, 6224, 13472, 5528, 13472, 4832, 13472];
-    const linexx = linex.map(val => val + 1600);
-    return new Float32Array(this.reversePoints(line3.concat(line4).concat(line5).concat(line6)));
   }
 }
