@@ -55,14 +55,35 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
 
 
 fn get_rectangle() -> array<vec3<f32>, 6> {
+    var width = glyph_transform.bbox.z - glyph_transform.bbox.x;
+    var height = glyph_transform.bbox.w - glyph_transform.bbox.y;
+
+    var aspect_ratio = width / height;
+
+    var rect_width = 1.0;
+    var rect_height = rect_width / aspect_ratio;
+    if (aspect_ratio < 1.0) {
+        rect_height = 1.0;
+        rect_width = rect_height * aspect_ratio;
+    }
+
     return array<vec3<f32>, 6>(
-        vec3(-0.5, -0.5, 0.0),
-        vec3(-0.5, 0.5, 0.0),
-        vec3(0.5, -0.5, 0.0),
-        vec3(0.5, -0.5, 0.0),
-        vec3(-0.5, 0.5, 0.0),
-        vec3(0.5, 0.5, 0.0)
+        vec3(-0.5 * rect_width, -0.5 * rect_height, 0.0),
+        vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
+        vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
+        vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
+        vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
+        vec3(0.5 * rect_width, 0.5 * rect_height, 0.0)
     );
+
+    // return array<vec3<f32>, 6>(
+    //     vec3(-0.5, -0.5, 0.0),
+    //     vec3(-0.5, 0.5, 0.0),
+    //     vec3(0.5, -0.5, 0.0),
+    //     vec3(0.5, -0.5, 0.0),
+    //     vec3(-0.5, 0.5, 0.0),
+    //     vec3(0.5, 0.5, 0.0)
+    // );
 }
 
 
@@ -181,24 +202,6 @@ fn cross_scalar(a: vec2<f32>, b: vec2<f32>) -> f32 {
     return a.x * b.y - a.y * b.x;
 }
 
-fn solve_cubic(a: f32, b: f32, c: f32) -> vec3<f32> {
-    var p = b - a * a / 3.0;
-    var p3 = p * p * p;
-    var q = a * (2.0*a*a - 9.0*b) / 27.0 + c;
-    var d = q*q + 4.0*p3 / 27.0;
-    var offset = -a / 3.0;
-    if(d >= 0.0) { 
-        var z = sqrt(d);
-        var x = (vec2(z, -z) - q) / 2.0;
-        var uv = sign(x)*pow(abs(x), vec2(1.0/3.0));
-        return vec3(offset + uv.x + uv.y);
-    }
-    var v = acos(-sqrt(-27.0 / p3) * q / 2.0) / 3.0;
-    var m = cos(v);
-    var n = sin(v)*1.732050808;
-    return vec3(m + m, -n - m, n - m) * sqrt(-p / 3.0) + offset;
-}
-
 fn test_cross(a: vec2<f32>, b: vec2<f32>, p: vec2<f32>) -> f32{
     return sign((b.y-a.y) * (p.x-a.x) - (b.x-a.x) * (p.y-a.y));
 }
@@ -214,24 +217,6 @@ fn sign_bezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> f
     return mix(sign(d.x * d.x - d.y), mix(-1.0, 1.0, 
     step(test_cross(p1, p2, pos) * test_cross(p2, p3, pos), 0.0)),
     step((d.x - d.y), 0.0)) * test_cross(p1, p3, p2);
-}
-
-fn sdBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, p: vec2<f32>) -> f32
-{    
-    var p22 = mix(p2 + vec2(1e-4), p2, abs(sign(p2 * 2.0 - p1 - p3)));
-    var a = p22 - p1;
-    var b = p1 - p22 * 2.0 + p3;
-    var c = a * 2.0;
-    var d = p1 - p;
-    var k = vec3(3.*dot(a,b), 2.*dot(a,a)+dot(d,b),dot(d,a)) / dot(b,b);      
-    var t = saturate(solve_cubic(k.x, k.y, k.z));
-    var pos = p1 + (c + b*t.x)*t.x;
-    var dis = length(pos - p);
-    pos = p1 + (c + b*t.y)*t.y;
-    dis = min(dis, length(pos - p));
-    pos = p1 + (c + b*t.z)*t.z;
-    dis = min(dis, length(pos - p));
-    return dis;
 }
 
 
