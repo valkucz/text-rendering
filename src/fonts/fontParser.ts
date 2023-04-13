@@ -2,6 +2,17 @@ import { vec2, vec4 } from "gl-matrix";
 import { cubicToQuadratic } from "../approximation";
 import { vec2ToFloat32 } from "../math";
 import opentype, { Font, PathCommand } from 'opentype.js'
+import { Glyph } from "../scene/objects/glyph";
+
+export interface ParsedGlyph {
+  bb: opentype.BoundingBox;
+  vertices: Float32Array;
+  leftSideBearing: number;
+  offsetX: number;
+  offsetY: number;
+  widht: number;
+  height: number;
+}
 
 export class FontParser {
   initFont: Font;
@@ -32,15 +43,31 @@ export class FontParser {
     this.font = await FontParser.loadFont(url);
   }
 
-  parseText(text: string) {
-    const path = this.font.getPath(text, 0, 0, 5000, { kerning: true });
-    const advWidth = this.font.getAdvanceWidth(text, 5000);
-    console.log('ADVANCE WIDTH', advWidth);
-    console.log('Path', path);
-    const bb = path.getBoundingBox();
-    console.log('BB', bb);
 
-    return { bb, advWidth, vertices: this.parseShapeToGlyphSdf(path.commands) };
+  parseText(text: string): ParsedGlyph[] {
+    const glyphs = this.font.stringToGlyphs(text);
+    const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
+    const parseGlyphs: ParsedGlyph[] = [];
+    let offsetX = 0;
+    let offsetY = 0;
+    const height = this.font.ascender - this.font.descender;
+    glyphs.forEach((glyph) => {
+      
+      const path = glyph.getPath(0, 0, 5000);
+      const bb = path.getBoundingBox();
+      const vertices = this.parseShapeToGlyph(path.commands);
+      parseGlyphs.push({ bb, vertices, leftSideBearing: glyph.leftSideBearing || 0, 
+        offsetX: offsetX, offsetY: offsetY, width: glyph.advanceWidth || 0, height: height});
+      
+      offsetX += (bb.x2 - bb.x1);
+      // offsetY += (bb.y2 - bb.y1);
+    })
+
+
+    console.log('parse glyphs', parseGlyphs);
+
+    return parseGlyphs;
+
   }
 
   getMiddle(point1: vec2, point2: vec2): vec2 {

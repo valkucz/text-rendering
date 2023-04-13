@@ -4,7 +4,7 @@ import { FontParser } from "../../fonts/fontParser";
 import { VertexBuffer } from "./vertexBuffer";
 
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
-const defaultBgColor = [1.0, 1.0, 1.0, 0.0];
+const defaultBgColor = [0.0, 1.0, 1.0, 0.0];
 export class TextBlock {
   device: GPUDevice;
   private _verticesSize: number;
@@ -82,19 +82,24 @@ export class TextBlock {
   private createGlyphs(): Glyph[] {
     console.log(this._text);
     const alignment = this.device.limits.minStorageBufferOffsetAlignment;
-    const glyphs = [];
+    const glyphs: Glyph[] = [];
     let transformsOffset = 0;
     let verticesOffset = 0;
     const bbs = [];
-    // const { bb } = this.fontParser.parseText(this._text);
-    for (let i = 0; i < this._text.length; i++) {
-      const { bb, vertices }= this.fontParser.parseText(this._text[i]);
+    const bbx = this.fontParser.parseText('x')[0].bb;
+
+    let prevScale = 1;
+    let prevWidth = 0;
+    let offsetX = 0;
+    this.fontParser.parseText(this._text).forEach((glyph, i) => {
+      const { bb, vertices } = glyph;
       let transformsSize = Math.ceil(21 / alignment) * alignment;
       let verticesSize = Math.ceil(vertices.length / alignment) * alignment;
       bbs.push(bb);
+      let {model, deltaX} = this.setModel(i, bb, glyph, offsetX, prevWidth);
       glyphs.push({
         vertices: vertices,
-        model: this.setModel(i),
+        model: model,
         bb: vec4.fromValues(bb.x1, bb.y1, bb.x2, bb.y2),
         length: vertices.length / 2,
         transformsSize: transformsSize,
@@ -102,32 +107,49 @@ export class TextBlock {
         transformsOffset: transformsOffset,
         verticesOffset: verticesOffset
       });
-
-      this.bb = this.maximBb(bbs);
-
-      console.log('Glyph iteration', i, 'vertices', vertices.length, 'transforms', transformsSize, 'vertices', verticesSize, 'offset', transformsOffset, verticesOffset)
+      prevScale = (bb.y2 - bb.y1) / glyph.height;
+      prevWidth = bb.x2 - bb.x1;
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
-    }
+      offsetX = deltaX;
+    });
+    this.bb = this.maximBb(bbs);
     this._verticesSize = verticesOffset;
     this._transformsSize = transformsOffset;
-    console.log('Vertices, transform size', this._verticesSize, this._transformsSize);
-
     return glyphs;
   }
 
   maximBb(bbs): vec4 {
 
-    const min = vec2.fromValues(Infinity, Infinity);
-    const max = vec2.fromValues(-Infinity, -Infinity);
+    // let min = vec2.fromValues(Infinity, Infinity);
+    // let max = vec2.fromValues(-Infinity, -Infinity);
 
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
     bbs.forEach((bb) => {
-      const minX = vec2.fromValues(bb.x1, bb.y1);
-      const maxX = vec2.fromValues(bb.x2, bb.y2);
-      vec2.min(min, min, minX);
-      vec2.max(max, max, maxX);
+      if (bb.x1 < minX) {
+        minX = bb.x1;
+      }
+
+      if (bb.y1 < minY) {
+        minY = bb.y1;
+      }
+
+      if (bb.x2 > maxX) {
+        maxX = bb.x2;
+      }
+
+      if (bb.y2 > maxY) {
+        maxY = bb.y2;
+      }
     })
-    return vec4.fromValues(min[0], min[1], max[0], max[1]);
+    return vec4.fromValues(minX, minY, maxX, maxY);
+  }
+
+  getAttributes() {
+    return new Float32Array ([this.fontParser.font.unitsPerEm]);
   }
 
 
@@ -192,11 +214,31 @@ export class TextBlock {
     return vec4.fromValues(min[0], min[1], max[0], max[1]);
   }
 
-  private setModel(shift: number): mat4 {
+  private setModel(shift: number, bb, glyph, offsetX, prevWidth) {
     const model = mat4.create();
     mat4.rotateY(model, model, -Math.PI / 2);
-    mat4.translate(model, model, [shift, 0, 0])
-    return model;
+
+    const width = bb.x2 - bb.x1;
+    const height = bb.y2 - bb.y1;
+    const totalHeight = glyph.height;
+
+    const scaleFactor = height / totalHeight;
+    const scalingX = width / totalHeight;
+
+    
+    let deltaX = offsetX;
+    if (width < prevWidth) {
+      deltaX += 1/2 *((prevWidth / totalHeight) - (width / totalHeight));
+    }
+    else if (width > prevWidth) {
+      deltaX += 0.5* ((prevWidth / totalHeight) - (width / totalHeight));
+    }
+    console.log('ScalingX, deltaX', scalingX, deltaX);
+    mat4.translate(model, model, [scalingX + deltaX, 0, 0]);
+    mat4.scale(model, model, [scalingX, scaleFactor, 1]);
+
+    deltaX += scalingX;
+    return { model, deltaX };
   }
 
   updateText(text: string) {

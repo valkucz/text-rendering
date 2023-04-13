@@ -2,6 +2,7 @@ struct Uniforms {
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
     bbox: vec4<f32>,
+    unitsPerEm: f32,
 
 };
 
@@ -67,23 +68,62 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
         rect_width = rect_height * aspect_ratio;
     }
 
-    return array<vec3<f32>, 6>(
-        vec3(-0.5 * rect_width, -0.5 * rect_height, 0.0),
-        vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
-        vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
-        vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
-        vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
-        vec3(0.5 * rect_width, 0.5 * rect_height, 0.0)
-    );
+    // rect_width *= uniforms.unitsPerEm / 1000;
+    // rect_height *= uniforms.unitsPerEm / 1000;
+    rect_height = 1.0;
+
+    var min_x = glyph_transform.bbox.x;
+    var max_x = glyph_transform.bbox.z;
+
+    var min_y = glyph_transform.bbox.y;
+    var max_y = glyph_transform.bbox.w;
+
+    var canvas_wdith = uniforms.bbox.z - uniforms.bbox.x;
+    var canvas_min_x = uniforms.bbox.x;
+
+    var canvas_height = uniforms.bbox.w - uniforms.bbox.y;
+    var canvas_min_y = uniforms.bbox.y;
+
+    var norm_min_x = ((2 * (min_x - canvas_min_x)) / canvas_wdith) - 1.0;
+    var norm_max_x = ((2 * (max_x - canvas_min_x)) / canvas_wdith) - 1.0;
+
+    var norm_min_y = ((2 * (min_y - canvas_min_y)) / canvas_height) - 1.0;
+    var norm_max_y = ((2 * (max_y - canvas_min_y)) / canvas_height) - 1.0;
 
     // return array<vec3<f32>, 6>(
-    //     vec3(-0.5, -0.5, 0.0),
-    //     vec3(-0.5, 0.5, 0.0),
-    //     vec3(0.5, -0.5, 0.0),
-    //     vec3(0.5, -0.5, 0.0),
-    //     vec3(-0.5, 0.5, 0.0),
-    //     vec3(0.5, 0.5, 0.0)
+    //     vec3(norm_min_x, norm_min_y, 0.0),
+    //     vec3(norm_min_x, norm_max_y, 0.0),
+    //     vec3(norm_max_x, norm_min_y, 0.0),
+    //     vec3(norm_max_x, norm_min_y, 0.0),
+    //     vec3(norm_min_x, norm_max_y, 0.0),
+    //     vec3(norm_max_x, norm_max_y, 0.0)
     // );
+    // return array<vec3<f32>, 6>(
+    //     vec3(norm_min_x, -0.5, 0.0),
+    //     vec3(norm_min_x, 0.5, 0.0),
+    //     vec3(norm_max_x, -0.5, 0.0),
+    //     vec3(norm_max_x, -0.5, 0.0),
+    //     vec3(norm_min_x, 0.5, 0.0),
+    //     vec3(norm_max_x, 0.5, 0.0)
+    // );
+
+    // return array<vec3<f32>, 6>(
+    //     vec3(-0.5 * rect_width, -0.5 * rect_height, 0.0),
+    //     vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
+    //     vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
+    //     vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
+    //     vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
+    //     vec3(0.5 * rect_width, 0.5 * rect_height, 0.0)
+    // );
+
+    return array<vec3<f32>, 6>(
+        vec3(-0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, 0.5, 0.0)
+    );
 }
 
 
@@ -92,11 +132,17 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // var glyphSize = vec2(10.0, 20.0);
     // var textCoord = vec2()
 
-    var x = uniforms.bbox.x + (uniforms.bbox.z - uniforms.bbox.x) * input.uv.x;
-    var y = uniforms.bbox.y + (uniforms.bbox.w  - uniforms.bbox.y) * input.uv.y;
+    var x = glyph_transform.bbox.x + (glyph_transform.bbox.z - glyph_transform.bbox.x) * input.uv.x;
+    var y = glyph_transform.bbox.y + (glyph_transform.bbox.w  - glyph_transform.bbox.y) * input.uv.y;
 
 
-    return fill_sdf(vec2<f32>(x, y));
+    var width = uniforms.bbox.z - uniforms.bbox.x;
+    var height = uniforms.bbox.w - uniforms.bbox.y;
+
+    var glyphWidth = glyph_transform.bbox.z - glyph_transform.bbox.x;
+    var glyphHeight = glyph_transform.bbox.w - glyph_transform.bbox.y;
+
+    return fill_winding(vec2<f32>(x , y));
 }
 
 fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
@@ -145,7 +191,7 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
 
 fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
     if (!is_inside_glyph(vec2<i32>(pos))){
-        discard;
+        return color.background;
     }
     return color.glyph;
 }

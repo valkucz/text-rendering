@@ -104,7 +104,7 @@ export class Renderer {
   createBuffers(): RendererBuffers {
     const uniformBuffer = this.device.createBuffer({
       // + 16 = 4 * 4;
-      size: MAT4LENGTH * 2 + 16,
+      size: MAT4LENGTH * 2 + 2 * 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const glyphBuffer = this.device.createBuffer({
@@ -288,6 +288,12 @@ export class Renderer {
       this.buffers.uniform,
       128,
       <ArrayBuffer>this.textBlock.bb
+    )
+
+    this.device.queue.writeBuffer(
+      this.buffers.uniform,
+      144,
+      <ArrayBuffer>this.textBlock.getAttributes()
     )
     console.log('bb', this.textBlock.bb);
     // Color
