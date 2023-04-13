@@ -1,8 +1,6 @@
 struct Uniforms {
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
-    bbox: vec4<f32>,
-    unitsPerEm: f32,
 
 };
 
@@ -31,9 +29,6 @@ struct GlyphTransform {
 @binding(1) @group(0) var<storage, read_write> color: Color;
 @binding(0) @group(1) var<storage, read_write> glyph: Glyph;
 @binding(1) @group(1) var<uniform> glyph_transform: GlyphTransform;
-// @binding(3) @group(0) var<uniform> text_info: TextInfo;
-
-// TODO: split vertex and fragment into separate files
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
     var rectangle = get_rectangle();
@@ -56,66 +51,6 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
 
 
 fn get_rectangle() -> array<vec3<f32>, 6> {
-    var width = glyph_transform.bbox.z - glyph_transform.bbox.x;
-    var height = glyph_transform.bbox.w - glyph_transform.bbox.y;
-
-    var aspect_ratio = width / height;
-
-    var rect_width = 1.0;
-    var rect_height = rect_width / aspect_ratio;
-    if (aspect_ratio < 1.0) {
-        rect_height = 1.0;
-        rect_width = rect_height * aspect_ratio;
-    }
-
-    // rect_width *= uniforms.unitsPerEm / 1000;
-    // rect_height *= uniforms.unitsPerEm / 1000;
-    rect_height = 1.0;
-
-    var min_x = glyph_transform.bbox.x;
-    var max_x = glyph_transform.bbox.z;
-
-    var min_y = glyph_transform.bbox.y;
-    var max_y = glyph_transform.bbox.w;
-
-    var canvas_wdith = uniforms.bbox.z - uniforms.bbox.x;
-    var canvas_min_x = uniforms.bbox.x;
-
-    var canvas_height = uniforms.bbox.w - uniforms.bbox.y;
-    var canvas_min_y = uniforms.bbox.y;
-
-    var norm_min_x = ((2 * (min_x - canvas_min_x)) / canvas_wdith) - 1.0;
-    var norm_max_x = ((2 * (max_x - canvas_min_x)) / canvas_wdith) - 1.0;
-
-    var norm_min_y = ((2 * (min_y - canvas_min_y)) / canvas_height) - 1.0;
-    var norm_max_y = ((2 * (max_y - canvas_min_y)) / canvas_height) - 1.0;
-
-    // return array<vec3<f32>, 6>(
-    //     vec3(norm_min_x, norm_min_y, 0.0),
-    //     vec3(norm_min_x, norm_max_y, 0.0),
-    //     vec3(norm_max_x, norm_min_y, 0.0),
-    //     vec3(norm_max_x, norm_min_y, 0.0),
-    //     vec3(norm_min_x, norm_max_y, 0.0),
-    //     vec3(norm_max_x, norm_max_y, 0.0)
-    // );
-    // return array<vec3<f32>, 6>(
-    //     vec3(norm_min_x, -0.5, 0.0),
-    //     vec3(norm_min_x, 0.5, 0.0),
-    //     vec3(norm_max_x, -0.5, 0.0),
-    //     vec3(norm_max_x, -0.5, 0.0),
-    //     vec3(norm_min_x, 0.5, 0.0),
-    //     vec3(norm_max_x, 0.5, 0.0)
-    // );
-
-    // return array<vec3<f32>, 6>(
-    //     vec3(-0.5 * rect_width, -0.5 * rect_height, 0.0),
-    //     vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
-    //     vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
-    //     vec3(0.5 * rect_width, -0.5 * rect_height, 0.0),
-    //     vec3(-0.5 * rect_width, 0.5 * rect_height, 0.0),
-    //     vec3(0.5 * rect_width, 0.5 * rect_height, 0.0)
-    // );
-
     return array<vec3<f32>, 6>(
         vec3(-0.5, -0.5, 0.0),
         vec3(-0.5, 0.5, 0.0),
@@ -129,18 +64,8 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    // var glyphSize = vec2(10.0, 20.0);
-    // var textCoord = vec2()
-
     var x = glyph_transform.bbox.x + (glyph_transform.bbox.z - glyph_transform.bbox.x) * input.uv.x;
     var y = glyph_transform.bbox.y + (glyph_transform.bbox.w  - glyph_transform.bbox.y) * input.uv.y;
-
-
-    var width = uniforms.bbox.z - uniforms.bbox.x;
-    var height = uniforms.bbox.w - uniforms.bbox.y;
-
-    var glyphWidth = glyph_transform.bbox.z - glyph_transform.bbox.x;
-    var glyphHeight = glyph_transform.bbox.w - glyph_transform.bbox.y;
 
     return fill_winding(vec2<f32>(x , y));
 }

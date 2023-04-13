@@ -7,10 +7,6 @@ import { Glyph } from "../scene/objects/glyph";
 export interface ParsedGlyph {
   bb: opentype.BoundingBox;
   vertices: Float32Array;
-  leftSideBearing: number;
-  offsetX: number;
-  offsetY: number;
-  widht: number;
   height: number;
 }
 
@@ -45,22 +41,16 @@ export class FontParser {
 
 
   parseText(text: string): ParsedGlyph[] {
-    const glyphs = this.font.stringToGlyphs(text);
     const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
     const parseGlyphs: ParsedGlyph[] = [];
-    let offsetX = 0;
-    let offsetY = 0;
     const height = this.font.ascender - this.font.descender;
-    glyphs.forEach((glyph) => {
+    paths.forEach((path) => {
       
-      const path = glyph.getPath(0, 0, 5000);
       const bb = path.getBoundingBox();
       const vertices = this.parseShapeToGlyph(path.commands);
-      parseGlyphs.push({ bb, vertices, leftSideBearing: glyph.leftSideBearing || 0, 
-        offsetX: offsetX, offsetY: offsetY, width: glyph.advanceWidth || 0, height: height});
+      parseGlyphs.push({ bb, vertices, 
+       height: height});
       
-      offsetX += (bb.x2 - bb.x1);
-      // offsetY += (bb.y2 - bb.y1);
     })
 
 

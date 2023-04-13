@@ -6,17 +6,17 @@ import { VertexBuffer } from "./vertexBuffer";
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
 const defaultBgColor = [0.0, 1.0, 1.0, 0.0];
 export class TextBlock {
-  device: GPUDevice;
   private _verticesSize: number;
   private _transformsSize: number;
   private _text: string;
-  color: number[];
-  bgColor: number[];
+  private _verticesBuffer: Float32Array;
+  private _transformsBuffer: Float32Array;
   private _glyphs: Glyph[];
   private _colorBuffer: VertexBuffer;
   fontParser: FontParser;
-  private _verticesBuffer: Float32Array;
-  private _transformsBuffer: Float32Array;
+  device: GPUDevice;
+  color: number[];
+  bgColor: number[];
 
   bb: vec4;
 
@@ -85,18 +85,16 @@ export class TextBlock {
     const glyphs: Glyph[] = [];
     let transformsOffset = 0;
     let verticesOffset = 0;
-    const bbs = [];
-    const bbx = this.fontParser.parseText('x')[0].bb;
-
-    let prevScale = 1;
     let prevWidth = 0;
     let offsetX = 0;
     this.fontParser.parseText(this._text).forEach((glyph, i) => {
       const { bb, vertices } = glyph;
       let transformsSize = Math.ceil(21 / alignment) * alignment;
       let verticesSize = Math.ceil(vertices.length / alignment) * alignment;
-      bbs.push(bb);
-      let {model, deltaX} = this.setModel(i, bb, glyph, offsetX, prevWidth);
+      const width = bb.x2 - bb.x1;
+      const height = bb.y2 - bb.y1;
+
+      const { model, deltaX } = this.setModel(width, height, glyph.height, offsetX, prevWidth);
       glyphs.push({
         vertices: vertices,
         model: model,
@@ -107,63 +105,15 @@ export class TextBlock {
         transformsOffset: transformsOffset,
         verticesOffset: verticesOffset
       });
-      prevScale = (bb.y2 - bb.y1) / glyph.height;
-      prevWidth = bb.x2 - bb.x1;
+      prevWidth = width;
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
       offsetX = deltaX;
     });
-    this.bb = this.maximBb(bbs);
     this._verticesSize = verticesOffset;
     this._transformsSize = transformsOffset;
     return glyphs;
   }
-
-  maximBb(bbs): vec4 {
-
-    // let min = vec2.fromValues(Infinity, Infinity);
-    // let max = vec2.fromValues(-Infinity, -Infinity);
-
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    bbs.forEach((bb) => {
-      if (bb.x1 < minX) {
-        minX = bb.x1;
-      }
-
-      if (bb.y1 < minY) {
-        minY = bb.y1;
-      }
-
-      if (bb.x2 > maxX) {
-        maxX = bb.x2;
-      }
-
-      if (bb.y2 > maxY) {
-        maxY = bb.y2;
-      }
-    })
-    return vec4.fromValues(minX, minY, maxX, maxY);
-  }
-
-  getAttributes() {
-    return new Float32Array ([this.fontParser.font.unitsPerEm]);
-  }
-
-
-  computeGlyphSize(glyph: Glyph, advWidth: number): vec2 {
-    const glyphSize = 5000;
-    const glyphWidth = advWidth * glyphSize;
-    const glyphHeight = glyphSize;
-
-    // return vec4.fromValues();
-    // const { width, height } = glyph;
-    // const scale = advWidth / width;
-    // return vec2.fromValues(width * scale, height * scale);
-  }
-
 
 
   createTransformsBuffer() {
@@ -186,55 +136,31 @@ export class TextBlock {
     return buffer;
   }
 
-    createVerticesBuffer() {
-      const buffer = new Float32Array(this._verticesSize);
-      let offset = 0;
-      for (let i = 0; i < this._glyphs.length; i++) {
-        const glyph = this._glyphs[i];
-        offset = glyph.verticesOffset;
-        const vertices = glyph.vertices;
-        console.log('Offset', offset, vertices.length);
-        buffer.set(vertices, offset);
-      }
-      return buffer;
+  createVerticesBuffer() {
+    const buffer = new Float32Array(this._verticesSize);
+    let offset = 0;
+    for (let i = 0; i < this._glyphs.length; i++) {
+      const glyph = this._glyphs[i];
+      const vertices = glyph.vertices;
+      offset = glyph.verticesOffset;
+      buffer.set(vertices, offset);
     }
-
-  private getBoundingBox(vertices: Float32Array): vec4 {
-    const min = vec2.fromValues(Infinity, Infinity);
-    const max = vec2.fromValues(-Infinity, -Infinity);
-
-    for (let i = 0; i < vertices.length; i += 2) {
-      const x = vertices[i];
-      const y = vertices[i + 1];
-
-      vec2.min(min, min, vec2.fromValues(x, y));
-      vec2.max(max, max, vec2.fromValues(x, y));
-    }
-
-    return vec4.fromValues(min[0], min[1], max[0], max[1]);
+    return buffer;
   }
 
-  private setModel(shift: number, bb, glyph, offsetX, prevWidth) {
+  private setModel(width: number, height: number, totalHeight: number, offsetX: number, prevWidth: number) {
     const model = mat4.create();
-    mat4.rotateY(model, model, -Math.PI / 2);
-
-    const width = bb.x2 - bb.x1;
-    const height = bb.y2 - bb.y1;
-    const totalHeight = glyph.height;
-
+    
     const scaleFactor = height / totalHeight;
     const scalingX = width / totalHeight;
-
     
     let deltaX = offsetX;
-    if (width < prevWidth) {
-      deltaX += 1/2 *((prevWidth / totalHeight) - (width / totalHeight));
+    if (width != prevWidth) {
+      deltaX += 1/2 * ((prevWidth - width) / totalHeight);
     }
-    else if (width > prevWidth) {
-      deltaX += 0.5* ((prevWidth / totalHeight) - (width / totalHeight));
-    }
-    console.log('ScalingX, deltaX', scalingX, deltaX);
-    mat4.translate(model, model, [scalingX + deltaX, 0, 0]);
+
+    mat4.rotateY(model, model, -Math.PI / 2);
+    mat4.translate(model, model, [scalingX + deltaX, 0.5 * scaleFactor, 0]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
 
     deltaX += scalingX;

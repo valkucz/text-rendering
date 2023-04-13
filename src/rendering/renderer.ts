@@ -1,5 +1,4 @@
 import shader from "../shaders/shaders.wgsl";
-import { Glyph } from "../scene/objects/glyph";
 import { PerFrameData } from "./perFrameData";
 import { mat4 } from "gl-matrix";
 import { RendererBuffers } from "./rendererBuffers";
@@ -9,8 +8,6 @@ import { TextBlock } from "../scene/objects/textBlock";
  * the matrix is 4x4 and each element is 4 bytes => 4 * 4 * 4 = 64
  */
 const MAT4LENGTH = 64;
-
-const OFFSET = 256;
 
 /**
  * Represents a GPU Renderer that is responsible for rendering objects
@@ -104,7 +101,7 @@ export class Renderer {
   createBuffers(): RendererBuffers {
     const uniformBuffer = this.device.createBuffer({
       // + 16 = 4 * 4;
-      size: MAT4LENGTH * 2 + 2 * 16,
+      size: MAT4LENGTH * 2,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const glyphBuffer = this.device.createBuffer({
@@ -284,18 +281,6 @@ export class Renderer {
       <ArrayBuffer>this.view
     );
 
-    this.device.queue.writeBuffer(
-      this.buffers.uniform,
-      128,
-      <ArrayBuffer>this.textBlock.bb
-    )
-
-    this.device.queue.writeBuffer(
-      this.buffers.uniform,
-      144,
-      <ArrayBuffer>this.textBlock.getAttributes()
-    )
-    console.log('bb', this.textBlock.bb);
     // Color
     this.device.queue.writeBuffer(
       this.textBlock.colorBuffer.buffer,
