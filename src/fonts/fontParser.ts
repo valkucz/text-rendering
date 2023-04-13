@@ -1,8 +1,7 @@
-import { vec2, vec4 } from "gl-matrix";
+import { vec2 } from "gl-matrix";
 import { cubicToQuadratic } from "../approximation";
 import { vec2ToFloat32 } from "../math";
 import opentype, { Font, PathCommand } from 'opentype.js'
-import { Glyph } from "../scene/objects/glyph";
 
 export interface ParsedGlyph {
   bb: opentype.BoundingBox;
@@ -47,7 +46,7 @@ export class FontParser {
     paths.forEach((path) => {
       
       const bb = path.getBoundingBox();
-      const vertices = this.parseShapeToGlyph(path.commands);
+      const vertices = this.parseShapeToGlyphSdf(path.commands);
       parseGlyphs.push({ bb, vertices, 
        height: height});
       

@@ -67,7 +67,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     var x = glyph_transform.bbox.x + (glyph_transform.bbox.z - glyph_transform.bbox.x) * input.uv.x;
     var y = glyph_transform.bbox.y + (glyph_transform.bbox.w  - glyph_transform.bbox.y) * input.uv.y;
 
-    return fill_winding(vec2<f32>(x , y));
+    return fill_sdf(vec2<f32>(x , y));
 }
 
 fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {

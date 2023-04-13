@@ -1,6 +1,5 @@
 import { Controller } from "./controller";
 import { App, defaultUrl } from "../app";
-import { Glyph } from "../scene/objects/glyph";
 import { hexToRgba, rgbaToHex } from "../math";
 
 const PREFIX = "./public/";
