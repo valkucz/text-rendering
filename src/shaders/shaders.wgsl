@@ -73,46 +73,40 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
     var mindist = 1000000.0;
     var side = 1.0;
-    var flag = 0;
     for (var i: u32 = 0; i < u32(glyph_transform.length); i += 4) {
         if (glyph.points[i].x < 0.0) {
             // Line
-            var sdist = sdfLine(glyph.points[i + 1], glyph.points[i + 3], pos);
-            var udist = abs(sdist);
-            var sgn = signSdfLine(glyph.points[i + 1], glyph.points[i + 3], pos);
-            if (udist < mindist) {
-                mindist = udist;
-                if (sgn <= 0.0) {
-                    side = -1.0;
-                }
-                else {
-                    side = 1.0;
-                }
+            let a = glyph.points[i + 1];
+            let b = glyph.points[i + 3];
+            var sdist = sdfLine(a, b, pos);
+
+            // https://iquilezles.org/articles/interiordistance/
+            // https://www.shadertoy.com/view/3t33WH
+            let cond = vec3<bool>(pos.y >= a.y, (pos.y < b.y), sdist.y > 0.0);
+            if( all(cond) || all(!(cond)) ) {
+                side *= -1.0;
             }
-        }
-        else {
+
+            mindist = min(mindist, abs(sdist.x));
+        } else {
             // Curve
             var sdist = sdfBezier(glyph.points[i + 1], glyph.points[i + 2], glyph.points[i + 3], pos);
             var udist = abs(sdist.x);
 
-            if (udist < mindist) {
-                mindist = udist;
-                if (sdist.y > 0.0) {
-                    side = -1.0;
-                }
-                else {
-                    side = 1.0;
-                }
-            };
-        }
+            if(sdist.z > 0.0) {
+                side *= -1.0;
+            }
 
+            mindist = min(mindist, abs(sdist.x));
+        }
     }
+    mindist = sqrt(mindist);
     if ((side > 0.0)) {
         discard;
     }
-    return vec4(mindist / 1000, 0.0, 0.0, 1.0);
-
+    return vec4(mindist / 500, 0.0, 0.0, 1.0);
 }
+
 
 fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
     if (!is_inside_glyph(vec2<i32>(pos))){
@@ -191,12 +185,34 @@ fn sign_bezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> f
 }
 
 
-fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec2<f32> {
+fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec3<f32> {
     var a = p2 - p1;
     var b = p1 - 2.0 * p2 + p3;
     var c = a * 2.0;
     var d = p1 - pos;
-    
+
+    // https://www.shadertoy.com/view/Ntyyzy    
+    var odd = 1.0;
+    // find if the number of intersection with an horizontal ray starting at p is odd
+    // [Célestin Marot'2022]
+    // intersection <=> root of  "b.y t^2 + c.y t + d.y" where 0<=t<=1
+    if (abs(b.y) < 0.001) { // <- branch depends on control pts only, so perf. overhead should be negligible
+        // linear case: count roots of "c.y t + d.y"
+        var t = -d.y / c.y; // c.y should never be 0 if A and B are distinct
+        if (t >= 0. && t <= 1. && d.x + (c.x + b.x*t) * t > 0.) {
+            odd = -1.;
+        }            
+    }
+    else {
+        var h = c.y*c.y - 4.*b.y*d.y;
+        if (h > 0.0) {
+            h = sqrt(h);
+            let t: vec2<f32> = (vec2(-h, h) - c.y) / (2.0* b.y);
+            let x: vec2<f32> = d.x + (c.x + b.x*t) * t;
+            let i: vec2<f32> = vec2(1.0) - vec2(2.0) * (step(vec2(0.0), t) * step(vec2(-1.0), -t) * step(vec2(0.0), x));
+            odd = i.x * i.y;
+        }
+    }
     var kk = 1.0/dot(b,b);
     var kx = kk * dot(a,b);
     var ky = kk * (2.0*dot(a,a)+dot(d,b))/3.0;
@@ -252,30 +268,12 @@ fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec
             sgn = sy;
         }
     }
-    return vec2(sqrt(res), sign(sgn));
+    return vec3(res, sign(sgn), odd);
 }
 
-fn sdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> f32 {
+fn sdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> vec2<f32> {
     var pa = pos - a;
     var ba = b - a;
     var h = saturate(dot(pa, ba) / dot(ba, ba));
-    return length(pa - ba * h);
-}
-
-fn signSdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> f32 {
-    var pa = pos - a;
-    var ba = b - a;
-    var h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0);
-
-
-    var d = cross(vec3(ba, 0.0), vec3(pa, 0.0));
-    return sign(d).z;
-
-    // return 
-    // var d = cross_scalar(ba, pa);
-    // var eps = 80000.0;
-    // if (abs(d) < eps) {
-    //     return 0.0;
-    // }
-    // return sign(d);
+    return vec2( dot(pa-ba*h, pa-ba*h), sign(cross_scalar(ba, pa)));
 }
