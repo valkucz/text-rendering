@@ -34,7 +34,7 @@ const dark = {
 /* Light mode */
 const light = {
     0: '#c9ccd5',
-    1: '#f1e8eb',
+    1: '#fbfbfb', // #f1e8eb
     2: '#c9cdd79a',
     3: '#ffffff',
     4: '#6b6e75'
@@ -76,6 +76,7 @@ export class AppController implements Controller {
           });
         
         this.modeBtn.addEventListener('click', () => {
+          console.log('here');
             if (this.isLight) {
               this.isLight = false;
               this.setColors(dark);

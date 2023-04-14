@@ -18,7 +18,7 @@
         <span aria-hidden="true"></span>
       </a>
     </div>
-  
+
     <div class="navbar-menu">
       <div class="navbar-start">
         <div class="tabs">
@@ -29,17 +29,17 @@
           </ul>
         </div>
       </div>
-  
+
       <div class="navbar-end">
         <div class="buttons">
           <a class="button">
             <span class="icon"><ion-icon name="logo-github" size="large">
-  
-            </ion-icon></span>
+
+              </ion-icon></span>
           </a>
           <a class="button" id="mode-btn">
             <span class="icon"><ion-icon name="moon-outline" size="large">
-            </ion-icon></span>
+              </ion-icon></span>
           </a>
         </div>
       </div>
@@ -48,158 +48,181 @@
   <div style="position: absolute">
 
 
-  <section class="section" id="section-1">
-    <!-- <div class="container"> -->
+    <section class="section" id="section-1">
       <h1 class="title header-element">
-       Text rendering
+        Text rendering
       </h1>
-    <!-- </div> -->
-  </section>
+    </section>
 
-  <section class="section" id="section-2">
-    <div class="content">
-      <h1 class="title section-title">Demo</h1>
-    </div>
-    <div class="container columns is-multiliner">
+    <section class="section" id="section-2">
+        <h1 class="title section-title">Demo</h1>
+      <div class="demo">
+          <div class="columns">
+            <div class="upper-controller controller-style column">
+              <!-- <nav class="navbar"> -->
 
-          <canvas class="canvas" id="canvas">
-          </canvas>
-          <button id="open-menu-button"  class="controller-menu-button"><ion-icon name="chevron-back-outline" size="large"></ion-icon></ion-icon></button>
-
-          <div class="container-child controller-menu" id="controller-menu">
-            <div>
-
-              <button id="close-menu-button" class="controller-menu-button"><ion-icon name="chevron-forward-outline" size="large"></ion-icon></button>
-            </div>
-          <div class="content-menu column" id="content-menu">
-            <aside class="menu">
-              <p class="menu-label">
-                Text
-              </p>
-              <ul class="menu-list">
-                <li>
-                  <input id="text-input" type="text">
-                </li>
-                <li>
-                  <p>Font</p>
-                  <select id="text-font">
-                    <option value="Blogger_Sans.otf">Blogger Sans</option>
-                    <option value="MontserratAlternates-Medium.otf">MontserratAlternates Medium</option>
-                  </select>
-                </li>
-                <li>
-                  <p>Color</p>
-                  <input type="color" id="text-color" value="#c9cdd7">
-                </li>
-                <li>
-                  <p>Background color</p>
-                  <input type="color" id="bgcolor" value="#f1e8eb">
-                </li>
-                <li>
-                  <div class="field  is-inline">
-                    <div class="control">
-                      <label class="radio">
-                        <input type="radio" name="radio-option" value="Winding Number">
-                        Winding Number
-                      </label>
-                      <label class="radio">
-                        <input type="radio" name="radio-option" value="SDF">
-                        Signed distance
-                      </label>
-                    </div>
+              
+                <div class="columns is-mobile">
+                  <div class="column is-half">
+                    <nav class="level">
+                      <div class="level-left">
+                        <div class="level-item">
+                          <input id="text-input" class="input" type="text" placeholder="Text input">
+                        </div>
+                        <div class="level-item">
+                          <p class="subtitle is-6">Font</p>
+                          <div class="select is-small">
+                            <select id="text-font">
+                              <option value="Blogger_Sans.otf">Blogger Sans</option>
+                              <option value="MontserratAlternates-Medium.otf">MontserratAlternates Medium</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="level-item">
+                          <p class="subtitle is-6">Color</p>
+                          <div class="control">
+                            <input type="color" id="text-color" class="input is-small" value="#c9cdd7">
+                          </div>
+                        </div>
+                        <div class="level-item">
+                          <p class="subtitle is-6">Background color</p>
+                          <div class="control">
+                            <input type="color" id="bgcolor" class="input is-small" value="#f1e8eb">
+                          </div>
+                        </div>
+                        <div class="level-item">
+                          <div class="control">
+                            <label class="radio">
+                              <input type="radio" name="radio-option" value="Winding Number">
+                              Winding Number
+                            </label>
+                            <label class="radio">
+                              <input type="radio" name="radio-option" value="SDF">
+                              Signed distance
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </nav>
                   </div>
-                </li>
-                <li>
-                  <button id="text-reset">Reset</button>
-                </li>
-              </ul>
-              <p class="menu-label">
-                <!-- TODO: rename to Glyph? -->
-                Object
-              </p>
-              <ul class="menu-list">
-                <li>Position</li>
-                <li>
-                  <ul>
+                </div>
+
+              <!-- </nav> -->
+
+            </div>
+          </div>
+          <div class="columns demo-child">
+              <canvas class="canvas" id="canvas">
+              </canvas>
+            <div class="controller-menu controller-style" id="controller-menu">
+              <div class="content-menu" id="content-menu">
+                <aside class="menu">
+                  <p class="menu-label">
+                    Text
+                  </p>
+                  <ul class="menu-list">
                     <li>
-                      <p>x</p>
-                      <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-x">
                     </li>
                     <li>
-                      <p>y</p>
-                      <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-y">
-                    </li>
-                    <li>
-                      <p>z</p>
-                      <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-z">
+                      <button id="text-reset">Reset</button>
                     </li>
                   </ul>
-                </li>
-                <li>Rotation</li>
-                <li>
-                  <ul>
+                  <p class="menu-label">
+                    <!-- TODO: rename to Glyph? -->
+                    Object
+                  </p>
+                  <ul class="menu-list">
+                    <li>Position</li>
                     <li>
-                      <p>x</p>
-                      <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-x">
+                      <ul>
+                        <li>
+                          <p>x</p>
+                          <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-x">
+                        </li>
+                        <li>
+                          <p>y</p>
+                          <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-y">
+                        </li>
+                        <li>
+                          <p>z</p>
+                          <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-z">
+                        </li>
+                      </ul>
                     </li>
+                    <li>Rotation</li>
                     <li>
-                      <p>y</p>
-                      <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-y">
+                      <ul>
+                        <li>
+                          <p>x</p>
+                          <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-x">
+                        </li>
+                        <li>
+                          <p>y</p>
+                          <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-y">
+                        </li>
+                        <li>
+                          <p>z</p>
+                          <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-z">
+                        </li>
+                      </ul>
                     </li>
-                    <li>
-                      <p>z</p>
-                      <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-z">
-                    </li>
+                    <li>Scale</li>
+                    <ul>
+                      <li><input type="range" min="1" max="500" value="250" class="slider" id="glyph-scale"></li>
+                    </ul>
+                    <li><button id="glyph-reset">Reset</button></li>
                   </ul>
-                </li>
-                <li>Scale</li>
-                <ul>
-                  <li><input type="range" min="1" max="500" value="250" class="slider" id="glyph-scale"></li>
-                </ul>
-                <li><button id="glyph-reset">Reset</button></li>
-              </ul>
-            </aside>
+                </aside>
+            </div>
+          </div>
           </div>
         </div>
-    </div>
-  </section>
-  <section class="section" id="section-3">
-    <div class="content">
-      <h1 class="title section-title">About</h1>
-      <p>
-        WebGPU<sup><a>[1]</a></sup> is a brand-new API that aims to optimize web-based graphics rendering. 
-        It was introduced in 2021 and is currently in the development phase. 
-        As an experimental feature on Chrome Canary, it offers developers the opportunity 
-        to explore its capabilities, including its potential for improving the efficiency and speed of graphics rendering.</p>
-      <p>
-        This website was created with Vite<sup><a>[2]</a></sup> as a part of Bachelor's thesis on the topic <i>3D Text rendering in WebGPU</i>. 
-        Its purpose is to showcase graphics API built with WebGPU that enables rendering of fonts in a dynamic 3D space.
-        As can be seen in the demo, the user is able to interact with the text in real-time. It includes moving, rotating and scaling the text, as well as changing its color and background color.
-        Since the canvas is representing a 3D space, the user can also move the camera around the text. 
-      </p>
-      <p>Graphics API is available as an open-source library [URL].</p>
-      <h3>How to Use API</h3>
+    </section>
+    <section class="section" id="section-3">
+      <div class="content">
+        <h1 class="title section-title">About</h1>
+        <p>
+          WebGPU<sup><a>[1]</a></sup> is a brand-new API that aims to optimize web-based graphics rendering.
+          It was introduced in 2021 and is currently in the development phase.
+          As an experimental feature on Chrome Canary, it offers developers the opportunity
+          to explore its capabilities, including its potential for improving the efficiency and speed of graphics
+          rendering.</p>
+        <p>
+          This website was created with Vite<sup><a>[2]</a></sup> as a part of Bachelor's thesis on the topic <i>3D Text
+            rendering in WebGPU</i>.
+          Its purpose is to showcase graphics API built with WebGPU that enables rendering of fonts in a dynamic 3D
+          space.
+          As can be seen in the demo, the user is able to interact with the text in real-time. It includes moving,
+          rotating and scaling the text, as well as changing its color and background color.
+          Since the canvas is representing a 3D space, the user can also move the camera around the text.
+        </p>
+        <p>Graphics API is available as an open-source library [URL].</p>
+        <h3>How to Use API</h3>
 
-      <p>Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit. Quisque condimentum maximus mi, sit amet commodo arcu rutrum id. Proin pretium urna vel cursus venenatis. Suspendisse potenti. Etiam mattis sem rhoncus lacus dapibus facilisis. Donec at dignissim dui. Ut et neque nisl.</p>
-      <ol>
-        <li>In fermentum leo eu lectus mollis, quis dictum mi aliquet.</li>
-        <li>Morbi eu nulla lobortis, lobortis est in, fringilla felis.</li>
-        <li>Aliquam nec felis in sapien venenatis viverra fermentum nec lectus.</li>
-        <li>Ut non enim metus.</li>
-      </ol>
-     
-      <dl>
-        <dt>Web</dt>
-        <dd>The part of the Internet that contains websites and web pages</dd>
-        <dt>HTML</dt>
-        <dd>A markup language for creating web pages</dd>
-        <dt>CSS</dt>
-        <dd>A technology to make HTML look better</dd>
-      </dl>
-      <p>Suspendisse egestas sapien non felis placerat elementum. Morbi tortor nisl, suscipit sed mi sit amet, mollis malesuada nulla. Nulla facilisi. Nullam ac erat ante.</p>
-      <h4>Fourth level</h4>
-      <p>Nulla efficitur eleifend nisi, sit amet bibendum sapien fringilla ac. Mauris euismod metus a tellus laoreet, at elementum ex efficitur.</p>
-      <pre class="box-element">
+        <p>Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit. Quisque condimentum maximus mi,
+          sit amet commodo arcu rutrum id. Proin pretium urna vel cursus venenatis. Suspendisse potenti. Etiam mattis
+          sem rhoncus lacus dapibus facilisis. Donec at dignissim dui. Ut et neque nisl.</p>
+        <ol>
+          <li>In fermentum leo eu lectus mollis, quis dictum mi aliquet.</li>
+          <li>Morbi eu nulla lobortis, lobortis est in, fringilla felis.</li>
+          <li>Aliquam nec felis in sapien venenatis viverra fermentum nec lectus.</li>
+          <li>Ut non enim metus.</li>
+        </ol>
+
+        <dl>
+          <dt>Web</dt>
+          <dd>The part of the Internet that contains websites and web pages</dd>
+          <dt>HTML</dt>
+          <dd>A markup language for creating web pages</dd>
+          <dt>CSS</dt>
+          <dd>A technology to make HTML look better</dd>
+        </dl>
+        <p>Suspendisse egestas sapien non felis placerat elementum. Morbi tortor nisl, suscipit sed mi sit amet, mollis
+          malesuada nulla. Nulla facilisi. Nullam ac erat ante.</p>
+        <h4>Fourth level</h4>
+        <p>Nulla efficitur eleifend nisi, sit amet bibendum sapien fringilla ac. Mauris euismod metus a tellus laoreet,
+          at elementum ex efficitur.</p>
+        <pre class="box-element">
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
       &lt;head&gt;
@@ -210,17 +233,17 @@
       &lt;/body&gt;
     &lt;/html&gt;
     </pre>
-    </div>
-  </section>
-  <footer class="footer">
-    <div class="content has-text-centered">
-      <p>
-        <strong>Text rendering</strong> by <a href="#">Zdenka Valkučáková</a>.
-      </p>
-    </div>
-  </footer>
-</div>
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+      </div>
+    </section>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong>Text rendering</strong> by <a href="#">Zdenka Valkučáková</a>.
+        </p>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 </body>
 
 </html>
