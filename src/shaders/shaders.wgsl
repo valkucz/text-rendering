@@ -107,7 +107,9 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
     if ((side > 0.0)) {
         discard;
     }
-    return vec4(mindist / 500, 0.0, 0.0, 1.0);
+    // color.glyph.x = color.glyph.x * mindist / 500;
+    // return color.glyph;
+    return vec4(mindist * color.glyph.x / 300, color.glyph.y, color.glyph.z, 1.0);
 }
 
 

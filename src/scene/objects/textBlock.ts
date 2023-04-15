@@ -27,8 +27,8 @@ export class TextBlock {
   private _isWinding: boolean;
   fontParser: FontParser;
   device: GPUDevice;
-  color: number[];
-  bgColor: number[];
+  private _color: number[];
+  private _bgColor: number[];
 
   bb: vec4;
 
@@ -50,8 +50,8 @@ export class TextBlock {
     this.device = device;
     this._text = text;
     this.fontParser = fontParser;
-    this.color = options?.color ?? defaultColor;
-    this.bgColor = options?.backgroundColor ?? defaultBgColor;
+    this._color = options?.color ?? defaultColor;
+    this._bgColor = options?.backgroundColor ?? defaultBgColor;
     this._colorBuffer = this.createVertexBuffer(device, this.getColorArray());
     this._spacing = options?.spacing ?? 1.0;
     this._width = options?.width ?? 1.0;
@@ -66,6 +66,19 @@ export class TextBlock {
     this.bb = vec4.create();
   }
 
+  public set color(color: number[]) {
+    this._color = color;
+    this._colorBuffer = this.createVertexBuffer(this.device, this.getColorArray());
+  }
+
+  public get color(): number[] {
+    return this._color;
+  }
+
+  public set bgColor(bgColor: number[]) {
+    this._bgColor = bgColor;
+    this._colorBuffer = this.createVertexBuffer(this.device, this.getColorArray());
+  }
 
   public get spacing(): number {
     return this._spacing;
@@ -141,7 +154,7 @@ export class TextBlock {
     return this._colorBuffer;
   }
   private getColorArray(): Float32Array {
-    return new Float32Array(this.color.concat(this.bgColor));
+    return new Float32Array(this._color.concat(this._bgColor));
   }
   private createVertexBuffer(
     device: GPUDevice,

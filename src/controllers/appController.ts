@@ -60,8 +60,8 @@ export class AppController implements Controller {
         this.modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
 
         // Init
-        this.setColors(light);
         this.textController = textController;
+        this.setColors(light);
     }
 
     addEventListener(app: App) {
@@ -104,7 +104,8 @@ export class AppController implements Controller {
         const root = document.querySelector(':root') as HTMLElement;
         Object.values(object).forEach((color, i) => {
             root.style.setProperty(CSSColors[i], color);  
-        })
+        });
+        this.textController.setElemColors();
     }
 
 
