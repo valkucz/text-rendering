@@ -65,22 +65,14 @@ button:enabled:active {
   cursor: crosshair;
   width: 80%;
   padding: 0.5rem;
-  /* height: 100vh; */
-  /* height: 100vh; */
-  /* overflow: hidden; */
 }
 
 .controller-menu {
   width: 20%;
-  /* height: 100vh; */
   font-size: var(--size-6);
   padding: 0.5rem;
   position: relative;
-  /* z-index: 1; */
-  /* top: 0; */
   right: 0;
-  /* height: 100%; */
-
   overflow: auto;
   overflow-x: hidden;
   /* ensure the panel is on top of the canvas */
@@ -89,20 +81,29 @@ button:enabled:active {
 }
 
 .controller-style {
-  /* background-color: var(--primary-bg-color); */
   background-color: #fbfbfb;
   box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
-  /* background-color: rgb(240, 234, 234); */
-  /* box-shadow: inset -5px -5px 9px rgba(255,255,255,0.45), inset 5px 5px 9px rgba(94,104,121,0.3); */
-  
-  /* box-shadow: var(--container-shadow); */
 }
 
-.upper-controller{
-  height: 12vh;
-  /* box-shadow: var(--container-shadow);
-  /* background-color: green; */
+.upper-controller .input-color
+ {
+  -webkit-appearance: none;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
 }
+
+.input-color::-webkit-color-swatch,
+.input-color::-webkit-color-swatch-wrapper{
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  box-shadow: var(--draggable-shadow);
+}
+
+
 
 .controller-menu.is-expanded {
   right: 0;
@@ -112,32 +113,22 @@ button:enabled:active {
   height: 40rem;
   background: 0px 2px 3px rgba(255, 255, 255, 0.5);
   background-color: var(--elem-bg-color);
-  /* margin: auto; */
-  /* width: auto; */
-  /* width: 100%; */
   box-shadow: var(--container-shadow);
   overflow: hidden;
 }
 
 .demo-child {
-  /* margin: 0 !important; */
-  /* padding: 2rem; */
-  /* margin: 5rem; */
-  /* height: 50%; */
   height: 70vh;
   background: 0px 2px 3px rgba(255, 255, 255, 0.5);
  
 }
 .demo {
   box-shadow: var(--container-shadow);
-  /* box-shadow: inset -5px -5px 9px rgba(255,255,255,0.45), inset 5px 5px 9px rgba(94,104,121,0.3); */
-  /* box-shadow: 
-  -10px -10px 15px rgba(255, 255, 255, 0.5),
-  10px 10px 15px rgba(70, 70, 70, 0.12); */
+  width: 90%;
+  margin: auto;
 }
 .demo .columns {
   margin: 0;
-
 }
 
 .section {
@@ -146,6 +137,27 @@ button:enabled:active {
   margin: 3rem;
 }
 
+.level-left {
+  align-items: stretch;
+}
+.menu-control {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.level-item {
+  padding: 0;
+  align-items: stretch;
+}
+
+
+.menu-control .control {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
 
 .content-menu {
   margin-right: 0;
@@ -199,13 +211,6 @@ button {
   color: var(--text-color);
   text-align: center;
 }
-
-.content {
-  /* background-color: none; */
-  /* margin:3rem; */
-}
-
-
 
 
 .slider {
@@ -273,11 +278,6 @@ ion-icon {
   margin: 0.2rem;
 }
 
-.section {
-  /* color: var(--text-primary-color);
-   */
-
-}
 
 .navbar {
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -286,11 +286,7 @@ ion-icon {
   background-color: var(--primary-color);
   box-shadow: var(--container-shadow);
   transition: 0.3s ease-in-out;
-  /* opacity: 0; */
   z-index: 1;
-
-  /* visibility: hidden; */
-  /* position: fixed; */
 }
 
 .navbar.is-visible {
@@ -301,7 +297,6 @@ ion-icon {
 .navbar:hover {
   opacity: 1;
   transform: translateY(0.1rem);
-
 }
 
 .navbar .button {
