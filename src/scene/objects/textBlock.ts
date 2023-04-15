@@ -5,6 +5,13 @@ import { VertexBuffer } from "./vertexBuffer";
 
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
 const defaultBgColor = [0.0, 1.0, 1.0, 0.0];
+
+export interface TextBlockOptions {
+  color?: number[];
+  backgroundColor?: number[];
+  spacing?: number;
+  isWinding?: boolean;
+}
 export class TextBlock {
   private _verticesSize: number;
   private _transformsSize: number;
@@ -13,6 +20,8 @@ export class TextBlock {
   private _transformsBuffer: Float32Array;
   private _glyphs: Glyph[];
   private _colorBuffer: VertexBuffer;
+  private _spacing: number;
+  private _isWinding: boolean;
   fontParser: FontParser;
   device: GPUDevice;
   color: number[];
@@ -20,20 +29,29 @@ export class TextBlock {
 
   bb: vec4;
 
+  /*
+  
+  options = {
+    color: [0.0, 0.0, 0.0, 1.0],
+    backgroundColor: [0.0, 1.0, 1.0, 0.0],
+    spacing: 1.0,
+    fill_winding: true,
+  }
+  */
   constructor(
     device: GPUDevice,
     text: string,
     fontParser: FontParser,
-    color?: number[],
-    backgroundColor?: number[]
+    options?: TextBlockOptions
   ) {
     this.device = device;
     this._text = text;
     this.fontParser = fontParser;
-    this.color = color ?? defaultColor;
-    this.bgColor = backgroundColor ?? defaultBgColor;
+    this.color = options?.color ?? defaultColor;
+    this.bgColor = options?.backgroundColor ?? defaultBgColor;
     this._colorBuffer = this.createVertexBuffer(device, this.getColorArray());
-
+    this._spacing = options?.spacing ?? 1.0;
+    this._isWinding = options?.isWinding ?? true;
     this._verticesSize = 0;
     this._transformsSize = 0;
     this._glyphs = this.createGlyphs();
@@ -41,6 +59,30 @@ export class TextBlock {
     this._transformsBuffer = this.createTransformsBuffer();
 
     this.bb = vec4.create();
+  }
+
+  public get spacing(): number {
+    return this._spacing;
+  }
+
+  public set spacing(spacing: number) {
+    this._spacing = spacing;
+    this._glyphs.forEach((glyph) => {
+      // set matrix
+    });
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
+
+  public get isWinding() : boolean {
+    return this._isWinding;
+  }
+
+  public set isWinding(value: boolean) {
+
+    if (value != this._isWinding){
+      this._isWinding = value;
+      this.updateGlyphs();
+    }
   }
 
   public get verticesBuffer() {
@@ -79,6 +121,12 @@ export class TextBlock {
   ): VertexBuffer {
     return new VertexBuffer(device, vertices);
   }
+
+  private updateGlyphs() {
+    this._glyphs = this.createGlyphs();
+    this._verticesBuffer = this.createVerticesBuffer();
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
   private createGlyphs(): Glyph[] {
     console.log(this._text);
     const alignment = this.device.limits.minStorageBufferOffsetAlignment;
@@ -87,7 +135,7 @@ export class TextBlock {
     let verticesOffset = 0;
     let prevWidth = 0;
     let offsetX = 0;
-    this.fontParser.parseText(this._text).forEach((glyph, i) => {
+    this.fontParser.parseText(this._text, this._isWinding).forEach((glyph) => {
       const { bb, vertices } = glyph;
       let transformsSize = Math.ceil(21 / alignment) * alignment;
       let verticesSize = Math.ceil(vertices.length / alignment) * alignment;

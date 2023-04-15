@@ -101,7 +101,7 @@ export class Renderer {
   createBuffers(): RendererBuffers {
     const uniformBuffer = this.device.createBuffer({
       // + 16 = 4 * 4;
-      size: MAT4LENGTH * 2,
+      size: MAT4LENGTH * 2 + 16,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const glyphBuffer = this.device.createBuffer({
@@ -267,6 +267,13 @@ export class Renderer {
    * Wrties the data to the uniform buffer.
    */
   private setupBuffer() {
+    // Camera view matrix
+    this.device.queue.writeBuffer(
+      this.buffers.uniform,
+      0,
+      <ArrayBuffer>this.view
+    );
+
     // Camera projection matrix
     this.device.queue.writeBuffer(
       this.buffers.uniform,
@@ -274,12 +281,13 @@ export class Renderer {
       <ArrayBuffer>this.projection
     );
 
-    // Camera view matrix
-    this.device.queue.writeBuffer(
-      this.buffers.uniform,
-      0,
-      <ArrayBuffer>this.view
-    );
+      // Filling algorithm
+      this.device.queue.writeBuffer(
+        this.buffers.uniform,
+        128,
+        new Float32Array([this.textBlock.isWinding ? 1 : -1]).buffer
+      );
+
 
     // Color
     this.device.queue.writeBuffer(

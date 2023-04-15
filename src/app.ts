@@ -93,8 +93,10 @@ export class App {
 
   notify() {
     console.log("notified");
+
     this.renderer.color = colors['ternary'];
     this.renderer.view = this.camera.view;
+
     const perFrameData = this.renderer.prepare();
     this.renderer.render(perFrameData);
   }

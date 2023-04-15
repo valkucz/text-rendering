@@ -1,6 +1,7 @@
 struct Uniforms {
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
+    is_winding: f32
 
 };
 
@@ -66,7 +67,9 @@ fn get_rectangle() -> array<vec3<f32>, 6> {
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     var x = glyph_transform.bbox.x + (glyph_transform.bbox.z - glyph_transform.bbox.x) * input.uv.x;
     var y = glyph_transform.bbox.y + (glyph_transform.bbox.w  - glyph_transform.bbox.y) * input.uv.y;
-
+    if (uniforms.is_winding == 1) {
+        return fill_winding(vec2<f32>(x, y));
+    }
     return fill_sdf(vec2<f32>(x , y));
 }
 

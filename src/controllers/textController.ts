@@ -16,11 +16,11 @@ const defaultText = 'A';
 export class TextController implements Controller {
     
   private inputElem: HTMLInputElement;
-  private resetBtn: HTMLButtonElement;
   private colorElem: HTMLInputElement;
   private bgcolorElem: HTMLInputElement;
   private fontElem: HTMLSelectElement;
-
+  private windingRadioElem: HTMLInputElement;
+  private sdfRadioElem: HTMLInputElement;
 
   color: number[];
   bgColor: number[];
@@ -36,10 +36,12 @@ export class TextController implements Controller {
   ) {
 
     this.inputElem = document.getElementById("text-input") as HTMLInputElement;
-    this.resetBtn = document.getElementById("text-reset") as HTMLButtonElement;
     this.colorElem = document.getElementById("text-color") as HTMLInputElement;
     this.bgcolorElem = document.getElementById("bgcolor") as HTMLInputElement;
     this.fontElem = document.getElementById("text-font") as HTMLSelectElement;
+    this.windingRadioElem = document.getElementById("radio-is-winding") as HTMLInputElement;
+    this.sdfRadioElem = document.getElementById("radio-is-sdf") as HTMLInputElement;
+
     // TODO: remove defaults, use direct colors
     this.defaultColor = this.color = defaultColorHex;
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
@@ -79,34 +81,24 @@ export class TextController implements Controller {
 
         this.textBlock.updateText(text);
       }
-
       app.notify();
     });
-
-    this.resetBtn.addEventListener("click", async () => {
-
-      console.log('Text controller', defaultColorHex, colors['primary']);
-      if (this.color != colors['primary'] || this.bgColor != colors['secondary']) {
-        this.updateColors();
-
-        
-      }
-      const url = PREFIX + this.fontElem.value;
-      this.fontElem.selectedIndex = 0;
-      if (url != defaultUrl) {
-        await this.textBlock.updateFont(defaultUrl);
-      }
-
-      this.inputElem.value = defaultText;
-      this.textBlock.updateText(defaultText);
-      app.notify();
-    })
 
     this.fontElem.addEventListener("change", async () => {
       const url = PREFIX + this.fontElem.value;
       await this.textBlock.updateFont(url);
       app.notify();
-    })   
+    });
+    
+    this.windingRadioElem.addEventListener("change", () => {
+      this.textBlock.isWinding = true;
+      app.notify();
+    });
+
+    this.sdfRadioElem.addEventListener("change", () => {
+      this.textBlock.isWinding = false;
+      app.notify();
+    });
   }
 
   updateColors() {
