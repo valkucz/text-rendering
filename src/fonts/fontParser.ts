@@ -6,7 +6,6 @@ import opentype, { Font, PathCommand } from 'opentype.js'
 export interface ParsedGlyph {
   bb: opentype.BoundingBox;
   vertices: Float32Array;
-  height: number;
 }
 
 export class FontParser {
@@ -16,6 +15,10 @@ export class FontParser {
   constructor(font: Font) {
     this.font = font;
     this.initFont = font;
+  }
+
+  public get height(): number {
+    return this.font.ascender - this.font.descender;
   }
 
   static async initialize(url: string): Promise<FontParser> {
@@ -42,14 +45,12 @@ export class FontParser {
   parseText(text: string, isWinding: boolean = true): ParsedGlyph[] {
     const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
     const parseGlyphs: ParsedGlyph[] = [];
-    const height = this.font.ascender - this.font.descender;
     console.log('iswinding', isWinding);
     paths.forEach((path) => {
       
       const bb = path.getBoundingBox();
       const vertices = this.parseShapeToGlyph(path.commands, isWinding);
-      parseGlyphs.push({ bb, vertices, 
-       height: height});
+      parseGlyphs.push({ bb, vertices });
       
     })
 

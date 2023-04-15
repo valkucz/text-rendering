@@ -6,10 +6,12 @@ import { VertexBuffer } from "./vertexBuffer";
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
 const defaultBgColor = [0.0, 1.0, 1.0, 0.0];
 
+const velocity = 0.125;
 export interface TextBlockOptions {
   color?: number[];
   backgroundColor?: number[];
   spacing?: number;
+  width?: number;
   isWinding?: boolean;
 }
 export class TextBlock {
@@ -21,6 +23,7 @@ export class TextBlock {
   private _glyphs: Glyph[];
   private _colorBuffer: VertexBuffer;
   private _spacing: number;
+  private _width: number;
   private _isWinding: boolean;
   fontParser: FontParser;
   device: GPUDevice;
@@ -51,25 +54,51 @@ export class TextBlock {
     this.bgColor = options?.backgroundColor ?? defaultBgColor;
     this._colorBuffer = this.createVertexBuffer(device, this.getColorArray());
     this._spacing = options?.spacing ?? 1.0;
+    this._width = options?.width ?? 1.0;
     this._isWinding = options?.isWinding ?? true;
     this._verticesSize = 0;
     this._transformsSize = 0;
     this._glyphs = this.createGlyphs();
+    this.setMatrices();
     this._verticesBuffer = this.createVerticesBuffer();
     this._transformsBuffer = this.createTransformsBuffer();
 
     this.bb = vec4.create();
   }
 
+
   public get spacing(): number {
     return this._spacing;
   }
 
-  public set spacing(spacing: number) {
-    this._spacing = spacing;
+  public get width(): number {
+    return this._width;
+  }
+
+  public set width(width: number) {
+    this._width = width * velocity;
+    this.setMatrices();
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
+
+  private setMatrices() {
+    let offsetX = 0;
+    let prevWidth = 0;
+    const totalHeight = this.fontParser.height;
     this._glyphs.forEach((glyph) => {
-      // set matrix
+      let width = glyph.bb[2] - glyph.bb[0];
+      let height = glyph.bb[3] - glyph.bb[1];
+      const { model, deltaX } = this.setModel(width, height, totalHeight, offsetX, prevWidth);
+      console.log('set matrices', glyph.model, model);
+      glyph.model = model;
+      offsetX = deltaX;
+      prevWidth = width;
     });
+  }
+
+  public set spacing(spacing: number) {
+    this._spacing = spacing * velocity;
+    this.setMatrices();
     this._transformsBuffer = this.createTransformsBuffer();
   }
 
@@ -78,7 +107,6 @@ export class TextBlock {
   }
 
   public set isWinding(value: boolean) {
-
     if (value != this._isWinding){
       this._isWinding = value;
       this.updateGlyphs();
@@ -124,9 +152,11 @@ export class TextBlock {
 
   private updateGlyphs() {
     this._glyphs = this.createGlyphs();
+    this.setMatrices();
     this._verticesBuffer = this.createVerticesBuffer();
     this._transformsBuffer = this.createTransformsBuffer();
   }
+
   private createGlyphs(): Glyph[] {
     console.log(this._text);
     const alignment = this.device.limits.minStorageBufferOffsetAlignment;
@@ -135,6 +165,7 @@ export class TextBlock {
     let verticesOffset = 0;
     let prevWidth = 0;
     let offsetX = 0;
+    const totalHeihgt = this.fontParser.height;
     this.fontParser.parseText(this._text, this._isWinding).forEach((glyph) => {
       const { bb, vertices } = glyph;
       let transformsSize = Math.ceil(21 / alignment) * alignment;
@@ -142,10 +173,10 @@ export class TextBlock {
       const width = bb.x2 - bb.x1;
       const height = bb.y2 - bb.y1;
 
-      const { model, deltaX } = this.setModel(width, height, glyph.height, offsetX, prevWidth);
+      // const { model, deltaX } = this.setModel(width, height, totalHeihgt, offsetX, prevWidth);
       glyphs.push({
         vertices: vertices,
-        model: model,
+        model: mat4.create(),
         bb: vec4.fromValues(bb.x1, bb.y1, bb.x2, bb.y2),
         length: vertices.length / 2,
         transformsSize: transformsSize,
@@ -153,10 +184,10 @@ export class TextBlock {
         transformsOffset: transformsOffset,
         verticesOffset: verticesOffset
       });
+      // offsetX = deltaX;
       prevWidth = width;
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
-      offsetX = deltaX;
     });
     this._verticesSize = verticesOffset;
     this._transformsSize = transformsOffset;
@@ -200,26 +231,28 @@ export class TextBlock {
     const model = mat4.create();
     
     const scaleFactor = height / totalHeight;
-    const scalingX = width / totalHeight;
+    const scalingX =  width * this._width / totalHeight;
     
     let deltaX = offsetX;
     if (width != prevWidth) {
-      deltaX += 1/2 * ((prevWidth - width) / totalHeight);
+      deltaX += (1/2 * ((prevWidth - width) / totalHeight));
     }
+    
 
     mat4.rotateY(model, model, -Math.PI / 2);
-    mat4.translate(model, model, [scalingX + deltaX, 0.5 * scaleFactor, 0]);
+    mat4.translate(model, model, [(scalingX + deltaX * this._spacing * this._width), 0.5 * scaleFactor, 0]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
 
     deltaX += scalingX;
+
+    console.log('setModel', model);
+
     return { model, deltaX };
   }
 
   updateText(text: string) {
     this._text = text;
-    this._glyphs = this.createGlyphs();
-    this._verticesBuffer = this.createVerticesBuffer();
-    this._transformsBuffer = this.createTransformsBuffer();
+    this.updateGlyphs();
   }
 
   async updateFont(font: string) {

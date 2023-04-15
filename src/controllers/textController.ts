@@ -21,6 +21,8 @@ export class TextController implements Controller {
   private fontElem: HTMLSelectElement;
   private windingRadioElem: HTMLInputElement;
   private sdfRadioElem: HTMLInputElement;
+  private spacing: HTMLInputElement;
+  private width: HTMLInputElement;
 
   color: number[];
   bgColor: number[];
@@ -41,7 +43,8 @@ export class TextController implements Controller {
     this.fontElem = document.getElementById("text-font") as HTMLSelectElement;
     this.windingRadioElem = document.getElementById("radio-is-winding") as HTMLInputElement;
     this.sdfRadioElem = document.getElementById("radio-is-sdf") as HTMLInputElement;
-
+    this.spacing = document.getElementById("text-spacing") as HTMLInputElement;
+    this.width = document.getElementById("text-width") as HTMLInputElement;
     // TODO: remove defaults, use direct colors
     this.defaultColor = this.color = defaultColorHex;
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
@@ -55,9 +58,11 @@ export class TextController implements Controller {
   
   setup() {
     this.inputElem.value = defaultText;
-    this.textBlock.updateText(defaultText);
+    this.textBlock.spacing = parseFloat(this.spacing.value);
+
     this.textBlock.color = this.defaultColor;
     this.textBlock.bgColor = this.defaultBgColor;
+    this.textBlock.updateText(defaultText);
   }
 
   addEventListener(app: App): void {
@@ -97,6 +102,16 @@ export class TextController implements Controller {
 
     this.sdfRadioElem.addEventListener("change", () => {
       this.textBlock.isWinding = false;
+      app.notify();
+    });
+
+    this.spacing.addEventListener("input", () => {
+      this.textBlock.spacing = parseFloat(this.spacing.value);
+      app.notify();
+    });
+
+    this.width.addEventListener("input", () => {
+      this.textBlock.width = parseFloat(this.width.value);
       app.notify();
     });
   }

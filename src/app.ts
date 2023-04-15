@@ -1,13 +1,10 @@
 import { Controller } from "./controllers/controller";
-import { MenuController } from "./controllers/menuController";
 import { SceneController } from "./controllers/sceneController";
 import { TextController } from "./controllers/textController";
 import { AppController } from "./controllers/appController";
 import { FontParser } from "./fonts/fontParser";
-import { hexToRgba } from "./math";
 import { Renderer } from "./rendering/renderer";
 import { Camera } from "./scene/camera";
-import { Glyph } from "./scene/objects/glyph";
 import { colors } from "./controllers/appController";
 import { TextBlock } from "./scene/objects/textBlock";
 // FIXME: move to fontParser
@@ -74,7 +71,6 @@ export class App {
     const controllers = [
       new SceneController("glyph", camera),
       textController,
-      new MenuController(),
       new AppController(textController),
     ];
 
