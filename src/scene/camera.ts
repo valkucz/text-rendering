@@ -95,7 +95,7 @@ export class Camera {
 
   rotateX(value: number): void {
     // value < 0, 360 >, initial 90 => Math.PI / 2
-    mat4.rotateX(this.view, this.view, degToRad(value));
+    mat4.rotateZ(this.view, this.view, degToRad(value));
   }
 
   // FIXME: moving in opposite direction; check camera
@@ -107,10 +107,13 @@ export class Camera {
 
   rotateZ(value: number): void {
     // value < 0, 360 >, initial 90 => Math.PI / 2
-    mat4.rotateZ(this.view, this.view, degToRad(value));
+    mat4.rotateX(this.view, this.view, degToRad(value));
   }
 
   move(vec: vec3): void {
+    const x = vec[0];
+    vec[0] = vec[2];
+    vec[2] = x;
     vec3.scale(vec, vec, this.moveVelocity);
     mat4.translate(this.view, this.view, vec);
   }
@@ -121,17 +124,7 @@ export class Camera {
     mat4.scale(this.view, this.view, vec);
   }
 
-  // setModel() {
-  //   // for default setting, use fromXRotation?
-  //   // https://glmatrix.net/docs/module-mat4.html
-  //   mat4.rotateY(this.view, this.view, Math.PI / 2);
-  //   // mat4.rotateZ(this.model, this.model, -Math.PI);
-  //   mat4.scale(this.view, this.view, [0.5, 0.5, 0.5]);
-  // }
-
-  // TOO: rename
   reset() {
-    // this.view = mat4.create();
     this.updateView();
   }
 }

@@ -1,5 +1,5 @@
 import { Controller } from "./controller";
-import { App, defaultUrl } from "../app";
+import { App } from "../app";
 import { hexToRgba, rgbaToHex } from "../math";
 
 const PREFIX = "./public/";
@@ -11,7 +11,7 @@ const defaultColorHex = colors["primary"];
 
 const defaultBgColorHex = colors["secondary"];
 
-const defaultText = "A";
+const defaultText = "Text rendering";
 // FIXME: why is there problem with loading textController.ts
 export class TextController implements Controller {
   private inputElem: HTMLInputElement;
@@ -48,8 +48,6 @@ export class TextController implements Controller {
     this.defaultColor = this.color = defaultColorHex;
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
     this.textBlock = textBlock;
-
-    console.log("Text controller", defaultColorHex, colors["primary"]);
     this.setup();
   }
 
@@ -113,8 +111,6 @@ export class TextController implements Controller {
   }
 
   updateColors() {
-    console.log("updateColors()", this.color, this.defaultColor);
-    console.log("text controller", this.color);
     this.color = colors["primary"];
     this.bgColor = colors["secondary"];
   }
@@ -123,7 +119,6 @@ export class TextController implements Controller {
     this.textBlock.color = this.color;
     this.textBlock.bgColor = this.bgColor;
     this.bgcolorElem.value = rgbaToHex(this.bgColor);
-    // console.log('hex', this.bgcolorElem.value);
     this.colorElem.value = rgbaToHex(this.color);
   }
 }

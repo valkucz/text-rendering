@@ -23,7 +23,6 @@
       <div class="navbar-start">
         <div class="tabs">
           <ul>
-            <li class="is-active"><a href="#section-1">Home</a></li>
             <li><a href="#section-2">Demo</a></li>
             <li><a href="#section-3">About</a></li>
           </ul>
@@ -47,175 +46,149 @@
   </nav>
   <div style="position: absolute">
 
-
-    <!-- <section class="section spacer layer1" id="section-1">
-      <h1 class="title header-element">
-        Text rendering
-      </h1>
-    </section> -->
-
     <section class="section spacer layer1" id="section-2">
-        <h1 class="title section-title">Demo</h1>
+      <h1 class="title section-title">Demo</h1>
       <div class="demo">
-          <div class="columns">
-            <div class="upper-controller secondary-style column">
-              <!-- <nav class="navbar"> -->
-
-              
-                <div class="columns is-mobile">
-                  <div class="column is-half">
-                    <nav class="level">
-                      <div class="level-left">
-                        <div class="level-item">
-                          <div class="menu-control">
-                            <div class="control-head">
-                              <p class="menu-label">Text</p>
-                            </div>
-                            <div>
-                              <input id="text-input" class="input is-medium secondary-style" type="text" placeholder="Text input">
-                            </div>
-                          </div>
+        <div class="columns">
+          <div class="upper-controller secondary-style column">
+            <div class="columns is-mobile">
+              <div class="column is-half">
+                <nav class="level">
+                  <div class="level-left">
+                    <div class="level-item">
+                      <div class="menu-control">
+                        <div class="control-head">
+                          <p class="menu-label">Text</p>
                         </div>
-                        <div class="level-item is-flex">
-                          <div class="menu-control">
-                            <div class="control-head">
-                              <p class="menu-label">Font</p>
-                            </div>
-                            <div class="control is-align-self-center select is-medium secondary-style">
-                              <select id="text-font"  class="secondary-style">
-                                <option value="Blogger_Sans.otf" class="secondary-style">Blogger Sans</option>
-                                <option value="MontserratAlternates-Medium.otf"  class="secondary-style">MontserratAlternates Medium</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="level-item is-flex">
-                          <div class="menu-control">
-                            <div class="control-head">
-                              <p class="menu-label">Color</p>
-                            </div>
-                            <div class="control">
-                              <input type="color" id="text-color" class="input is-small input-color" value="#c9cdd7">
-                              <input type="color" id="bgcolor" class="input is-small input-color" value="#f1e8eb">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="level-item is-flex">
-                          <div class="menu-control">
-                            <div class="control-head">
-                              <p class="menu-label">Spacing</p>
-                            </div>
-                            <div class="control is-align-self-center">
-                              <input type="range" min="1" max="16" value="8" class="slider" id="text-spacing">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="level-item is-flex">
-                          <div class="menu-control">
-                            <div class="control-head">
-                              <p class="menu-label">Width</p>
-                            </div>
-                            <div class="control is-align-self-center">
-                              <input type="range" min="1" max="16" value="8" class="slider" id="text-width">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="level-item is-flex">
-                          <div class="menu-control">
-                            <div>
-                              <p class="menu-label">Filling algorithm</p>
-                            </div>
-                            <div class="control">
-                                <label class="radio">
-                                  <input type="radio" name="radio-option" value="true" id="radio-is-winding" checked>
-                                  Winding Number
-
-                                <label class="radio">
-                                  <input type="radio" name="radio-option" value="false" id="radio-is-sdf">
-                                  Signed distance
-                                </label>
-                            </div>
-                          </div>
+                        <div>
+                          <input id="text-input" class="input is-medium secondary-style" type="text"
+                            placeholder="Text input">
                         </div>
                       </div>
-                    </nav>
+                    </div>
+                    <div class="level-item is-flex">
+                      <div class="menu-control">
+                        <div class="control-head">
+                          <p class="menu-label">Font</p>
+                        </div>
+                        <div class="control is-align-self-center select is-medium secondary-style">
+                          <select id="text-font" class="secondary-style">
+                            <option value="Blogger_Sans.otf" class="secondary-style">Blogger Sans</option>
+                            <option value="MontserratAlternates-Medium.otf" class="secondary-style">MontserratAlternates
+                              Medium</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="level-item is-flex">
+                      <div class="menu-control">
+                        <div class="control-head">
+                          <p class="menu-label">Color</p>
+                        </div>
+                        <div class="control">
+                          <input type="color" id="text-color" class="input is-small input-color" value="#c9cdd7">
+                          <input type="color" id="bgcolor" class="input is-small input-color" value="#f1e8eb">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="level-item is-flex">
+                      <div class="menu-control">
+                        <div class="control-head">
+                          <p class="menu-label">Spacing</p>
+                        </div>
+                        <div class="control is-align-self-center">
+                          <input type="range" min="1" max="16" value="8" class="slider" id="text-spacing">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="level-item is-flex">
+                      <div class="menu-control">
+                        <div class="control-head">
+                          <p class="menu-label">Width</p>
+                        </div>
+                        <div class="control is-align-self-center">
+                          <input type="range" min="1" max="16" value="8" class="slider" id="text-width">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="level-item is-flex">
+                      <div class="menu-control">
+                        <div>
+                          <p class="menu-label">Filling algorithm</p>
+                        </div>
+                        <div class="control">
+                          <label class="radio">
+                            <input type="radio" name="radio-option" value="true" id="radio-is-winding" checked>
+                            Winding Number
+
+                            <label class="radio">
+                              <input type="radio" name="radio-option" value="false" id="radio-is-sdf">
+                              Signed distance
+                            </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                
-                
-                
-
-              <!-- </nav> -->
-
+                </nav>
+              </div>
             </div>
-          </div>
-          <div class="columns demo-child">
-              <canvas class="canvas" id="canvas">
-              </canvas>
-            <div class="controller-menu secondary-style" id="controller-menu">
-              <div class="content-menu" id="content-menu">
-                <aside class="menu">
-                  <!-- <p class="menu-label">
-                    Text
-                  </p> -->
-                  <!-- <ul class="menu-list">
-                    <li>
-                    </li>
-                    <li>
-                      <button id="text-reset">Reset</button>
-                    </li>
-                  </ul> -->
-                  <p class="menu-label">
-                    <!-- TODO: rename to Glyph? -->
-                    Object
-                  </p>
-                  <ul class="menu-list">
-                    <li>Position</li>
-                    <li>
-                      <ul>
-                        <li>
-                          <p>x</p>
-                          <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-x">
-                        </li>
-                        <li>
-                          <p>y</p>
-                          <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-y">
-                        </li>
-                        <li>
-                          <p>z</p>
-                          <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-z">
-                        </li>
-                      </ul>
-                    </li>
-                    <li>Rotation</li>
-                    <li>
-                      <ul>
-                        <li>
-                          <p>x</p>
-                          <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-x">
-                        </li>
-                        <li>
-                          <p>y</p>
-                          <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-y">
-                        </li>
-                        <li>
-                          <p>z</p>
-                          <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-z">
-                        </li>
-                      </ul>
-                    </li>
-                    <li>Scale</li>
-                    <ul>
-                      <li><input type="range" min="1" max="500" value="250" class="slider" id="glyph-scale"></li>
-                    </ul>
-                    <li><button id="glyph-reset">Reset</button></li>
-                  </ul>
-                </aside>
-            </div>
-          </div>
           </div>
         </div>
+        <div class="columns demo-child">
+          <canvas class="canvas" id="canvas">
+          </canvas>
+          <div class="controller-menu secondary-style" id="controller-menu">
+            <div class="content-menu" id="content-menu">
+              <aside class="menu">
+                <p class="menu-label">
+                  Object
+                </p>
+                <ul class="menu-list">
+                  <li>Position</li>
+                  <li>
+                    <ul>
+                      <li>
+                        <p>x</p>
+                        <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-x">
+                      </li>
+                      <li>
+                        <p>y</p>
+                        <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-y">
+                      </li>
+                      <li>
+                        <p>z</p>
+                        <input type="range" min="1" max="500" value="250" class="slider" id="glyph-move-z">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>Rotation</li>
+                  <li>
+                    <ul>
+                      <li>
+                        <p>x</p>
+                        <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-x">
+                      </li>
+                      <li>
+                        <p>y</p>
+                        <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-y">
+                      </li>
+                      <li>
+                        <p>z</p>
+                        <input type="range" min="1" max="360" value="180" class="slider" id="glyph-rotate-z">
+                      </li>
+                    </ul>
+                  </li>
+                  <li>Scale</li>
+                  <ul>
+                    <li><input type="range" min="1" max="500" value="250" class="slider" id="glyph-scale"></li>
+                  </ul>
+                  <li><button id="glyph-reset">Reset</button></li>
+                </ul>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     <section class="section spacer layer2" id="section-3">
       <div class="content">

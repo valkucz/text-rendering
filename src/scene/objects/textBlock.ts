@@ -247,6 +247,7 @@ export class TextBlock {
     offsetY: number,
     prevWidth: number
   ) {
+    totalHeight *= 4;
     const model = mat4.create();
     const scaleFactor = height / totalHeight;
     const scalingX = (width * this._width) / totalHeight;

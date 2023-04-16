@@ -59,7 +59,22 @@ export class SceneController implements Controller {
     this.scaleValue = parseInt(this.scale.value);
 
     this.camera = camera;
+    this.setup();
   }
+
+  setup() {
+    this.camera.scale(-5);
+    this.camera.move([-29, 0, 0]);
+    this.camera.rotateY(15);
+    this.camera.rotateX(-15);
+
+    this.scaleValue -= 5;
+    this.moveXvalue -= 29;
+    this.rotateYvalue += 15;
+    this.rotateXvalue -= 15;
+    // this.scaleValue = parseInt(this.scale.value);
+  }
+
   addEventListener(app: App): void {
     // TODO: remove duplicity
     this.rotateX.addEventListener("input", () => {
@@ -101,7 +116,6 @@ export class SceneController implements Controller {
     });
 
     this.scale.addEventListener("input", () => {
-      console.log("scaling");
       this.camera.scale(parseInt(this.scale.value) - this.scaleValue);
       this.scaleValue = parseInt(this.scale.value);
       app.notify();
@@ -110,6 +124,7 @@ export class SceneController implements Controller {
     this.resetBtn.addEventListener("click", () => {
       this.reset();
       this.camera.reset();
+      this.setup();
       app.notify();
     });
   }
