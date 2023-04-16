@@ -1,43 +1,64 @@
 @import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css";
 
 :root {
-  --container-shadow: 0 4px 8px 0 rgba(255, 255, 255, 0.5), 0 6px 20px 0 rgba(70, 70, 70, 0.12);
-  --draggable-shadow: inset 0 -1px 0px rgba(0, 0, 0, 0.19);
+  --container-shadow: 0 4px 8px 0 var(--secondary-bg-color), 0 6px 20px 0 rgba(70, 70, 70, 0.12);
   --family-primary: 'Open Sans', sans-serif;
 
   /* Dark */
   --dark-bg-img-up: url('./wave-up-dark.svg');
   --dark-bg-img-down: url('./wave-down-dark.svg');
+  --dark-secondary-bg-color: rgb(40, 46, 54);
+  /* #1a1a1a */
+  --dark-text-color: #FFFFFF;
+  --dark-draggable-shadow: inset 0 -1px 0px rgba(255, 255, 255, 0.19);
+  --dark-primary-color: #03C4A1;
+  --dark-secondary-color: #66347f;
 
   /* Light */
   --light-bg-img-up: url('./wave-up-light.svg');
   --light-bg-img-down: url('./wave-down-light.svg');
+  --light-secondary-bg-color: #fbfbfb;
+  --light-text-color: #6b6e75;
+  --light-draggable-shadow: inset 0 -1px 0px rgba(0, 0, 0, 0.19);
+  --light-primary-color: #9DE5FF;
+  --light-secondary-color: #fbfbfb;
+
+
   /* Default */
   --bg-img-up: var(--light-bg-img-up);
   --bg-img-down: var(--light-bg-img-down);
+  --secondary-bg-color: var(--light-secondary-bg-color);
+  --text-color: var(--light-text-color);
+  --draggable-shadow: var(--light-draggable-shadow);
+  --primary-color: var(--light-primary-color);
+  --secondary-color: var(--light-secondary-color);
 }
 
 .dark-mode {
   --bg-img-up: var(--dark-bg-img-up);
   --bg-img-down: var(--dark-bg-img-down);
+  --secondary-bg-color: var(--dark-secondary-bg-color);
+  --text-color: var(--dark-text-color);
+  --draggable-shadow: var(--dark-draggable-shadow);
+  --primary-color: var(--dark-primary-color);
+  --secondary-color: var(--dark-secondary-color);
 }
+
 html,
 body {
   margin: 0;
   padding: 0;
   height: 100%;
-  /* color: var(--text-primary-color); */
-  /* background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--primary-bg-color) 100%),
-  var(--bg-img); */
   background-size: cover;
   background-repeat: no-repeat;
-  /* background-color: var(--primary-bg-color); */
   scroll-behavior: smooth;
 }
 
-input, select, .section-title, .navbar-start .tabs ul li.is-active a {
-  /* background-color: var(--primary-bg-color); */
+.secondary-style {
+  background-color: var(--secondary-bg-color) !important;
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
 }
+
 .menu button {
   letter-spacing: 0.05rem;
   background: var(--primary-color);
@@ -47,7 +68,7 @@ input, select, .section-title, .navbar-start .tabs ul li.is-active a {
   text-transform: uppercase;
 }
 
-*{
+* {
   color: var(--text-color) !important;
 }
 
@@ -78,18 +99,11 @@ button:enabled:active {
   right: 0;
   overflow: auto;
   overflow-x: hidden;
-  /* ensure the panel is on top of the canvas */
   transition: right 1.0s ease-in-out;
 
 }
 
-.controller-style {
-  background-color: #fbfbfb;
-  box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
-}
-
-.upper-controller .input-color
- {
+.upper-controller .input-color {
   -webkit-appearance: none;
   padding: 0;
   border: none;
@@ -99,23 +113,21 @@ button:enabled:active {
 }
 
 .input-color::-webkit-color-swatch,
-.input-color::-webkit-color-swatch-wrapper{
+.input-color::-webkit-color-swatch-wrapper {
   border: none;
   border-radius: 50%;
   padding: 0;
   box-shadow: var(--draggable-shadow);
 }
 
-
-
 .controller-menu.is-expanded {
   right: 0;
 }
+
 .container {
   padding: 0;
   height: 40rem;
   background: 0px 2px 3px rgba(255, 255, 255, 0.5);
-  background-color: var(--elem-bg-color);
   box-shadow: var(--container-shadow);
   overflow: hidden;
 }
@@ -123,26 +135,26 @@ button:enabled:active {
 .demo-child {
   height: 70vh;
   background: 0px 2px 3px rgba(255, 255, 255, 0.5);
- 
 }
+
 .demo {
   box-shadow: var(--container-shadow);
   width: 90%;
   margin: auto;
 }
+
 .demo .columns {
   margin: 0;
 }
 
 .section {
   min-height: 50rem;
-  /* padding: 2rem; */
-  /* margin: 3rem; */
 }
 
 .level-left {
   align-items: stretch;
 }
+
 .menu-control {
   display: flex;
   flex-direction: column;
@@ -172,15 +184,6 @@ button:enabled:active {
   display: inline;
 }
 
-.controller-menu-button {
-  height: 40px;
-  width: 40px;
-  top: 50%;
-  background-color: transparent;
-  border: none;
-  display: inline-block;
-  margin: 0.2rem;
-}
 
 .controller-menu input,
 select,
@@ -203,6 +206,7 @@ button {
 .menu-label {
   font-size: 0.9em;
 }
+
 .tabs .buttons {
   float: right !important;
 }
@@ -220,7 +224,7 @@ button {
   box-shadow: var(--draggable-shadow);
   -webkit-appearance: none;
   border-radius: 1rem;
-  background: var(--secondary-color);
+  background: var(--secondary-bg-color);
   outline: none;
   -webkit-transition: .2s;
   transition: opacity .2s;
@@ -252,6 +256,7 @@ input:hover {
 /* width */
 ::-webkit-scrollbar {
   width: 1rem;
+  background-color: var(--secondary-bg-color);
 }
 
 /* Track */
@@ -267,7 +272,6 @@ input:hover {
 }
 
 .box-element {
-  /* background-color: var(--elem-bg-color); */
   color: var(--text-color);
   box-shadow: var(--container-shadow);
 }

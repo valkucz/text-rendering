@@ -10,9 +10,6 @@ import { TextBlock } from "./scene/objects/textBlock";
 // FIXME: move to fontParser
 export const defaultUrl = "./public/Blogger_Sans.otf";
 
-
-// rename to manager,
-// divide -> manager, app
 export class App {
   fontParser: FontParser;
   renderer: Renderer;
@@ -60,10 +57,6 @@ export class App {
     const camera: Camera = new Camera();
 
     // Create object
-
-    // FIXME: hello world problem => prilis dlhy text na maly bb, strata dat pri konverzii?
-    // const glyph = new Glyph(device, fontParser, 'Oo');
-    // const txt = ['A']
     const textBlock = new TextBlock(device, "A", fontParser);
 
     // Create controllers
@@ -88,9 +81,7 @@ export class App {
   }
 
   notify() {
-    console.log("notified");
-
-    this.renderer.color = colors['ternary'];
+    this.renderer.color = colors["ternary"];
     this.renderer.view = this.camera.view;
 
     const perFrameData = this.renderer.prepare();
