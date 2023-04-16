@@ -218,15 +218,17 @@ export class TextBlock {
       }
       let width = glyph.bb[2] - glyph.bb[0];
       let height = glyph.bb[3] - glyph.bb[1];
-      offsetX = this.setModel(glyph.model, width, height, totalHeight, offsetX, offsetY, prevWidth);
+      const { model, deltaX } = this.setModel(width, height, totalHeight, offsetX, offsetY, prevWidth);
+      glyph.model = model;
       prevWidth = width;
+      offsetX = deltaX;
     });
 
   }
 
-
-  private setModel(model: mat4, width: number, height: number, totalHeight: number, offsetX: number, offsetY: number, prevWidth: number) {
-    
+  // TODO: not creating new model every time
+  private setModel(width: number, height: number, totalHeight: number, offsetX: number, offsetY: number, prevWidth: number) {
+    const model = mat4.create();
     const scaleFactor = height / totalHeight;
     const scalingX =  width * this._width / totalHeight;
     
@@ -238,9 +240,9 @@ export class TextBlock {
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [(scalingX + deltaX * this._spacing * this._width), 0.5 * scaleFactor, 0]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
-    // mat4.translate(model, model, [0, -5 / scaleFactor * offsetY, 0]);
+    mat4.translate(model, model, [0, -5 / scaleFactor * offsetY, 0]);
     deltaX += scalingX;
-    return deltaX;
+    return {model, deltaX};
   }
 
   updateText(text: string) {
