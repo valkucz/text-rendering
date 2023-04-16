@@ -1,7 +1,5 @@
 import { vec3 } from "gl-matrix";
 import { App } from "../app";
-import { Glyph } from "../scene/objects/glyph";
-import { SceneObject } from "../scene/objects/sceneObject";
 import { Controller } from "./controller";
 import { Camera } from "../scene/camera";
 
@@ -28,7 +26,6 @@ export class SceneController implements Controller {
   moveZvalue: number;
 
   scaleValue: number;
-;
   camera: Camera;
 
   constructor(id: string, camera: Camera) {
@@ -104,7 +101,7 @@ export class SceneController implements Controller {
     });
 
     this.scale.addEventListener("input", () => {
-      console.log('scaling');
+      console.log("scaling");
       this.camera.scale(parseInt(this.scale.value) - this.scaleValue);
       this.scaleValue = parseInt(this.scale.value);
       app.notify();

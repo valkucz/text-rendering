@@ -4,17 +4,16 @@ import { hexToRgba, rgbaToHex } from "../math";
 
 const PREFIX = "./public/";
 
-import { colors } from './appController'
+import { colors } from "./appController";
 import { TextBlock } from "../scene/objects/textBlock";
 
-const defaultColorHex = colors['primary'];
+const defaultColorHex = colors["primary"];
 
-const defaultBgColorHex = colors['secondary'];
+const defaultBgColorHex = colors["secondary"];
 
-const defaultText = 'A';
+const defaultText = "A";
 // FIXME: why is there problem with loading textController.ts
 export class TextController implements Controller {
-    
   private inputElem: HTMLInputElement;
   private colorElem: HTMLInputElement;
   private bgcolorElem: HTMLInputElement;
@@ -32,17 +31,17 @@ export class TextController implements Controller {
   defaultBgColor: number[];
   // font parser has glyph or glyph has font parser, so no need to pass both
 
-
-  constructor(
-    textBlock: TextBlock,
-  ) {
-
+  constructor(textBlock: TextBlock) {
     this.inputElem = document.getElementById("text-input") as HTMLInputElement;
     this.colorElem = document.getElementById("text-color") as HTMLInputElement;
     this.bgcolorElem = document.getElementById("bgcolor") as HTMLInputElement;
     this.fontElem = document.getElementById("text-font") as HTMLSelectElement;
-    this.windingRadioElem = document.getElementById("radio-is-winding") as HTMLInputElement;
-    this.sdfRadioElem = document.getElementById("radio-is-sdf") as HTMLInputElement;
+    this.windingRadioElem = document.getElementById(
+      "radio-is-winding"
+    ) as HTMLInputElement;
+    this.sdfRadioElem = document.getElementById(
+      "radio-is-sdf"
+    ) as HTMLInputElement;
     this.spacing = document.getElementById("text-spacing") as HTMLInputElement;
     this.width = document.getElementById("text-width") as HTMLInputElement;
     // TODO: remove defaults, use direct colors
@@ -50,12 +49,10 @@ export class TextController implements Controller {
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
     this.textBlock = textBlock;
 
-    console.log('Text controller', defaultColorHex, colors['primary']);
+    console.log("Text controller", defaultColorHex, colors["primary"]);
     this.setup();
-    
-    
   }
-  
+
   setup() {
     this.inputElem.value = defaultText;
     this.textBlock.spacing = parseFloat(this.spacing.value);
@@ -83,7 +80,6 @@ export class TextController implements Controller {
     this.inputElem.addEventListener("input", () => {
       const text = this.inputElem.value;
       if (text.length > 0) {
-
         this.textBlock.updateText(text);
       }
       app.notify();
@@ -94,7 +90,7 @@ export class TextController implements Controller {
       await this.textBlock.updateFont(url);
       app.notify();
     });
-    
+
     this.windingRadioElem.addEventListener("change", () => {
       this.textBlock.isWinding = true;
       app.notify();
@@ -117,12 +113,10 @@ export class TextController implements Controller {
   }
 
   updateColors() {
-    console.log('updateColors()', this.color, this.defaultColor);
-    console.log('text controller', this.color);
-    this.color = colors['primary'];
-    this.bgColor = colors['secondary'];
-
-
+    console.log("updateColors()", this.color, this.defaultColor);
+    console.log("text controller", this.color);
+    this.color = colors["primary"];
+    this.bgColor = colors["secondary"];
   }
 
   setElemColors() {
@@ -132,5 +126,4 @@ export class TextController implements Controller {
     // console.log('hex', this.bgcolorElem.value);
     this.colorElem.value = rgbaToHex(this.color);
   }
-
 }

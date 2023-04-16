@@ -11,7 +11,6 @@ canvas.height = rect.height * dpr;
 
 // TODO: remove export
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
-export const segments: number = 15;
 
 const app = await App.initialize(canvas);
 app.run();

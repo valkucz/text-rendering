@@ -59,7 +59,10 @@ export class TextBlock {
 
   public set color(color: number[]) {
     this._color = color;
-    this._colorBuffer = this.createVertexBuffer(this.device, this.getColorArray());
+    this._colorBuffer = this.createVertexBuffer(
+      this.device,
+      this.getColorArray()
+    );
   }
 
   public get color(): number[] {
@@ -68,7 +71,10 @@ export class TextBlock {
 
   public set bgColor(bgColor: number[]) {
     this._bgColor = bgColor;
-    this._colorBuffer = this.createVertexBuffer(this.device, this.getColorArray());
+    this._colorBuffer = this.createVertexBuffer(
+      this.device,
+      this.getColorArray()
+    );
   }
 
   public get spacing(): number {
@@ -91,12 +97,12 @@ export class TextBlock {
     this._transformsBuffer = this.createTransformsBuffer();
   }
 
-  public get isWinding() : boolean {
+  public get isWinding(): boolean {
     return this._isWinding;
   }
 
   public set isWinding(value: boolean) {
-    if (value != this._isWinding){
+    if (value != this._isWinding) {
       this._isWinding = value;
       this.updateGlyphs();
     }
@@ -129,9 +135,11 @@ export class TextBlock {
   public get colorBuffer(): VertexBuffer {
     return this._colorBuffer;
   }
+
   private getColorArray(): Float32Array {
     return new Float32Array(this._color.concat(this._bgColor));
   }
+
   private createVertexBuffer(
     device: GPUDevice,
     vertices: Float32Array
@@ -163,7 +171,7 @@ export class TextBlock {
         transformsSize: transformsSize,
         verticesSize: verticesSize,
         transformsOffset: transformsOffset,
-        verticesOffset: verticesOffset
+        verticesOffset: verticesOffset,
       });
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
@@ -172,7 +180,6 @@ export class TextBlock {
     this._transformsSize = transformsOffset;
     return glyphs;
   }
-
 
   createTransformsBuffer() {
     const buffer = new Float32Array(this._transformsSize);
@@ -189,7 +196,6 @@ export class TextBlock {
       offset += 16;
 
       buffer.set(glyph.bb, offset);
-
     }
     return buffer;
   }
@@ -218,31 +224,48 @@ export class TextBlock {
       }
       let width = glyph.bb[2] - glyph.bb[0];
       let height = glyph.bb[3] - glyph.bb[1];
-      const { model, deltaX } = this.setModel(width, height, totalHeight, offsetX, offsetY, prevWidth);
+      const { model, deltaX } = this.setModel(
+        width,
+        height,
+        totalHeight,
+        offsetX,
+        offsetY,
+        prevWidth
+      );
       glyph.model = model;
       prevWidth = width;
       offsetX = deltaX;
     });
-
   }
 
   // TODO: not creating new model every time
-  private setModel(width: number, height: number, totalHeight: number, offsetX: number, offsetY: number, prevWidth: number) {
+  private setModel(
+    width: number,
+    height: number,
+    totalHeight: number,
+    offsetX: number,
+    offsetY: number,
+    prevWidth: number
+  ) {
     const model = mat4.create();
     const scaleFactor = height / totalHeight;
-    const scalingX =  width * this._width / totalHeight;
-    
+    const scalingX = (width * this._width) / totalHeight;
+
     let deltaX = offsetX;
     if (width != prevWidth) {
-      deltaX += (1/2 * ((prevWidth - width) / totalHeight));
+      deltaX += (1 / 2) * ((prevWidth - width) / totalHeight);
     }
-    
+
     mat4.rotateY(model, model, -Math.PI / 2);
-    mat4.translate(model, model, [(scalingX + deltaX * this._spacing * this._width), 0.5 * scaleFactor, 0]);
+    mat4.translate(model, model, [
+      scalingX + deltaX * this._spacing * this._width,
+      0.5 * scaleFactor,
+      0,
+    ]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
-    mat4.translate(model, model, [0, -5 / scaleFactor * offsetY, 0]);
+    mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
-    return {model, deltaX};
+    return { model, deltaX };
   }
 
   updateText(text: string) {
@@ -253,7 +276,6 @@ export class TextBlock {
   async updateFont(font: string) {
     await this.fontParser.changeFont(font);
     this.updateGlyphs();
-
   }
 
   resetText() {

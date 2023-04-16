@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
-import { cubicToQuadratic } from "../approximation";
+import { cubicToQuadratic } from "../math";
 import { vec2ToFloat32 } from "../math";
-import opentype, { Font, PathCommand } from 'opentype.js'
+import opentype, { Font, PathCommand } from "opentype.js";
 
 export interface ParsedGlyph {
   bb: opentype.BoundingBox;
@@ -34,17 +34,15 @@ export class FontParser {
     return opentypeFont;
   }
 
-
   async changeFont(url: string): Promise<void> {
     console.log(url);
     this.font = await FontParser.loadFont(url);
   }
 
-
   parseText(text: string, isWinding: boolean = true): ParsedGlyph[] {
     const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
-    const enter = new opentype.Glyph({unicode: 10});
-    console.log('enter',enter);
+    const enter = new opentype.Glyph({ unicode: 10 });
+    console.log("enter", enter);
     const parseGlyphs: ParsedGlyph[] = [];
     paths.forEach((path) => {
       let bb = path.getBoundingBox();
@@ -55,7 +53,6 @@ export class FontParser {
         bb.x2 = this.height;
       }
       parseGlyphs.push({ bb, vertices });
-      
     });
     return parseGlyphs;
   }
@@ -67,7 +64,10 @@ export class FontParser {
     return res;
   }
 
-  private parseShapeToGlyph(cmds: PathCommand[], isWinding: boolean = true): Float32Array {
+  private parseShapeToGlyph(
+    cmds: PathCommand[],
+    isWinding: boolean = true
+  ): Float32Array {
     let vertices: vec2[] = [];
     let last = vec2.create();
     let first = vec2.create();
@@ -80,7 +80,7 @@ export class FontParser {
           break;
         case "L":
           let curr = vec2.fromValues(cmd.x, cmd.y);
-          if (!isWinding){
+          if (!isWinding) {
             vertices.push(vec2.fromValues(-1, -1));
           }
           vertices.push(last);
@@ -89,7 +89,12 @@ export class FontParser {
           last = vec2.clone(curr);
           break;
         case "C":
-          let points = [last, vec2.fromValues(cmd.x1, cmd.y1), vec2.fromValues(cmd.x2, cmd.y2), vec2.fromValues(cmd.x, cmd.y)];
+          let points = [
+            last,
+            vec2.fromValues(cmd.x1, cmd.y1),
+            vec2.fromValues(cmd.x2, cmd.y2),
+            vec2.fromValues(cmd.x, cmd.y),
+          ];
           cubicToQuadratic(points).forEach((qpoints) => {
             if (!isWinding) {
               vertices.push(vec2.fromValues(1, 1));
@@ -99,7 +104,7 @@ export class FontParser {
           last = vec2.clone(vertices[vertices.length - 1]);
           break;
         case "Q":
-          if (!isWinding){
+          if (!isWinding) {
             vertices.push(vec2.fromValues(1, 1));
           }
           vertices.push(last);

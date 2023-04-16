@@ -93,7 +93,6 @@ export class Camera {
     mat4.lookAt(this.view, this.eye, this.center, this.up);
   }
 
-  
   rotateX(value: number): void {
     // value < 0, 360 >, initial 90 => Math.PI / 2
     mat4.rotateX(this.view, this.view, degToRad(value));
@@ -117,7 +116,7 @@ export class Camera {
   }
 
   scale(value: number): void {
-    const amount = (this.scaleVelocity) ** value;
+    const amount = this.scaleVelocity ** value;
     const vec = vec3.fromValues(amount, amount, amount);
     mat4.scale(this.view, this.view, vec);
   }
@@ -133,5 +132,6 @@ export class Camera {
   // TOO: rename
   reset() {
     // this.view = mat4.create();
-    this.updateView();  }
+    this.updateView();
+  }
 }

@@ -26,9 +26,7 @@ export const colors = {
 export class AppController implements Controller {
   private navbar: HTMLElement;
   private modeBtn: HTMLButtonElement;
-
   private textController: TextController;
-
   private isLight: boolean = true;
   private lastScrollTop: number = 0;
 

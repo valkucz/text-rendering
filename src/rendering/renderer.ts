@@ -67,7 +67,7 @@ export class Renderer {
     textBlock: TextBlock,
     projection: mat4,
     view: mat4,
-    // TODO: set to default? 
+    // TODO: set to default?
     color: number[],
     format: GPUTextureFormat = "bgra8unorm"
   ) {
@@ -76,7 +76,7 @@ export class Renderer {
     this.ctx = <GPUCanvasContext>canvas.getContext("webgpu");
     if (!this.ctx) {
       throw new Error("Context is null or undefined");
-    }    
+    }
     this.textBlock = textBlock;
     this.projection = projection;
     this.view = view;
@@ -107,11 +107,11 @@ export class Renderer {
     const glyphBuffer = this.device.createBuffer({
       size: this.textBlock.verticesSize * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-    })
+    });
     const transformBuffer = this.device.createBuffer({
       size: this.textBlock.transformsSize * 4,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    })
+    });
 
     return {
       uniform: uniformBuffer,
@@ -164,44 +164,43 @@ export class Renderer {
   createBindGroupLayouts(): GPUBindGroupLayout[] {
     return [
       this.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-          buffer: {
-            type: "uniform",
+        entries: [
+          {
+            binding: 0,
+            visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+            buffer: {
+              type: "uniform",
+            },
           },
-        },
-        {
-          // TODO: change to uniform
-          binding: 1,
-          visibility: GPUShaderStage.FRAGMENT,
-          buffer: {
-            type: "storage",
+          {
+            // TODO: change to uniform
+            binding: 1,
+            visibility: GPUShaderStage.FRAGMENT,
+            buffer: {
+              type: "storage",
+            },
           },
-        },
-
-      ],
-    }),
-    this.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.FRAGMENT,
-          buffer: {
-            type: "storage",
+        ],
+      }),
+      this.device.createBindGroupLayout({
+        entries: [
+          {
+            binding: 0,
+            visibility: GPUShaderStage.FRAGMENT,
+            buffer: {
+              type: "storage",
+            },
           },
-        },
-        {
-          binding: 1,
-          visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
-          buffer: {
-            type: "uniform",
+          {
+            binding: 1,
+            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
+            buffer: {
+              type: "uniform",
+            },
           },
-        },
-      ]
-    }),
-  ];
+        ],
+      }),
+    ];
   }
 
   /**
@@ -231,37 +230,38 @@ export class Renderer {
 
   /**
    * Creates bind groups for each glyph.
-   * @returns 
+   * @returns
    */
   createGlyphBindGroups(): GPUBindGroup[] {
     const bindGroups: GPUBindGroup[] = [];
     for (let i = 0; i < this.textBlock.glyphs.length; i++) {
-      bindGroups.push(this.device.createBindGroup({
-        layout: this.bindGroupLayouts[1],
-        entries: [
-          {
-            binding: 0,
-            resource: {
-              buffer: this.buffers.glyph,
-              size: this.textBlock.glyphs[i].verticesSize * 4,
-              offset: this.textBlock.glyphs[i].verticesOffset * 4
+      bindGroups.push(
+        this.device.createBindGroup({
+          layout: this.bindGroupLayouts[1],
+          entries: [
+            {
+              binding: 0,
+              resource: {
+                buffer: this.buffers.glyph,
+                size: this.textBlock.glyphs[i].verticesSize * 4,
+                offset: this.textBlock.glyphs[i].verticesOffset * 4,
+              },
             },
-          },
-          {
-            binding: 1,
-            resource: {
-              buffer: this.buffers.transforms,
-              size: this.textBlock.glyphs[i].transformsSize * 4,
-              offset: this.textBlock.glyphs[i].transformsOffset * 4
+            {
+              binding: 1,
+              resource: {
+                buffer: this.buffers.transforms,
+                size: this.textBlock.glyphs[i].transformsSize * 4,
+                offset: this.textBlock.glyphs[i].transformsOffset * 4,
+              },
             },
-          },
-        ],
-      }))
+          ],
+        })
+      );
     }
-    
+
     return bindGroups;
   }
-
 
   /**
    * Wrties the data to the uniform buffer.
@@ -281,13 +281,12 @@ export class Renderer {
       <ArrayBuffer>this.projection
     );
 
-      // Filling algorithm
-      this.device.queue.writeBuffer(
-        this.buffers.uniform,
-        128,
-        new Float32Array([this.textBlock.isWinding ? 1 : -1]).buffer
-      );
-
+    // Filling algorithm
+    this.device.queue.writeBuffer(
+      this.buffers.uniform,
+      128,
+      new Float32Array([this.textBlock.isWinding ? 1 : -1]).buffer
+    );
 
     // Color
     this.device.queue.writeBuffer(
@@ -314,7 +313,7 @@ export class Renderer {
    * Prepares data ahead needed for rendering.
    */
   prepare(): PerFrameData {
-    const capacity = 3;//Max number of timestamps we can store
+    const capacity = 3; //Max number of timestamps we can store
     const querySet = this.device.createQuerySet({
       // If timestampWrites is not empty, "timestamp-query" must be enabled for device.
       type: "timestamp",
@@ -323,10 +322,11 @@ export class Renderer {
 
     const queryBuffer = this.device.createBuffer({
       size: 8 * capacity,
-      usage: GPUBufferUsage.QUERY_RESOLVE 
-        | GPUBufferUsage.STORAGE
-        | GPUBufferUsage.COPY_SRC
-        | GPUBufferUsage.COPY_DST,
+      usage:
+        GPUBufferUsage.QUERY_RESOLVE |
+        GPUBufferUsage.STORAGE |
+        GPUBufferUsage.COPY_SRC |
+        GPUBufferUsage.COPY_DST,
     });
     // const renderTarget = this.device.createTexture({
     //   size: [this.canvas.width, this.canvas.height],
@@ -351,7 +351,12 @@ export class Renderer {
       colorAttachments: [
         {
           view: textureView,
-          clearValue: { r: this.color[0], g: this.color[1], b: this.color[2], a: this.color[3]},
+          clearValue: {
+            r: this.color[0],
+            g: this.color[1],
+            b: this.color[2],
+            a: this.color[3],
+          },
           loadOp: "clear",
           storeOp: "store",
         },
@@ -372,7 +377,14 @@ export class Renderer {
    * @param perFrameData - Data needed for rendering a frame.
    */
   render(perFrameData: PerFrameData) {
-    const { uniformBindGroup, glyphBindGroups, commandEncoder, renderPass, querySet, queryBuffer } = perFrameData;
+    const {
+      uniformBindGroup,
+      glyphBindGroups,
+      commandEncoder,
+      renderPass,
+      querySet,
+      queryBuffer,
+    } = perFrameData;
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, uniformBindGroup);
     glyphBindGroups.forEach((bindGroup) => {
@@ -380,7 +392,7 @@ export class Renderer {
       renderPass.draw(6, 1, 0, 0);
     });
     renderPass.end();
-    
+
     commandEncoder.writeTimestamp(querySet, 1);
     commandEncoder.resolveQuerySet(querySet, 0, 3, queryBuffer, 0);
     // this.readBuffer(queryBuffer).then(res => {
@@ -388,24 +400,26 @@ export class Renderer {
     // })
     this.device.queue.submit([commandEncoder.finish()]);
 
-    this.readBuffer(queryBuffer).then(res => {
-      console.log('Read buffer timestamp', res);
+    this.readBuffer(queryBuffer).then((res) => {
+      console.log("Read buffer timestamp", res);
       const timingsNanoseconds = new BigInt64Array(res);
-      console.log('Time: ', timingsNanoseconds[1] - timingsNanoseconds[0]);
+      console.log("Time: ", timingsNanoseconds[1] - timingsNanoseconds[0]);
       return res;
     });
   }
 
-
-    // from  https://omar-shehata.medium.com/how-to-use-webgpu-timestamp-query-9bf81fb5344a
-    async readBuffer(buffer: GPUBuffer) {
-      const size = buffer.size;
-      const gpuReadBuffer = this.device.createBuffer({size, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-      const copyEncoder = this.device.createCommandEncoder();
-      copyEncoder.copyBufferToBuffer(buffer, 0, gpuReadBuffer, 0, size);
-      const copyCommands = copyEncoder.finish();
-      this.device.queue.submit([copyCommands]);
-      await gpuReadBuffer.mapAsync(GPUMapMode.READ);
-      return gpuReadBuffer.getMappedRange();
-    }
+  // from  https://omar-shehata.medium.com/how-to-use-webgpu-timestamp-query-9bf81fb5344a
+  async readBuffer(buffer: GPUBuffer) {
+    const size = buffer.size;
+    const gpuReadBuffer = this.device.createBuffer({
+      size,
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+    });
+    const copyEncoder = this.device.createCommandEncoder();
+    copyEncoder.copyBufferToBuffer(buffer, 0, gpuReadBuffer, 0, size);
+    const copyCommands = copyEncoder.finish();
+    this.device.queue.submit([copyCommands]);
+    await gpuReadBuffer.mapAsync(GPUMapMode.READ);
+    return gpuReadBuffer.getMappedRange();
+  }
 }
