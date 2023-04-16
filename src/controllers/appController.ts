@@ -24,16 +24,16 @@ enum CSSColors {
     
 /* Dark mode */
 const dark = {
-    0 : '#503277',
+    0 : '#03C4A1',
     1: '#a0487b90',
     2: '#503277e9',
-    3: '#2f2d48',
+    3: '#232931',
     4: '#FFFFFF'
 }
 
 /* Light mode */
 const light = {
-    0: '#c9ccd5',
+    0: '#9DE5FF',
     1: '#fbfbfb', // #f1e8eb
     2: '#c9cdd79a',
     3: '#ffffff',
@@ -43,7 +43,7 @@ const light = {
 export const colors = {
     'primary': hexToRgba(light[0]), 
     'secondary': hexToRgba(light[1]),
-    'ternary': hexToRgba(light[3]),
+    'ternary': hexToRgba(light[3])
 }
 
 export class AppController implements Controller {

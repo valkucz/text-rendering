@@ -115,7 +115,7 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
 
 fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
     if (!is_inside_glyph(vec2<i32>(pos))){
-        return color.background;
+        discard;
     }
     return color.glyph;
 }

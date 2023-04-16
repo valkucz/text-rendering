@@ -85,20 +85,6 @@ export class TextBlock {
     this._transformsBuffer = this.createTransformsBuffer();
   }
 
-  private setMatrices() {
-    let offsetX = 0;
-    let prevWidth = 0;
-    const totalHeight = this.fontParser.height;
-    this._glyphs.forEach((glyph) => {
-      let width = glyph.bb[2] - glyph.bb[0];
-      let height = glyph.bb[3] - glyph.bb[1];
-      const { model, deltaX } = this.setModel(width, height, totalHeight, offsetX, prevWidth);
-      glyph.model = model;
-      offsetX = deltaX;
-      prevWidth = width;
-    });
-  }
-
   public set spacing(spacing: number) {
     this._spacing = spacing * velocity;
     this.setMatrices();
@@ -220,8 +206,26 @@ export class TextBlock {
     return buffer;
   }
 
-  private setModel(width: number, height: number, totalHeight: number, offsetX: number, prevWidth: number) {
-    const model = mat4.create();
+  private setMatrices() {
+    let offsetX = 0;
+    let prevWidth = 0;
+    let offsetY = 0;
+    const totalHeight = this.fontParser.height;
+    this._glyphs.forEach((glyph, i) => {
+      if (i > 0 && i % 25 == 0) {
+        offsetY++;
+        offsetX = 0;
+      }
+      let width = glyph.bb[2] - glyph.bb[0];
+      let height = glyph.bb[3] - glyph.bb[1];
+      offsetX = this.setModel(glyph.model, width, height, totalHeight, offsetX, offsetY, prevWidth);
+      prevWidth = width;
+    });
+
+  }
+
+
+  private setModel(model: mat4, width: number, height: number, totalHeight: number, offsetX: number, offsetY: number, prevWidth: number) {
     
     const scaleFactor = height / totalHeight;
     const scalingX =  width * this._width / totalHeight;
@@ -234,9 +238,9 @@ export class TextBlock {
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [(scalingX + deltaX * this._spacing * this._width), 0.5 * scaleFactor, 0]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
-
+    // mat4.translate(model, model, [0, -5 / scaleFactor * offsetY, 0]);
     deltaX += scalingX;
-    return { model, deltaX };
+    return deltaX;
   }
 
   updateText(text: string) {

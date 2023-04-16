@@ -9,12 +9,12 @@ export interface ParsedGlyph {
 }
 
 export class FontParser {
-  initFont: Font;
+  private _initFont: Font;
   font: Font;
 
   constructor(font: Font) {
     this.font = font;
-    this.initFont = font;
+    this._initFont = font;
   }
 
   public get height(): number {
@@ -22,12 +22,11 @@ export class FontParser {
   }
 
   static async initialize(url: string): Promise<FontParser> {
-    console.log(url);
     return FontParser.loadFont(url).then((font) => new FontParser(font));
   }
 
-  reset() {
-    this.font = this.initFont;
+  resetFont() {
+    this.font = this._initFont;
   }
 
   static async loadFont(url: string): Promise<Font> {
@@ -44,26 +43,25 @@ export class FontParser {
 
   parseText(text: string, isWinding: boolean = true): ParsedGlyph[] {
     const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
+    const enter = new opentype.Glyph({unicode: 10});
+    console.log('enter',enter);
     const parseGlyphs: ParsedGlyph[] = [];
-    console.log('iswinding', isWinding);
     paths.forEach((path) => {
-      
-      const bb = path.getBoundingBox();
-      const vertices = this.parseShapeToGlyph(path.commands, isWinding);
+      let bb = path.getBoundingBox();
+      let vertices = this.parseShapeToGlyph(path.commands, isWinding);
+      // Handling space cases
+      if (vertices.length == 0) {
+        vertices = new Float32Array([0, 0, this.height, 0]);
+        bb.x2 = this.height;
+      }
       parseGlyphs.push({ bb, vertices });
       
-    })
-
-
-    console.log('parse glyphs', parseGlyphs);
-
+    });
     return parseGlyphs;
-
   }
 
   private getMiddle(point1: vec2, point2: vec2): vec2 {
     const res = vec2.create();
-
     vec2.add(res, point1, point2);
     vec2.scale(res, res, 0.5);
     return res;

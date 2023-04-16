@@ -6,17 +6,20 @@
   --family-primary: 'Open Sans', sans-serif;
 
   /* Dark */
-  --dark-bg-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='100%25' width='100%25'%3E%3Cdefs%3E%3Cpattern id='doodad' width='300' height='300' viewBox='0 0 40 40' patternUnits='userSpaceOnUse' patternTransform='rotate(135)'%3E%3Crect width='100%25' height='100%25' fill='rgba(47, 45, 72,1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L34 6h-28v28z' fill='rgba(80, 50, 119,1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L6 34h28v-28z' fill='rgba(160, 72, 124,1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L0 40h40v-40z' fill='rgba(80, 50, 119,1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L40 0h-40v40z' fill='rgba(160, 72, 124,1)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23doodad)' height='200%25' width='200%25'/%3E%3C/svg%3E ");
+  --dark-bg-img-up: url('./wave-up-dark.svg');
+  --dark-bg-img-down: url('./wave-down-dark.svg');
 
   /* Light */
-  --light-bg-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='100%25' width='100%25'%3E%3Cdefs%3E%3Cpattern id='doodad' width='300' height='300' viewBox='0 0 40 40' patternUnits='userSpaceOnUse' patternTransform='rotate(135)'%3E%3Crect width='100%25' height='100%25' fill='rgba(247, 250, 252,1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L34 6h-28v28z' fill='rgba(201, 204, 213,1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L6 34h28v-28z' fill='rgba(228, 216, 220,1)'/%3E%3Cpath d='M40 0v10h60v60L0 40L0 40h40v-40z' fill='rgba(201, 204, 213,1)'/%3E%3Cpath d='M0 40h-10v-60h60L40 0L40 0h-40v40z' fill='rgba(228, 216, 220,1)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23doodad)' height='200%25' width='200%25'/%3E%3C/svg%3E ");
-
+  --light-bg-img-up: url('./wave-up-light.svg');
+  --light-bg-img-down: url('./wave-down-light.svg');
   /* Default */
-  --bg-img: var(--light-bg-img);
+  --bg-img-up: var(--light-bg-img-up);
+  --bg-img-down: var(--light-bg-img-down);
 }
 
 .dark-mode {
-  --bg-img: var(--dark-bg-img);
+  --bg-img-up: var(--dark-bg-img-up);
+  --bg-img-down: var(--dark-bg-img-down);
 }
 html,
 body {
@@ -24,16 +27,16 @@ body {
   padding: 0;
   height: 100%;
   /* color: var(--text-primary-color); */
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--primary-bg-color) 100%),
-  var(--bg-img);
+  /* background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--primary-bg-color) 100%),
+  var(--bg-img); */
   background-size: cover;
   background-repeat: no-repeat;
-  background-color: var(--primary-bg-color);
+  /* background-color: var(--primary-bg-color); */
   scroll-behavior: smooth;
 }
 
 input, select, .section-title, .navbar-start .tabs ul li.is-active a {
-  background-color: var(--primary-bg-color);
+  /* background-color: var(--primary-bg-color); */
 }
 .menu button {
   letter-spacing: 0.05rem;
@@ -44,7 +47,7 @@ input, select, .section-title, .navbar-start .tabs ul li.is-active a {
   text-transform: uppercase;
 }
 
-* {
+*{
   color: var(--text-color) !important;
 }
 
@@ -64,7 +67,7 @@ button:enabled:active {
 .canvas {
   cursor: crosshair;
   width: 80%;
-  padding: 0.5rem;
+  /* padding: 0.5rem; */
 }
 
 .controller-menu {
@@ -133,8 +136,8 @@ button:enabled:active {
 
 .section {
   min-height: 50rem;
-  padding: 2rem;
-  margin: 3rem;
+  /* padding: 2rem; */
+  /* margin: 3rem; */
 }
 
 .level-left {
@@ -263,12 +266,8 @@ input:hover {
   border-radius: 1rem;
 }
 
-.footer {
-  background-color: var(--elem-bg-color);
-}
-
 .box-element {
-  background-color: var(--elem-bg-color);
+  /* background-color: var(--elem-bg-color); */
   color: var(--text-color);
   box-shadow: var(--container-shadow);
 }
@@ -284,7 +283,7 @@ ion-icon {
   transform: translateY(-100%);
   opacity: 0;
   background-color: var(--primary-color);
-  box-shadow: var(--container-shadow);
+  /* box-shadow: var(--container-shadow); */
   transition: 0.3s ease-in-out;
   z-index: 1;
 }
@@ -302,4 +301,21 @@ ion-icon {
 .navbar .button {
   border: none;
   background-color: transparent;
+}
+
+.spacer {
+  /* aspect-ratio: 960/300; */
+  /* width: 100%; */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+
+}
+
+.layer1 {
+  background-image: var(--bg-img-up);
+}
+
+.layer2 {
+  background-image: var(--bg-img-down);
 }
