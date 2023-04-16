@@ -32,15 +32,6 @@ export class TextBlock {
 
   bb: vec4;
 
-  /*
-  
-  options = {
-    color: [0.0, 0.0, 0.0, 1.0],
-    backgroundColor: [0.0, 1.0, 1.0, 0.0],
-    spacing: 1.0,
-    fill_winding: true,
-  }
-  */
   constructor(
     device: GPUDevice,
     text: string,
@@ -102,7 +93,6 @@ export class TextBlock {
       let width = glyph.bb[2] - glyph.bb[0];
       let height = glyph.bb[3] - glyph.bb[1];
       const { model, deltaX } = this.setModel(width, height, totalHeight, offsetX, prevWidth);
-      console.log('set matrices', glyph.model, model);
       glyph.model = model;
       offsetX = deltaX;
       prevWidth = width;
@@ -171,22 +161,14 @@ export class TextBlock {
   }
 
   private createGlyphs(): Glyph[] {
-    console.log(this._text);
     const alignment = this.device.limits.minStorageBufferOffsetAlignment;
     const glyphs: Glyph[] = [];
     let transformsOffset = 0;
     let verticesOffset = 0;
-    let prevWidth = 0;
-    let offsetX = 0;
-    const totalHeihgt = this.fontParser.height;
     this.fontParser.parseText(this._text, this._isWinding).forEach((glyph) => {
       const { bb, vertices } = glyph;
       let transformsSize = Math.ceil(21 / alignment) * alignment;
       let verticesSize = Math.ceil(vertices.length / alignment) * alignment;
-      const width = bb.x2 - bb.x1;
-      const height = bb.y2 - bb.y1;
-
-      // const { model, deltaX } = this.setModel(width, height, totalHeihgt, offsetX, prevWidth);
       glyphs.push({
         vertices: vertices,
         model: mat4.create(),
@@ -197,8 +179,6 @@ export class TextBlock {
         transformsOffset: transformsOffset,
         verticesOffset: verticesOffset
       });
-      // offsetX = deltaX;
-      prevWidth = width;
       transformsOffset += transformsSize;
       verticesOffset += verticesSize;
     });
@@ -251,15 +231,11 @@ export class TextBlock {
       deltaX += (1/2 * ((prevWidth - width) / totalHeight));
     }
     
-
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [(scalingX + deltaX * this._spacing * this._width), 0.5 * scaleFactor, 0]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
 
     deltaX += scalingX;
-
-    console.log('setModel', model);
-
     return { model, deltaX };
   }
 
@@ -270,12 +246,11 @@ export class TextBlock {
 
   async updateFont(font: string) {
     await this.fontParser.changeFont(font);
-    this._glyphs = this.createGlyphs();
-    this._verticesBuffer = this.createVerticesBuffer();
-    this._transformsBuffer = this.createTransformsBuffer();
+    this.updateGlyphs();
+
   }
 
   resetText() {
-    this.fontParser.reset();
+    this.fontParser.resetFont();
   }
 }
