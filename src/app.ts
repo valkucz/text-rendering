@@ -1,4 +1,4 @@
-import { Controller } from "./controllers/controller";
+
 import { SceneController } from "./controllers/sceneController";
 import { TextController } from "./controllers/textController";
 import { AppController } from "./controllers/appController";
@@ -13,18 +13,24 @@ export const defaultUrl = "./public/Blogger_Sans.otf";
 export class App {
   fontParser: FontParser;
   renderer: Renderer;
-  controllers: Controller[];
+  sceneController: SceneController;
+  textController: TextController;
+  appController: AppController;
   camera: Camera;
 
   constructor(
     renderer: Renderer,
     fontParser: FontParser,
-    controllers: Controller[],
+    sceneController: SceneController,
+    textController: TextController,
+    appController: AppController,
     camera: Camera
   ) {
     this.renderer = renderer;
     this.fontParser = fontParser;
-    this.controllers = controllers;
+    this.sceneController = sceneController;
+    this.textController = textController;
+    this.appController = appController;
     this.camera = camera;
   }
   // TODO: upravit OOP
@@ -61,11 +67,6 @@ export class App {
 
     // Create controllers
     const textController = new TextController(textBlock);
-    const controllers = [
-      new SceneController("glyph", camera),
-      textController,
-      new AppController(textController),
-    ];
 
     // Create renderer
     const renderer = new Renderer(
@@ -74,14 +75,16 @@ export class App {
       textBlock,
       camera.projection,
       camera.view,
-      colors["ternary"]
+      colors["secondary"]
     );
 
-    return new App(renderer, fontParser, controllers, camera);
-  }
+    return new App(renderer, fontParser, new SceneController("glyph", camera),
+    textController,
+    new AppController(textController), camera);
+  } 
 
   notify() {
-    this.renderer.color = colors["ternary"];
+    this.renderer.color = this.textController.bgColor;
     this.renderer.view = this.camera.view;
 
     const perFrameData = this.renderer.prepare();
@@ -91,6 +94,8 @@ export class App {
   run() {
     const perFrameData = this.renderer.prepare();
     this.renderer.render(perFrameData);
-    this.controllers.forEach((controller) => controller.addEventListener(this));
+    this.sceneController.addEventListener(this);
+    this.textController.addEventListener(this);
+    this.appController.addEventListener(this);
   }
 }

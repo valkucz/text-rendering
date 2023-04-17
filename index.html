@@ -210,41 +210,32 @@
         </p>
         <p>Graphics API is available as an open-source library [URL].</p>
         <h3>How to Use API</h3>
-
-        <p>Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit. Quisque condimentum maximus mi,
-          sit amet commodo arcu rutrum id. Proin pretium urna vel cursus venenatis. Suspendisse potenti. Etiam mattis
-          sem rhoncus lacus dapibus facilisis. Donec at dignissim dui. Ut et neque nisl.</p>
-        <ol>
-          <li>In fermentum leo eu lectus mollis, quis dictum mi aliquet.</li>
-          <li>Morbi eu nulla lobortis, lobortis est in, fringilla felis.</li>
-          <li>Aliquam nec felis in sapien venenatis viverra fermentum nec lectus.</li>
-          <li>Ut non enim metus.</li>
-        </ol>
-
-        <dl>
-          <dt>Web</dt>
-          <dd>The part of the Internet that contains websites and web pages</dd>
-          <dt>HTML</dt>
-          <dd>A markup language for creating web pages</dd>
-          <dt>CSS</dt>
-          <dd>A technology to make HTML look better</dd>
-        </dl>
-        <p>Suspendisse egestas sapien non felis placerat elementum. Morbi tortor nisl, suscipit sed mi sit amet, mollis
-          malesuada nulla. Nulla facilisi. Nullam ac erat ante.</p>
-        <h4>Fourth level</h4>
-        <p>Nulla efficitur eleifend nisi, sit amet bibendum sapien fringilla ac. Mauris euismod metus a tellus laoreet,
-          at elementum ex efficitur.</p>
+        <h4>Initialization</h4>
         <pre class="secondary-style">
-    &lt;!DOCTYPE html&gt;
-    &lt;html&gt;
-      &lt;head&gt;
-        &lt;title&gt;Hello World&lt;/title&gt;
-      &lt;/head&gt;
-      &lt;body&gt;
-        &lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec viverra nec nulla vitae mollis.&lt;/p&gt;
-      &lt;/body&gt;
-    &lt;/html&gt;
+        /* Canvas initialization */
+        const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+
+        /* WebGPU initialization */
+        const adapter: GPUAdapter = await navigator.gpu.requestAdapter() as GPUAdapter;
+        const device: GPUDevice = await adapter.requestDevice() as GPUDevice;
+        
+        /* Font initialization */
+        const fontParser = new FontParser(device, "fonts/Roboto-Regular.ttf")
+
+        /* Text block to render */
+        const textBlock = new TextBlock(device, "Hello World", fontParser)
+
+        /* Renderer initialization */
+        const renderer = new Renderer(device, canvas, textBlock, projectionMatrix, viewMatrix, color?);
+
+        /* Rendering */
+        const perFrameData = this.renderer.prepare();
+        this.renderer.render(perFrameData);
     </pre>
+    <!-- <h4>Options</h4>
+    <pre class="secondary-style">
+    /* Text block options */
+    </pre> -->
       </div>
     </section>
   </div>

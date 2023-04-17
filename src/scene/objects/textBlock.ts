@@ -20,15 +20,14 @@ export class TextBlock {
   private _text: string;
   private _verticesBuffer: Float32Array;
   private _transformsBuffer: Float32Array;
+  private _colorBuffer: Float32Array;
   private _glyphs: Glyph[];
-  private _colorBuffer: VertexBuffer;
   private _spacing: number;
   private _width: number;
   private _isWinding: boolean;
   fontParser: FontParser;
   device: GPUDevice;
   private _color: number[];
-  private _bgColor: number[];
 
   bb: vec4;
 
@@ -42,8 +41,7 @@ export class TextBlock {
     this._text = text;
     this.fontParser = fontParser;
     this._color = options?.color ?? defaultColor;
-    this._bgColor = options?.backgroundColor ?? defaultBgColor;
-    this._colorBuffer = this.createVertexBuffer(device, this.getColorArray());
+    this._colorBuffer = new Float32Array(this._color);
     this._spacing = options?.spacing ?? 1.0;
     this._width = options?.width ?? 1.0;
     this._isWinding = options?.isWinding ?? true;
@@ -59,22 +57,11 @@ export class TextBlock {
 
   public set color(color: number[]) {
     this._color = color;
-    this._colorBuffer = this.createVertexBuffer(
-      this.device,
-      this.getColorArray()
-    );
+    this._colorBuffer = new Float32Array(this._color);
   }
 
   public get color(): number[] {
     return this._color;
-  }
-
-  public set bgColor(bgColor: number[]) {
-    this._bgColor = bgColor;
-    this._colorBuffer = this.createVertexBuffer(
-      this.device,
-      this.getColorArray()
-    );
   }
 
   public get spacing(): number {
@@ -116,6 +103,10 @@ export class TextBlock {
     return this._transformsBuffer;
   }
 
+  public get colorBuffer(): Float32Array {
+    return this._colorBuffer;
+  }
+
   public get verticesSize(): number {
     return this._verticesSize;
   }
@@ -130,21 +121,6 @@ export class TextBlock {
 
   public get glyphs(): Glyph[] {
     return this._glyphs;
-  }
-
-  public get colorBuffer(): VertexBuffer {
-    return this._colorBuffer;
-  }
-
-  private getColorArray(): Float32Array {
-    return new Float32Array(this._color.concat(this._bgColor));
-  }
-
-  private createVertexBuffer(
-    device: GPUDevice,
-    vertices: Float32Array
-  ): VertexBuffer {
-    return new VertexBuffer(device, vertices);
   }
 
   private updateGlyphs() {

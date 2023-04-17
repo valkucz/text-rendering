@@ -101,7 +101,7 @@ export class Renderer {
   createBuffers(): RendererBuffers {
     const uniformBuffer = this.device.createBuffer({
       // + 16 = 4 * 4;
-      size: MAT4LENGTH * 2 + 16,
+      size: MAT4LENGTH * 2 + 16 + this.textBlock.colorBuffer.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     const glyphBuffer = this.device.createBuffer({
@@ -116,7 +116,7 @@ export class Renderer {
     return {
       uniform: uniformBuffer,
       glyph: glyphBuffer,
-      transforms: transformBuffer,
+      transforms: transformBuffer
     };
   }
   /**
@@ -172,14 +172,6 @@ export class Renderer {
               type: "uniform",
             },
           },
-          {
-            // TODO: change to uniform
-            binding: 1,
-            visibility: GPUShaderStage.FRAGMENT,
-            buffer: {
-              type: "storage",
-            },
-          },
         ],
       }),
       this.device.createBindGroupLayout({
@@ -217,13 +209,7 @@ export class Renderer {
           resource: {
             buffer: this.buffers.uniform,
           },
-        },
-        {
-          binding: 1,
-          resource: {
-            buffer: this.textBlock.colorBuffer.buffer,
-          },
-        },
+        }
       ],
     });
   }
@@ -290,9 +276,9 @@ export class Renderer {
 
     // Color
     this.device.queue.writeBuffer(
-      this.textBlock.colorBuffer.buffer,
-      0,
-      this.textBlock.colorBuffer.vertices.buffer
+      this.buffers.uniform,
+      144,
+      this.textBlock.colorBuffer
     );
 
     // Glyph

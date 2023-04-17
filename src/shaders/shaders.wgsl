@@ -1,7 +1,8 @@
 struct Uniforms {
     view: mat4x4<f32>,
     projection: mat4x4<f32>,
-    is_winding: f32
+    is_winding: f32,
+    color: vec4<f32>,
 
 };
 
@@ -10,10 +11,6 @@ struct VertexOutput {
     @location(0) uv: vec2<f32>,
 }
 
-struct Color {
-    glyph: vec4<f32>,
-    background: vec4<f32>,
-}
 
 struct Glyph {
     points: array<vec2<f32>>,
@@ -27,7 +24,7 @@ struct GlyphTransform {
 
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
-@binding(1) @group(0) var<storage, read_write> color: Color;
+// @binding(1) @group(0) var<uniform> color: Color;
 @binding(0) @group(1) var<storage, read_write> glyph: Glyph;
 @binding(1) @group(1) var<uniform> glyph_transform: GlyphTransform;
 @vertex
@@ -109,7 +106,7 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
     }
     // color.glyph.x = color.glyph.x * mindist / 500;
     // return color.glyph;
-    return vec4(mindist * color.glyph.x / 300, color.glyph.y, color.glyph.z, 1.0);
+    return vec4(mindist * uniforms.color.x / 300, uniforms.color.y, uniforms.color.z, 1.0);
 }
 
 
@@ -117,7 +114,7 @@ fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
     if (!is_inside_glyph(vec2<i32>(pos))){
         discard;
     }
-    return color.glyph;
+    return uniforms.color;
 }
 
 

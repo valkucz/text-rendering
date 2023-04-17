@@ -1,9 +1,8 @@
 import { vec3 } from "gl-matrix";
 import { App } from "../app";
-import { Controller } from "./controller";
 import { Camera } from "../scene/camera";
 
-export class SceneController implements Controller {
+export class SceneController {
   // TODO: remove duplicity
   rotateX: HTMLInputElement;
   rotateY: HTMLInputElement;
