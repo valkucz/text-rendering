@@ -3,14 +3,12 @@ struct Uniforms {
     projection: mat4x4<f32>,
     is_winding: f32,
     color: vec4<f32>,
-
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
 }
-
 
 struct Glyph {
     points: array<vec2<f32>>,
@@ -22,15 +20,20 @@ struct GlyphTransform {
     bbox: vec4<f32>,
 }
 
-
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
-// @binding(1) @group(0) var<uniform> color: Color;
 @binding(0) @group(1) var<storage, read_write> glyph: Glyph;
 @binding(1) @group(1) var<uniform> glyph_transform: GlyphTransform;
+
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
-    var rectangle = get_rectangle();
-
+    var rectangle = array<vec3<f32>, 6>(
+        vec3(-0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(0.5, -0.5, 0.0),
+        vec3(-0.5, 0.5, 0.0),
+        vec3(0.5, 0.5, 0.0)
+    );
     var squareUV = array<vec2<f32>, 6>(
         vec2(0.0, 1.0),
         vec2(0.0, 0.0),
@@ -39,26 +42,11 @@ fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutput {
         vec2(0.0, 0.0),
         vec2(1.0, 0.0)
     );
-
-
-     return VertexOutput(
-        uniforms.projection * uniforms.view * glyph_transform.model * vec4<f32>(rectangle[VertexIndex].xyz, 1.0),
-        squareUV[VertexIndex],
+    return VertexOutput(
+    uniforms.projection * uniforms.view * glyph_transform.model * vec4<f32>(rectangle[VertexIndex].xyz, 1.0),
+    squareUV[VertexIndex],
     );
 };
-
-
-fn get_rectangle() -> array<vec3<f32>, 6> {
-    return array<vec3<f32>, 6>(
-        vec3(-0.5, -0.5, 0.0),
-        vec3(-0.5, 0.5, 0.0),
-        vec3(0.5, -0.5, 0.0),
-        vec3(0.5, -0.5, 0.0),
-        vec3(-0.5, 0.5, 0.0),
-        vec3(0.5, 0.5, 0.0)
-    );
-}
-
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
@@ -79,14 +67,12 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
             let a = glyph.points[i + 1];
             let b = glyph.points[i + 3];
             var sdist = sdfLine(a, b, pos);
-
             // https://iquilezles.org/articles/interiordistance/
             // https://www.shadertoy.com/view/3t33WH
             let cond = vec3<bool>(pos.y >= a.y, (pos.y < b.y), sdist.y > 0.0);
             if( all(cond) || all(!(cond)) ) {
                 side *= -1.0;
             }
-
             mindist = min(mindist, abs(sdist.x));
         } else {
             // Curve
@@ -96,7 +82,6 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
             if(sdist.z > 0.0) {
                 side *= -1.0;
             }
-
             mindist = min(mindist, abs(sdist.x));
         }
     }
@@ -104,11 +89,8 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
     if ((side > 0.0)) {
         discard;
     }
-    // color.glyph.x = color.glyph.x * mindist / 500;
-    // return color.glyph;
     return vec4(mindist * uniforms.color.x / 300, uniforms.color.y, uniforms.color.z, 1.0);
 }
-
 
 fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
     if (!is_inside_glyph(vec2<i32>(pos))){
@@ -116,7 +98,6 @@ fn fill_winding(pos: vec2<f32>) -> vec4<f32>{
     }
     return uniforms.color;
 }
-
 
 fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: vec2<i32>) -> i32 {
     var a: vec2<i32> = p1 - pos;
@@ -141,8 +122,8 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
     var res1: f32 = (f32(r.x) * t1 - f32(s.x) * 2.0) * t1 + f32(a.x);
     var res2: f32 = (f32(r.x) * t2 - f32(s.x) * 2.0) * t2 + f32(a.x);
   
-    var code1: i32 = (~(a.y) & (b.y | c.y)) | (~(b.y) & c.y);
-    var code2: i32 = (a.y & (~(b.y) | ~(c.y))) | (b.y & ~(c.y));
+    var code1: i32 = (~a.y & (b.y | c.y)) | (~b.y & c.y);
+    var code2: i32 = (a.y & (~b.y | ~c.y)) | (b.y & ~c.y);
     
     var windingNumber: i32 = 0;
     if ((code1 | code2) < 0) {
@@ -164,17 +145,15 @@ fn is_inside_glyph(pos: vec2<i32>) -> bool {
     return windingNumber != 0;
 }
 
-
 fn cross_scalar(a: vec2<f32>, b: vec2<f32>) -> f32 {
     return a.x * b.y - a.y * b.x;
 }
 
 fn test_cross(a: vec2<f32>, b: vec2<f32>, p: vec2<f32>) -> f32{
-    return sign((b.y-a.y) * (p.x-a.x) - (b.x-a.x) * (p.y-a.y));
+    return sign((b.y - a.y) * (p.x - a.x) - (b.x - a.x) * (p.y - a.y));
 }
 
 fn sign_bezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> f32 {
-
     var a = p3 - p1;
     var b = p2 - p1;
     var c = pos - p1;
@@ -185,7 +164,6 @@ fn sign_bezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> f
     step(test_cross(p1, p2, pos) * test_cross(p2, p3, pos), 0.0)),
     step((d.x - d.y), 0.0)) * test_cross(p1, p3, p2);
 }
-
 
 fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec3<f32> {
     var a = p2 - p1;
@@ -206,7 +184,7 @@ fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec
         }            
     }
     else {
-        var h = c.y*c.y - 4.*b.y*d.y;
+        var h = c.y * c.y - 4. * b.y * d.y;
         if (h > 0.0) {
             h = sqrt(h);
             let t: vec2<f32> = (vec2(-h, h) - c.y) / (2.0* b.y);
@@ -215,14 +193,14 @@ fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec
             odd = i.x * i.y;
         }
     }
-    var kk = 1.0/dot(b,b);
-    var kx = kk * dot(a,b);
-    var ky = kk * (2.0*dot(a,a)+dot(d,b))/3.0;
-    var kz = kk * dot(d,a); 
+    var kk = 1.0 / dot(b, b);
+    var kx = kk * dot(a, b);
+    var ky = kk * (2.0 * dot(a, a) + dot(d, b)) / 3.0;
+    var kz = kk * dot(d, a); 
 
     var l = ky - kx * kx;
     var l3 = l * l * l;
-    var q  = kx*(2.0*kx*kx - 3.0*ky) + kz;
+    var q  = kx*(2.0 * kx * kx - 3.0 * ky) + kz;
     var h = q * q + 4.0 * l3;
 
     var res = 0.0;
@@ -231,12 +209,10 @@ fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec
     if (h >= 0.0) {
         h = sqrt(h);
         var x = (vec2(h, -h) - q) / 2.0;
-        
-        if(abs(abs(h/q) - 1.0) < 0.0001)
+        if(abs(abs(h / q) - 1.0) < 0.0001)
         {
-            x = vec2(l3/q, -q - l3/q);
+            x = vec2(l3 / q, -q - l3 / q);
             if(q < 0.0){
-
                 x = x.yx;
             }
         }
@@ -273,9 +249,10 @@ fn sdfBezier(p1: vec2<f32>, p2: vec2<f32>, p3: vec2<f32>, pos: vec2<f32>) -> vec
     return vec3(res, sign(sgn), odd);
 }
 
+
 fn sdfLine(a: vec2<f32>, b: vec2<f32>, pos: vec2<f32>) -> vec2<f32> {
     var pa = pos - a;
     var ba = b - a;
     var h = saturate(dot(pa, ba) / dot(ba, ba));
-    return vec2( dot(pa-ba*h, pa-ba*h), sign(cross_scalar(ba, pa)));
+    return vec2(dot(pa - ba * h, pa - ba * h), sign(cross_scalar(ba, pa)));
 }

@@ -1,10 +1,8 @@
-import { mat4, vec2, vec4 } from "gl-matrix";
+import { mat4, vec4 } from "gl-matrix";
 import { Glyph } from "./glyph";
 import { FontParser } from "../../fonts/fontParser";
-import { VertexBuffer } from "./vertexBuffer";
 
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
-const defaultBgColor = [0.0, 1.0, 1.0, 0.0];
 
 const velocity = 0.125;
 export interface TextBlockOptions {
@@ -25,11 +23,9 @@ export class TextBlock {
   private _spacing: number;
   private _width: number;
   private _isWinding: boolean;
+  private _color: number[];
   fontParser: FontParser;
   device: GPUDevice;
-  private _color: number[];
-
-  bb: vec4;
 
   constructor(
     device: GPUDevice,
@@ -51,76 +47,6 @@ export class TextBlock {
     this.setMatrices();
     this._verticesBuffer = this.createVerticesBuffer();
     this._transformsBuffer = this.createTransformsBuffer();
-
-    this.bb = vec4.create();
-  }
-
-  public set color(color: number[]) {
-    this._color = color;
-    this._colorBuffer = new Float32Array(this._color);
-  }
-
-  public get color(): number[] {
-    return this._color;
-  }
-
-  public get spacing(): number {
-    return this._spacing;
-  }
-
-  public get width(): number {
-    return this._width;
-  }
-
-  public set width(width: number) {
-    this._width = width * velocity;
-    this.setMatrices();
-    this._transformsBuffer = this.createTransformsBuffer();
-  }
-
-  public set spacing(spacing: number) {
-    this._spacing = spacing * velocity;
-    this.setMatrices();
-    this._transformsBuffer = this.createTransformsBuffer();
-  }
-
-  public get isWinding(): boolean {
-    return this._isWinding;
-  }
-
-  public set isWinding(value: boolean) {
-    if (value != this._isWinding) {
-      this._isWinding = value;
-      this.updateGlyphs();
-    }
-  }
-
-  public get verticesBuffer() {
-    return this._verticesBuffer;
-  }
-
-  public get transformsBuffer() {
-    return this._transformsBuffer;
-  }
-
-  public get colorBuffer(): Float32Array {
-    return this._colorBuffer;
-  }
-
-  public get verticesSize(): number {
-    return this._verticesSize;
-  }
-
-  public get transformsSize(): number {
-    return this._transformsSize;
-  }
-
-  public get text(): string {
-    return this._text;
-  }
-
-  public get glyphs(): Glyph[] {
-    return this._glyphs;
   }
 
   private updateGlyphs() {
@@ -194,10 +120,10 @@ export class TextBlock {
     let offsetY = 0;
     const totalHeight = this.fontParser.height;
     this._glyphs.forEach((glyph, i) => {
-      if (i > 0 && i % 25 == 0) {
-        offsetY++;
-        offsetX = 0;
-      }
+      // if (i > 0 && i % 25 == 0) {
+      //   offsetY++;
+      //   offsetX = 0;
+      // }
       let width = glyph.bb[2] - glyph.bb[0];
       let height = glyph.bb[3] - glyph.bb[1];
       const { model, deltaX } = this.setModel(
@@ -240,7 +166,7 @@ export class TextBlock {
       0,
     ]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
-    mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
+    // mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
     return { model, deltaX };
   }
@@ -257,5 +183,73 @@ export class TextBlock {
 
   resetText() {
     this.fontParser.resetFont();
+  }
+
+  set color(color: number[]) {
+    this._color = color;
+    this._colorBuffer = new Float32Array(this._color);
+  }
+
+  get color(): number[] {
+    return this._color;
+  }
+
+  get spacing(): number {
+    return this._spacing;
+  }
+
+  get width(): number {
+    return this._width;
+  }
+
+  set width(width: number) {
+    this._width = width * velocity;
+    this.setMatrices();
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
+
+  set spacing(spacing: number) {
+    this._spacing = spacing * velocity;
+    this.setMatrices();
+    this._transformsBuffer = this.createTransformsBuffer();
+  }
+
+  get isWinding(): boolean {
+    return this._isWinding;
+  }
+
+  set isWinding(value: boolean) {
+    if (value != this._isWinding) {
+      this._isWinding = value;
+      this.updateGlyphs();
+    }
+  }
+
+  get verticesBuffer() {
+    return this._verticesBuffer;
+  }
+
+  get transformsBuffer() {
+    return this._transformsBuffer;
+  }
+
+  get colorBuffer(): Float32Array {
+    return this._colorBuffer;
+  }
+
+  get verticesSize(): number {
+    return this._verticesSize;
+  }
+
+  get transformsSize(): number {
+    return this._transformsSize;
+  }
+
+  get text(): string {
+    return this._text;
+  }
+
+  get glyphs(): Glyph[] {
+    return this._glyphs;
   }
 }

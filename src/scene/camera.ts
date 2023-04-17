@@ -29,9 +29,8 @@ export class Camera {
   scaleVelocity: number;
 
   constructor() {
-    // create projection matrix
+    // Create projection matrix
     this.projection = mat4.create();
-    // TODO: remove global conversion factor, only as constructor parameter
     mat4.perspective(
       this.projection,
       Math.PI / 2,
@@ -43,9 +42,9 @@ export class Camera {
     this.moveVelocity = 0.1;
     this.scaleVelocity = 1.1;
 
-    // create view matrix
+    // Create view matrix
     this.view = mat4.create();
-    this.updateView();
+    this.setupView();
   }
 
   // move(dir: MoveDirection) {
@@ -72,7 +71,8 @@ export class Camera {
   //     }
   // }
 
-  updateView() {
+  setupView() {
+    console.log("view");
     this.front[0] = cos(glm.toRadian(this.yaw)) * cos(glm.toRadian(this.pitch));
     this.front[1] = sin(glm.toRadian(this.pitch));
     this.front[2] = sin(glm.toRadian(this.yaw)) * cos(glm.toRadian(this.pitch));
@@ -85,35 +85,37 @@ export class Camera {
     vec3.cross(this.up, this.right, this.front);
     vec3.normalize(this.up, this.up);
 
-    // because it was in different direction idk why
-    // vec3.negate(this.up, this.up);
-
     vec3.add(this.center, this.eye, this.front);
 
     mat4.lookAt(this.view, this.eye, this.center, this.up);
   }
 
   rotateX(value: number): void {
-    // value < 0, 360 >, initial 90 => Math.PI / 2
     mat4.rotateZ(this.view, this.view, degToRad(value));
   }
 
-  // FIXME: moving in opposite direction; check camera
-  // TODO: check rotation if it's in reality correct number
   rotateY(value: number): void {
-    // value < 0, 360 >, initial 90 => Math.PI / 2
     mat4.rotateY(this.view, this.view, degToRad(value));
   }
 
   rotateZ(value: number): void {
-    // value < 0, 360 >, initial 90 => Math.PI / 2
     mat4.rotateX(this.view, this.view, degToRad(value));
   }
 
-  move(vec: vec3): void {
-    const x = vec[0];
-    vec[0] = vec[2];
-    vec[2] = x;
+  moveX(value: number): void {
+    const vec = vec3.fromValues(0, 0, value);
+    vec3.scale(vec, vec, this.moveVelocity);
+    mat4.translate(this.view, this.view, vec);
+  }
+
+  moveY(value: number): void {
+    const vec = vec3.fromValues(0, value, 0);
+    vec3.scale(vec, vec, this.moveVelocity);
+    mat4.translate(this.view, this.view, vec);
+  }
+
+  moveZ(value: number): void {
+    const vec = vec3.fromValues(value, 0, 0);
     vec3.scale(vec, vec, this.moveVelocity);
     mat4.translate(this.view, this.view, vec);
   }
@@ -125,6 +127,6 @@ export class Camera {
   }
 
   reset() {
-    this.updateView();
+    mat4.lookAt(this.view, this.eye, this.center, this.up);
   }
 }

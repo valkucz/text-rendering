@@ -2,11 +2,7 @@ import { vec2 } from "gl-matrix";
 import { cubicToQuadratic } from "../math";
 import { vec2ToFloat32 } from "../math";
 import opentype, { Font, PathCommand } from "opentype.js";
-
-export interface ParsedGlyph {
-  bb: opentype.BoundingBox;
-  vertices: Float32Array;
-}
+import { ParsedGlyph } from "./parsedGlyphs";
 
 export class FontParser {
   private _initFont: Font;
