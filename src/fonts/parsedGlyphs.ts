@@ -1,4 +1,4 @@
 export interface ParsedGlyph {
-    bb: opentype.BoundingBox;
-    vertices: Float32Array;
-  }
+  bb: opentype.BoundingBox;
+  vertices: Float32Array;
+}

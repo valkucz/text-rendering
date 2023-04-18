@@ -116,7 +116,7 @@ export class Renderer {
     return {
       uniform: uniformBuffer,
       glyph: glyphBuffer,
-      transforms: transformBuffer
+      transforms: transformBuffer,
     };
   }
   /**
@@ -209,7 +209,7 @@ export class Renderer {
           resource: {
             buffer: this.buffers.uniform,
           },
-        }
+        },
       ],
     });
   }

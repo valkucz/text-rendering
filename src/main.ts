@@ -9,9 +9,7 @@ var rect = canvas.getBoundingClientRect();
 canvas.width = rect.width * dpr;
 canvas.height = rect.height * dpr;
 
-// TODO: remove export
 export const conversionFactor = vec2.fromValues(canvas.width, canvas.height);
 
 const app = await App.initialize(canvas);
 app.run();
-

@@ -7,52 +7,53 @@ export class SceneController {
   resetBtn: HTMLButtonElement;
 
   constructor(id: string, camera: Camera) {
-    console.log('camera', camera);
+    console.log("camera", camera);
     this.camera = camera;
 
-    this.draggables = [{
-      currentValue: 0,
-      defaultValue: 0,
-      input: document.getElementById(
-        id + "-rotate-x"
-      ) as HTMLInputElement,
-      function: this.camera.rotateX.bind(this.camera),
-    }, {
-      currentValue: 15,
-      defaultValue: 15,
-      input: document.getElementById(
-        id + "-rotate-y"
-      ) as HTMLInputElement,
-      function: this.camera.rotateY.bind(this.camera),
-    }, {
-      currentValue: 0,
-      defaultValue: 0,
-      input: document.getElementById(
-        id + "-rotate-z"
-      ) as HTMLInputElement,
-      function: this.camera.rotateZ.bind(this.camera),
-    }, {
-      currentValue: 221,
-      defaultValue: 221,
-      input: document.getElementById(id + "-move-x") as HTMLInputElement,
-      function: this.camera.moveX.bind(this.camera),
-    }, {
-      currentValue: 250,
-      defaultValue: 250,
-      input: document.getElementById(id + "-move-y") as HTMLInputElement,
-      function: this.camera.moveY.bind(this.camera),
-    }, {
-      currentValue: 250,
-      defaultValue: 250,
-      input: document.getElementById(id + "-move-z") as HTMLInputElement,
-      function: this.camera.moveZ.bind(this.camera),
-    }, {
-      currentValue: 245,
-      defaultValue: 245,
-      input: document.getElementById(id + "-scale") as HTMLInputElement,
-      function: this.camera.scale.bind(this.camera),
-    }
-  ];
+    this.draggables = [
+      {
+        currentValue: 0,
+        defaultValue: 0,
+        input: document.getElementById(id + "-rotate-x") as HTMLInputElement,
+        function: this.camera.rotateX.bind(this.camera),
+      },
+      {
+        currentValue: 15,
+        defaultValue: 15,
+        input: document.getElementById(id + "-rotate-y") as HTMLInputElement,
+        function: this.camera.rotateY.bind(this.camera),
+      },
+      {
+        currentValue: 0,
+        defaultValue: 0,
+        input: document.getElementById(id + "-rotate-z") as HTMLInputElement,
+        function: this.camera.rotateZ.bind(this.camera),
+      },
+      {
+        currentValue: 221,
+        defaultValue: 221,
+        input: document.getElementById(id + "-move-x") as HTMLInputElement,
+        function: this.camera.moveX.bind(this.camera),
+      },
+      {
+        currentValue: 250,
+        defaultValue: 250,
+        input: document.getElementById(id + "-move-y") as HTMLInputElement,
+        function: this.camera.moveY.bind(this.camera),
+      },
+      {
+        currentValue: 250,
+        defaultValue: 250,
+        input: document.getElementById(id + "-move-z") as HTMLInputElement,
+        function: this.camera.moveZ.bind(this.camera),
+      },
+      {
+        currentValue: 245,
+        defaultValue: 245,
+        input: document.getElementById(id + "-scale") as HTMLInputElement,
+        function: this.camera.scale.bind(this.camera),
+      },
+    ];
     this.resetBtn = document.getElementById(id + "-reset") as HTMLButtonElement;
     this.setup();
   }
@@ -71,7 +72,9 @@ export class SceneController {
     this.draggables.forEach((draggable) => {
       draggable.input.addEventListener("input", () => {
         console.log(parseInt(draggable.input.value) - draggable.currentValue);
-        draggable.function(parseInt(draggable.input.value) - draggable.currentValue);
+        draggable.function(
+          parseInt(draggable.input.value) - draggable.currentValue
+        );
         draggable.currentValue = parseInt(draggable.input.value);
         app.notify();
       });

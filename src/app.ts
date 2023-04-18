@@ -1,4 +1,3 @@
-
 import { SceneController } from "./controllers/sceneController";
 import { TextController } from "./controllers/textController";
 import { AppController } from "./controllers/appController";
@@ -33,7 +32,6 @@ export class App {
     this.appController = appController;
     this.camera = camera;
   }
-  // TODO: upravit OOP
   static async initialize(canvas: HTMLCanvasElement): Promise<App> {
     console.log(navigator.gpu);
     if (!("gpu" in navigator)) {
@@ -78,10 +76,15 @@ export class App {
       colors["secondary"]
     );
 
-    return new App(renderer, fontParser, new SceneController("glyph", camera),
-    textController,
-    new AppController(textController), camera);
-  } 
+    return new App(
+      renderer,
+      fontParser,
+      new SceneController("glyph", camera),
+      textController,
+      new AppController(textController),
+      camera
+    );
+  }
 
   notify() {
     this.renderer.color = this.textController.bgColor;

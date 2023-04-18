@@ -23,7 +23,6 @@
   --light-primary-color: #9DE5FF;
   --light-secondary-color: #fbfbfb;
 
-
   /* Default */
   --bg-img-up: var(--light-bg-img-up);
   --bg-img-down: var(--light-bg-img-down);
@@ -72,7 +71,6 @@ body {
   color: var(--text-color) !important;
 }
 
-
 button:enabled {
   cursor: pointer;
 }
@@ -100,7 +98,6 @@ button:enabled:active {
   overflow: auto;
   overflow-x: hidden;
   transition: right 1.0s ease-in-out;
-
 }
 
 .upper-controller .input-color {
@@ -167,7 +164,6 @@ button:enabled:active {
   align-items: stretch;
 }
 
-
 .menu-control .control {
   height: 100%;
   display: flex;
@@ -183,7 +179,6 @@ button:enabled:active {
   float: left;
   display: inline;
 }
-
 
 .controller-menu input,
 select,
@@ -211,14 +206,12 @@ button {
   float: right !important;
 }
 
-
 .header-element {
   margin-top: 10rem;
   font-size: 10rem;
   color: var(--text-color);
   text-align: center;
 }
-
 
 .slider {
   box-shadow: var(--draggable-shadow);
@@ -246,7 +239,6 @@ button {
   background: var(--primary-color);
   cursor: pointer;
 }
-
 
 input:hover {
   scale: 1.1;
@@ -280,7 +272,6 @@ ion-icon {
   color: var(--text-color);
   margin: 0.2rem;
 }
-
 
 .navbar {
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
