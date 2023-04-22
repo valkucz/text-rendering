@@ -52,6 +52,7 @@ export class App {
     const device: GPUDevice = <GPUDevice>await adapter.requestDevice({
       // For timestamp
       // start chrome --disable-dawn-features=disallow_unsafe_apis
+      // open -na Google\ Chrome\ Canary.app --args --user-data-dir=/tmp/temporary-chrome-profile-dir --disable-dawn-features=disallow_unsafe_apis
       requiredFeatures: ["timestamp-query"],
     });
 
