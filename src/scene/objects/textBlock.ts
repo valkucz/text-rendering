@@ -1,17 +1,11 @@
 import { mat4, vec4 } from "gl-matrix";
 import { Glyph } from "./glyph";
 import { FontParser } from "../../fonts/fontParser";
+import { TextBlockOptions } from "./textBlockOptions";
 
 const defaultColor = [0.0, 0.0, 0.0, 1.0];
-
 const velocity = 0.125;
-export interface TextBlockOptions {
-  color?: number[];
-  backgroundColor?: number[];
-  spacing?: number;
-  width?: number;
-  isWinding?: boolean;
-}
+
 export class TextBlock {
   private _verticesSize: number;
   private _transformsSize: number;
@@ -67,8 +61,8 @@ export class TextBlock {
       let verticesSize = Math.ceil(vertices.length / alignment) * alignment;
       glyphs.push({
         vertices: vertices,
-        model: mat4.create(),
-        bb: vec4.fromValues(bb.x1, bb.y1, bb.x2, bb.y2),
+        modelMatrix: mat4.create(),
+        boundingBox: vec4.fromValues(bb.x1, bb.y1, bb.x2, bb.y2),
         length: vertices.length / 2,
         transformsSize: transformsSize,
         verticesSize: verticesSize,
@@ -83,13 +77,13 @@ export class TextBlock {
     return glyphs;
   }
 
-  createTransformsBuffer() {
+  private createTransformsBuffer() {
     const buffer = new Float32Array(this._transformsSize);
     let offset = 0;
     for (let i = 0; i < this._glyphs.length; i++) {
       const glyph = this._glyphs[i];
       offset = glyph.transformsOffset;
-      const model = glyph.model;
+      const model = glyph.modelMatrix;
 
       buffer.set([glyph.length], offset);
       offset += 4;
@@ -97,12 +91,12 @@ export class TextBlock {
       buffer.set(model, offset);
       offset += 16;
 
-      buffer.set(glyph.bb, offset);
+      buffer.set(glyph.boundingBox, offset);
     }
     return buffer;
   }
 
-  createVerticesBuffer() {
+  private createVerticesBuffer() {
     const buffer = new Float32Array(this._verticesSize);
     let offset = 0;
     for (let i = 0; i < this._glyphs.length; i++) {
@@ -124,8 +118,8 @@ export class TextBlock {
       //   offsetY++;
       //   offsetX = 0;
       // }
-      let width = glyph.bb[2] - glyph.bb[0];
-      let height = glyph.bb[3] - glyph.bb[1];
+      let width = glyph.boundingBox[2] - glyph.boundingBox[0];
+      let height = glyph.boundingBox[3] - glyph.boundingBox[1];
       const { model, deltaX } = this.setModel(
         width,
         height,
@@ -134,7 +128,7 @@ export class TextBlock {
         offsetY,
         prevWidth
       );
-      glyph.model = model;
+      glyph.modelMatrix = model;
       prevWidth = width;
       offsetX = deltaX;
     });
@@ -179,10 +173,6 @@ export class TextBlock {
   async updateFont(font: string) {
     await this.fontParser.changeFont(font);
     this.updateGlyphs();
-  }
-
-  resetText() {
-    this.fontParser.resetFont();
   }
 
   set color(color: number[]) {

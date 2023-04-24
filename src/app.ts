@@ -72,8 +72,8 @@ export class App {
       device,
       canvas,
       textBlock,
-      camera.projection,
-      camera.view,
+      camera.projectionMatrix,
+      camera.viewMatrix,
       colors["secondary"]
     );
 
@@ -88,8 +88,8 @@ export class App {
   }
 
   notify() {
-    this.renderer.color = this.textController.bgColor;
-    this.renderer.view = this.camera.view;
+    this.renderer.canvasColor = this.textController.bgColor;
+    this.renderer.viewMatrix = this.camera.viewMatrix;
 
     const perFrameData = this.renderer.prepare();
     this.renderer.render(perFrameData);

@@ -4,9 +4,9 @@ import { conversionFactor } from "../main";
 import { degToRad } from "../math";
 
 export class Camera {
-  view: mat4;
+  viewMatrix: mat4;
 
-  projection: mat4;
+  projectionMatrix: mat4;
 
   worldUp: vec3 = [0, 1, 0];
 
@@ -30,9 +30,9 @@ export class Camera {
 
   constructor() {
     // Create projection matrix
-    this.projection = mat4.create();
+    this.projectionMatrix = mat4.create();
     mat4.perspective(
-      this.projection,
+      this.projectionMatrix,
       Math.PI / 2,
       conversionFactor[0] / conversionFactor[1],
       0.1,
@@ -43,7 +43,7 @@ export class Camera {
     this.scaleVelocity = 1.1;
 
     // Create view matrix
-    this.view = mat4.create();
+    this.viewMatrix = mat4.create();
     this.setupView();
   }
 
@@ -86,46 +86,46 @@ export class Camera {
 
     vec3.add(this.center, this.eye, this.front);
 
-    mat4.lookAt(this.view, this.eye, this.center, this.up);
+    mat4.lookAt(this.viewMatrix, this.eye, this.center, this.up);
   }
 
   rotateX(value: number): void {
-    mat4.rotateZ(this.view, this.view, degToRad(value));
+    mat4.rotateZ(this.viewMatrix, this.viewMatrix, degToRad(value));
   }
 
   rotateY(value: number): void {
-    mat4.rotateY(this.view, this.view, degToRad(value));
+    mat4.rotateY(this.viewMatrix, this.viewMatrix, degToRad(value));
   }
 
   rotateZ(value: number): void {
-    mat4.rotateX(this.view, this.view, degToRad(value));
+    mat4.rotateX(this.viewMatrix, this.viewMatrix, degToRad(value));
   }
 
   moveX(value: number): void {
     const vec = vec3.fromValues(0, 0, value);
     vec3.scale(vec, vec, this.moveVelocity);
-    mat4.translate(this.view, this.view, vec);
+    mat4.translate(this.viewMatrix, this.viewMatrix, vec);
   }
 
   moveY(value: number): void {
     const vec = vec3.fromValues(0, value, 0);
     vec3.scale(vec, vec, this.moveVelocity);
-    mat4.translate(this.view, this.view, vec);
+    mat4.translate(this.viewMatrix, this.viewMatrix, vec);
   }
 
   moveZ(value: number): void {
     const vec = vec3.fromValues(value, 0, 0);
     vec3.scale(vec, vec, this.moveVelocity);
-    mat4.translate(this.view, this.view, vec);
+    mat4.translate(this.viewMatrix, this.viewMatrix, vec);
   }
 
   scale(value: number): void {
     const amount = this.scaleVelocity ** value;
     const vec = vec3.fromValues(amount, amount, amount);
-    mat4.scale(this.view, this.view, vec);
+    mat4.scale(this.viewMatrix, this.viewMatrix, vec);
   }
 
   reset() {
-    mat4.lookAt(this.view, this.eye, this.center, this.up);
+    mat4.lookAt(this.viewMatrix, this.eye, this.center, this.up);
   }
 }

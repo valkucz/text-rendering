@@ -37,13 +37,13 @@ export class Renderer {
   textBlock: TextBlock;
 
   /** Camera attribute: projection matrix */
-  projection: mat4;
+  projectionMatrix: mat4;
 
   /** Camera attribute: view matrix */
-  view: mat4;
+  viewMatrix: mat4;
 
   /** Color of WebGPU Canvas */
-  color: number[];
+  canvasColor: number[];
 
   /** Format of the canvas
    * @default "bgra8unorm"
@@ -67,7 +67,6 @@ export class Renderer {
     textBlock: TextBlock,
     projection: mat4,
     view: mat4,
-    // TODO: set to default?
     color: number[],
     format: GPUTextureFormat = "bgra8unorm"
   ) {
@@ -78,9 +77,9 @@ export class Renderer {
       throw new Error("Context is null or undefined");
     }
     this.textBlock = textBlock;
-    this.projection = projection;
-    this.view = view;
-    this.color = color;
+    this.projectionMatrix = projection;
+    this.viewMatrix = view;
+    this.canvasColor = color;
     this.format = navigator.gpu.getPreferredCanvasFormat();
 
     this.buffers = this.createBuffers();
@@ -257,14 +256,14 @@ export class Renderer {
     this.device.queue.writeBuffer(
       this.buffers.uniform,
       0,
-      <ArrayBuffer>this.view
+      <ArrayBuffer>this.viewMatrix
     );
 
     // Camera projection matrix
     this.device.queue.writeBuffer(
       this.buffers.uniform,
       64,
-      <ArrayBuffer>this.projection
+      <ArrayBuffer>this.projectionMatrix
     );
 
     // Filling algorithm
@@ -338,10 +337,10 @@ export class Renderer {
         {
           view: textureView,
           clearValue: {
-            r: this.color[0],
-            g: this.color[1],
-            b: this.color[2],
-            a: this.color[3],
+            r: this.canvasColor[0],
+            g: this.canvasColor[1],
+            b: this.canvasColor[2],
+            a: this.canvasColor[3],
           },
           loadOp: "clear",
           storeOp: "store",
