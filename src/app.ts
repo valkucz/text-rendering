@@ -95,23 +95,39 @@ export class App {
     this.renderer.render(perFrameData);
   }
 
+  createPlot(timestamps, title, id) {
+        // Creating plot:
+        const trace = {
+          x: frames,
+          y: timestamps,
+          type: 'scatter',
+          mode: 'lines',
+          name: title
+        };
+    
+        // Creating layout
+        const layout = {
+          title: title,
+          xaxis: {
+            title: 'Frame number',
+          },
+          yaxis: {
+            title: 'Time (seconds)',
+          },
+        };
+    
+        Plotly.newPlot(id, [trace], layout);
+  }
 
-  async run() {
-    // const perFrameData = this.renderer.prepare();
-    // this.renderer.render(perFrameData);
-
-    this.sceneController.addEventListener(this);
-    this.textController.addEventListener(this);
-    this.appController.addEventListener(this);
-
-
+  async runTimestamping(isWinding, title, id) {
     // Timestamping: 
     const timestamps = [];
     const test = 'A'.repeat(100);
     const converter = 10 ** 9;
-    const frames = 200;
+    const frames = 100;
     let total = 0;
     this.textController.textBlock.text = test;
+    this.textController.textBlock.isWinding = isWinding;
     for (let i = 0; i < frames; i++) {
       const perFrameData = this.renderer.prepare();
       let number =  Number(await this.renderer.render(perFrameData)) / converter;
@@ -126,46 +142,43 @@ export class App {
     console.log('Fps: ', fps);
     console.log('Timestamps array: ', timestamps, timestamps.length);
 
-    // Creating plot:
-    const trace = {
-      x: frames,
-      y: timestamps,
-      type: 'scatter',
-      mode: 'lines',
-      name: 'timestamps'
-    };
+            // Creating plot:
+            const trace = {
+              x: frames,
+              y: timestamps,
+              type: 'scatter',
+              mode: 'lines',
+              name: title
+            };
+        
+            // Creating layout
+            const layout = {
+              title: title,
+              xaxis: {
+                title: 'Frame number',
+              },
+              yaxis: {
+                title: 'Time (seconds)',
+              },
+            };
+        
+            Plotly.newPlot(id, [trace], layout);
+    // Plotly.purge(id);
+  }
 
-    // Creating layout
-    const layout = {
-      title: 'Timestamps',
-      xaxis: {
-        title: 'Frame number',
-      },
-      yaxis: {
-        title: 'Time (seconds)',
-      },
-    };
 
-    const figure = {
-      data: [trace],
-      layout: layout,
-    };
+  async run() {
+    // const perFrameData = this.renderer.prepare();
+    // this.renderer.render(perFrameData);
 
-    Plotly.newPlot("myPlot", [trace], layout);
+    this.sceneController.addEventListener(this);
+    this.textController.addEventListener(this);
+    this.appController.addEventListener(this);
 
-  //   // Export the figure as SVG
-  // const img = Plotly.toImage(figure, { format: 'svg' });
-  //   // Save the SVG image to a file
-  //   const svgBlob = new Blob([img], { type: 'image/svg+xml;charset=utf-8' });
-  //   const url = URL.createObjectURL(svgBlob);
-    
-  //   const link = document.createElement('a');
-  //   link.download = 'timestamps.svg';
-  //   link.href = url;
-  //   link.click();
-    
-  //   // Cleanup
-  //   URL.revokeObjectURL(url);
+
+    // Timestamping: 
+    await this.runTimestamping(true, 'Timestamps for winding', 'plotWinding');
+    await this.runTimestamping(false, 'Timestamps for sdf', 'plotSdf');
   
 }
 }
