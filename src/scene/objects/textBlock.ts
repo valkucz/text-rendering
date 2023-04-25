@@ -165,7 +165,7 @@ export class TextBlock {
     return { model, deltaX };
   }
 
-  updateText(text: string) {
+  public set text(text: string) {
     this._text = text;
     this.updateGlyphs();
   }

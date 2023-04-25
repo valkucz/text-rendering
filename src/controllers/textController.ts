@@ -55,7 +55,7 @@ export class TextController {
     this.textBlock.spacing = parseFloat(this.spacing.value);
 
     this.textBlock.color = this.defaultColor;
-    this.textBlock.updateText(defaultText);
+    this.textBlock.text = defaultText;
   }
 
   addEventListener(app: App): void {
@@ -74,7 +74,7 @@ export class TextController {
     this.inputElem.addEventListener("input", () => {
       const text = this.inputElem.value;
       if (text.length > 0) {
-        this.textBlock.updateText(text);
+        this.textBlock.text = text;
       }
       app.notify();
     });
