@@ -385,11 +385,11 @@ export class Renderer {
     // })
     this.device.queue.submit([commandEncoder.finish()]);
 
-    this.readBuffer(queryBuffer).then((res) => {
-      console.log("Read buffer timestamp", res);
+    return this.readBuffer(queryBuffer).then((res) => {
+      // console.log("Read buffer timestamp", res);
       const timingsNanoseconds = new BigInt64Array(res);
-      console.log("Time: ", timingsNanoseconds[1] - timingsNanoseconds[0]);
-      return res;
+      // console.log("Time: ", timingsNanoseconds[1] - timingsNanoseconds[0]);
+      return timingsNanoseconds[1] - timingsNanoseconds[0];
     });
   }
 

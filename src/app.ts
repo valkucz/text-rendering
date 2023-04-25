@@ -95,11 +95,36 @@ export class App {
     this.renderer.render(perFrameData);
   }
 
-  run() {
-    const perFrameData = this.renderer.prepare();
-    this.renderer.render(perFrameData);
+  async run() {
+    // const perFrameData = this.renderer.prepare();
+    // this.renderer.render(perFrameData);
+
     this.sceneController.addEventListener(this);
     this.textController.addEventListener(this);
     this.appController.addEventListener(this);
-  }
+
+
+    // Timestamping: 
+    const timestamps = [];
+    const test = 'A'.repeat(100);
+    const converter = 10 ** 9;
+    const frames = 100;
+    let total = 0;
+    this.textController.textBlock.text = test;
+    for (let i = 0; i < frames; i++) {
+      const perFrameData = this.renderer.prepare();
+      let number =  Number(await this.renderer.render(perFrameData)) / converter;
+      total += number;
+
+      timestamps.push(number);
+    }
+
+    const avg = total / frames;
+    const fps = 1 / avg;
+    console.log('Total time: ', total);
+    console.log('Fps: ', fps);
+    console.log('Timestamps array: ', timestamps, timestamps.length);
+
+  
+}
 }

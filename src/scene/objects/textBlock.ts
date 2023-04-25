@@ -114,10 +114,10 @@ export class TextBlock {
     let offsetY = 0;
     const totalHeight = this.fontParser.height;
     this._glyphs.forEach((glyph, i) => {
-      // if (i > 0 && i % 25 == 0) {
-      //   offsetY++;
-      //   offsetX = 0;
-      // }
+      if (i > 0 && i % 25 == 0) {
+        offsetY++;
+        offsetX = 0;
+      }
       let width = glyph.boundingBox[2] - glyph.boundingBox[0];
       let height = glyph.boundingBox[3] - glyph.boundingBox[1];
       const { model, deltaX } = this.setModel(
@@ -160,7 +160,7 @@ export class TextBlock {
       0,
     ]);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
-    // mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
+    mat4.translate(model, model, [0, (-1 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
     return { model, deltaX };
   }
