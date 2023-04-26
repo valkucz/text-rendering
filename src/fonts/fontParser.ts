@@ -26,7 +26,9 @@ export class FontParser {
   }
 
   static async loadFont(url: string): Promise<Font> {
+    console.log('load font');
     const opentypeFont = await opentype.load(url);
+    console.log(opentypeFont);
     return opentypeFont;
   }
 
@@ -37,6 +39,7 @@ export class FontParser {
 
   parseText(text: string, isWinding: boolean = true): ParsedGlyph[] {
     const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
+    console.log('parse text', this.font, paths);
     const enter = new opentype.Glyph({ unicode: 10 });
     console.log("enter", enter);
     const parseGlyphs: ParsedGlyph[] = [];
