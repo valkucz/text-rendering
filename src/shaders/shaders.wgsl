@@ -119,14 +119,13 @@ fn winding_number_calculation(p1: vec2<i32>, p2: vec2<i32>, p3: vec2<i32>, pos: 
         t2 = t1;
     }
   
-    var res1: f32 = (f32(r.x) * t1 - f32(s.x) * 2.0) * t1 + f32(a.x);
-    var res2: f32 = (f32(r.x) * t2 - f32(s.x) * 2.0) * t2 + f32(a.x);
-  
     var code1: i32 = (~a.y & (b.y | c.y)) | (~b.y & c.y);
     var code2: i32 = (a.y & (~b.y | ~c.y)) | (b.y & ~c.y);
     
     var windingNumber: i32 = 0;
     if ((code1 | code2) < 0) {
+        var res1: f32 = (f32(r.x) * t1 - f32(s.x) * 2.0) * t1 + f32(a.x);
+        var res2: f32 = (f32(r.x) * t2 - f32(s.x) * 2.0) * t2 + f32(a.x);
         if (code1 < 0 && res1 > 0.0) {
             windingNumber++;
         }
