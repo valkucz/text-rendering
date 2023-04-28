@@ -298,39 +298,15 @@ export class Renderer {
    * Prepares data ahead needed for rendering.
    */
   prepare(): PerFrameData {
-    const capacity = 3; //Max number of timestamps we can store
-    const querySet = this.device.createQuerySet({
-      // If timestampWrites is not empty, "timestamp-query" must be enabled for device.
-      type: "timestamp",
-      count: capacity,
-    });
-
-    const queryBuffer = this.device.createBuffer({
-      size: 8 * capacity,
-      usage:
-        GPUBufferUsage.QUERY_RESOLVE |
-        GPUBufferUsage.STORAGE |
-        GPUBufferUsage.COPY_SRC |
-        GPUBufferUsage.COPY_DST,
-    });
-    // const renderTarget = this.device.createTexture({
-    //   size: [this.canvas.width, this.canvas.height],
-    //   sampleCount: 4,
-    //   format: this.format,
-    //   usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    // });
-    // const renderTargetView = renderTarget.createView();
     this.buffers = this.createBuffers();
     this.setupBuffer();
-    // const glyphBuffers = this.setupGlyphBuffers();
 
-    // const { bindGroups, buffers } = this.setupGlyphBuffers();
     const glyphBindGroups = this.createGlyphBindGroups();
     const uniformBindGroup = this.createUniformBindGroup();
     const commandEncoder = this.device.createCommandEncoder();
     const textureView = this.ctx.getCurrentTexture().createView();
 
-    commandEncoder.writeTimestamp(querySet, 0);
+    // commandEncoder.writeTimestamp(querySet, 0);
     // console.log('Renderer: ', this.color);
     const renderPass = commandEncoder.beginRenderPass({
       colorAttachments: [
@@ -351,9 +327,7 @@ export class Renderer {
       uniformBindGroup,
       glyphBindGroups,
       commandEncoder,
-      renderPass,
-      querySet,
-      queryBuffer,
+      renderPass
     };
   }
 
@@ -366,9 +340,7 @@ export class Renderer {
       uniformBindGroup,
       glyphBindGroups,
       commandEncoder,
-      renderPass,
-      querySet,
-      queryBuffer,
+      renderPass
     } = perFrameData;
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, uniformBindGroup);
@@ -378,33 +350,8 @@ export class Renderer {
     });
     renderPass.end();
 
-    commandEncoder.writeTimestamp(querySet, 1);
-    commandEncoder.resolveQuerySet(querySet, 0, 3, queryBuffer, 0);
-    // this.readBuffer(queryBuffer).then(res => {
-    //   console.log('Read buffer timestamp', res);
-    // })
     this.device.queue.submit([commandEncoder.finish()]);
 
-    this.readBuffer(queryBuffer).then((res) => {
-      console.log("Read buffer timestamp", res);
-      const timingsNanoseconds = new BigInt64Array(res);
-      console.log("Time: ", timingsNanoseconds[1] - timingsNanoseconds[0]);
-      return res;
-    });
   }
 
-  // from  https://omar-shehata.medium.com/how-to-use-webgpu-timestamp-query-9bf81fb5344a
-  async readBuffer(buffer: GPUBuffer) {
-    const size = buffer.size;
-    const gpuReadBuffer = this.device.createBuffer({
-      size,
-      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-    });
-    const copyEncoder = this.device.createCommandEncoder();
-    copyEncoder.copyBufferToBuffer(buffer, 0, gpuReadBuffer, 0, size);
-    const copyCommands = copyEncoder.finish();
-    this.device.queue.submit([copyCommands]);
-    await gpuReadBuffer.mapAsync(GPUMapMode.READ);
-    return gpuReadBuffer.getMappedRange();
-  }
 }
