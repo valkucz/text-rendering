@@ -12,11 +12,22 @@
   <script type="module" src="/src/main.ts"></script>
   <nav class="navbar is-visible is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-      </a>
+      <div class="dropdown is-active">
+        <div class="dropdown-trigger">
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" id="burger-btn">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div class="dropdown-menu is-hidden-desktop is-mobile" id="dropdown-menu" role="menu">
+          <div class="dropdown-content secondary-style" id="mobile-menu-content" style="display: none;">
+            <a href="#section-2" class="dropdown-item">Demo</a>
+            <a href="#section-3" class="dropdown-item">About</a>
+            <a id="mobile-mode" class="dropdown-item">Dark mode</a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="navbar-menu">
@@ -52,12 +63,12 @@
         <div class="columns">
           <div class="upper-controller secondary-style column">
             <div class="columns is-mobile">
-              <div class="column is-half">
-                <nav class="level">
+              <div class="column is-half is-mobile">
+                <nav class="level is-mobile">
                   <div class="level-left">
                     <div class="level-item">
                       <div class="menu-control">
-                        <div class="control-head">
+                        <div class="control-head is-mobile">
                           <p class="menu-label">Text</p>
                         </div>
                         <div>
@@ -136,7 +147,7 @@
             </div>
           </div>
         </div>
-        <div class="columns demo-child">
+        <div class="columns demo-child is-mobile">
           <canvas class="canvas" id="canvas">
           </canvas>
           <div class="controller-menu secondary-style" id="controller-menu">

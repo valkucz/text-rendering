@@ -22,6 +22,9 @@ export const colors = {
 export class AppController {
   private navbar: HTMLElement;
   private modeBtn: HTMLButtonElement;
+  private burgerBtn: HTMLButtonElement;
+  private mobileMood: HTMLAnchorElement;
+  private mobileMenu: HTMLElement;
   private textController: TextController;
   private isLight: boolean = true;
   private lastScrollTop: number = 0;
@@ -29,7 +32,9 @@ export class AppController {
   constructor(textController: TextController) {
     this.navbar = document.querySelector(".navbar") as HTMLElement;
     this.modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
-
+    this.burgerBtn = document.getElementById("burger-btn") as HTMLButtonElement;
+    this.mobileMood = document.getElementById("mobile-mode") as HTMLAnchorElement;
+    this.mobileMenu = document.getElementById("mobile-menu-content") as HTMLElement;
     // Init
     this.textController = textController;
     this.textController.setElemColors();
@@ -47,22 +52,34 @@ export class AppController {
       this.lastScrollTop = scrollTop;
     });
 
-    this.modeBtn.addEventListener("click", () => {
-      if (this.isLight) {
-        this.isLight = false;
-        colors["primary"] = dark[0];
-        colors["secondary"] = dark[1];
-        document.documentElement.classList.add("dark-mode");
-      } else {
-        this.isLight = true;
-        colors["primary"] = light[0];
-        colors["secondary"] = light[1];
-        document.documentElement.classList.remove("dark-mode");
-      }
-      this.textController.bgColor = colors["secondary"];
-      // this.textController.updateColors();
-      this.textController.setElemColors();
-      app.notify();
+    this.modeBtn.addEventListener("click", () => this.changeMode(app));
+    this.mobileMood.addEventListener("click", () => this.changeMode(app));
+
+    this.burgerBtn.addEventListener("click", () => {
+      // this.burgerBtn.ariaExpanded = "true";
+      this.burgerBtn.classList.toggle("is-active");
+      this.mobileMenu.style.display = this.mobileMenu.style.display === "block" ? "none" : "block";
+      // document.getElementById("navbar-menu").classList.toggle("is-active");
     });
+  }
+
+  changeMode(app: App) {
+    if (this.isLight) {
+      this.isLight = false;
+      colors["primary"] = dark[0];
+      colors["secondary"] = dark[1];
+      this.mobileMood.innerHTML = "Light mode";
+      document.documentElement.classList.add("dark-mode");
+    } else {
+      this.isLight = true;
+      colors["primary"] = light[0];
+      colors["secondary"] = light[1];
+      this.mobileMood.innerHTML = "Dark mode";
+      document.documentElement.classList.remove("dark-mode");
+    }
+    this.textController.bgColor = colors["secondary"];
+    // this.textController.updateColors();
+    this.textController.setElemColors();
+    app.notify();
   }
 }
