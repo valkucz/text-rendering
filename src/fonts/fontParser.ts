@@ -13,7 +13,13 @@ export class FontParser {
     this._initFont = font;
   }
 
+  public get ascender(): number {
+    return (this.font.ascender / this.font.unitsPerEm) * 5000;
+  }
+
   public get height(): number {
+    console.log(this.font.ascender, this.font.descender);
+    console.log(this.font.unitsPerEm);
     return this.font.ascender - this.font.descender;
   }
 
@@ -26,9 +32,7 @@ export class FontParser {
   }
 
   static async loadFont(url: string): Promise<Font> {
-    console.log('load font');
     const opentypeFont = await opentype.load(url);
-    console.log(opentypeFont);
     return opentypeFont;
   }
 
@@ -38,12 +42,13 @@ export class FontParser {
   }
 
   parseText(text: string, isWinding: boolean = true): ParsedGlyph[] {
-    const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true });
-    console.log('parse text', this.font, paths);
-    const enter = new opentype.Glyph({ unicode: 10 });
-    console.log("enter", enter);
+    console.log('Font attr', this.font);
+    const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true, features: { rlig: true }});
+    console.log('Paths', paths);
     const parseGlyphs: ParsedGlyph[] = [];
-    paths.forEach((path) => {
+
+    text.split('').forEach(letter => {
+      const path = this.font.getPath(letter, 1, this.font.ascender - this.font.descender, 5000, { kerning: true, features: { rlig: true }});
       let bb = path.getBoundingBox();
       let vertices = this.parseShapeToGlyph(path.commands, isWinding);
       // Handling space cases
@@ -53,6 +58,17 @@ export class FontParser {
       }
       parseGlyphs.push({ bb, vertices });
     });
+
+    // paths.forEach((path) => {
+    //   let bb = path.getBoundingBox();
+    //   let vertices = this.parseShapeToGlyph(path.commands, isWinding);
+    //   // Handling space cases
+    //   if (vertices.length == 0) {
+    //     vertices = new Float32Array([0, 0, this.height, 0]);
+    //     bb.x2 = this.height;
+    //   }
+    //   parseGlyphs.push({ bb, vertices });
+    // });
     return parseGlyphs;
   }
 

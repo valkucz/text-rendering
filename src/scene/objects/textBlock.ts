@@ -126,6 +126,7 @@ export class TextBlock {
         totalHeight,
         offsetX,
         offsetY,
+        glyph.boundingBox,
         prevWidth
       );
       glyph.modelMatrix = model;
@@ -141,6 +142,7 @@ export class TextBlock {
     totalHeight: number,
     offsetX: number,
     offsetY: number,
+    bb,
     prevWidth: number
   ) {
     totalHeight *= 4;
@@ -156,9 +158,10 @@ export class TextBlock {
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [
       scalingX + deltaX * this._spacing * this._width,
-      0.5 * scaleFactor,
+      (0.76 - bb[3] / totalHeight) * scaleFactor ,
       0,
     ]);
+    console.log(bb);
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
     // mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
