@@ -4,6 +4,7 @@ import { vec2ToFloat32 } from "../math";
 import opentype, { Font, PathCommand } from "opentype.js";
 import { ParsedGlyph } from "./parsedGlyphs";
 
+const FONTSIZE = 5000;
 export class FontParser {
   private _initFont: Font;
   font: Font;
@@ -14,7 +15,7 @@ export class FontParser {
   }
 
   public get ascender(): number {
-    return (this.font.ascender / this.font.unitsPerEm) * 5000;
+    return (this.font.ascender / this.font.unitsPerEm) * FONTSIZE;
   }
 
   public get height(): number {
@@ -48,7 +49,7 @@ export class FontParser {
         letter,
         1,
         this.font.ascender - this.font.descender,
-        5000,
+        FONTSIZE,
         { kerning: true, features: { rlig: true } }
       );
       let bb = path.getBoundingBox();

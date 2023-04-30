@@ -113,7 +113,7 @@ export class TextBlock {
     let prevWidth = 0;
     let offsetY = 0;
     const totalHeight = this.fontParser.height;
-    this._glyphs.forEach((glyph, i) => {
+    this._glyphs.forEach((glyph) => {
       // if (i > 0 && i % 25 == 0) {
       //   offsetY++;
       //   offsetX = 0;
