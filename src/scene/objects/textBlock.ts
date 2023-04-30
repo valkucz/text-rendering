@@ -120,52 +120,53 @@ export class TextBlock {
       // }
       let width = glyph.boundingBox[2] - glyph.boundingBox[0];
       let height = glyph.boundingBox[3] - glyph.boundingBox[1];
-      const { model, deltaX } = this.setModel(
+
+      offsetX = this.setModel(
         width,
         height,
         totalHeight,
         offsetX,
         offsetY,
         glyph.boundingBox,
+        glyph.modelMatrix,
         prevWidth
       );
-      glyph.modelMatrix = model;
       prevWidth = width;
-      offsetX = deltaX;
     });
   }
 
-  // TODO: not creating new model every time
+  // OffsetY was for testing; for \n
   private setModel(
     width: number,
     height: number,
     totalHeight: number,
     offsetX: number,
     offsetY: number,
-    bb,
+    bb: vec4,
+    model: mat4,
     prevWidth: number
   ) {
     totalHeight *= 4;
-    const model = mat4.create();
+    mat4.identity(model);
     const scaleFactor = height / totalHeight;
     const scalingX = (width * this._width) / totalHeight;
 
     let deltaX = offsetX;
     if (width != prevWidth) {
-      deltaX += (1 / 2) * ((prevWidth - width) / totalHeight);
+      deltaX += 0.5 * ((prevWidth - width) / totalHeight);
     }
 
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [
-      scalingX + deltaX * this._spacing * this._width,
-      (0.76 - bb[3] / totalHeight) * scaleFactor ,
+      scalingX + deltaX * this._spacing,
+      (0.76 - bb[3] / totalHeight) * scaleFactor,
       0,
     ]);
-    console.log(bb);
+
     mat4.scale(model, model, [scalingX, scaleFactor, 1]);
     // mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
-    return { model, deltaX };
+    return deltaX;
   }
 
   public set text(text: string) {

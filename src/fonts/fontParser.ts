@@ -37,18 +37,20 @@ export class FontParser {
   }
 
   async changeFont(url: string): Promise<void> {
-    console.log(url);
     this.font = await FontParser.loadFont(url);
   }
 
   parseText(text: string, isWinding: boolean = true): ParsedGlyph[] {
-    console.log('Font attr', this.font);
-    const paths = this.font.getPaths(text, 0, 0, 5000, { kerning: true, features: { rlig: true }});
-    console.log('Paths', paths);
     const parseGlyphs: ParsedGlyph[] = [];
 
-    text.split('').forEach(letter => {
-      const path = this.font.getPath(letter, 1, this.font.ascender - this.font.descender, 5000, { kerning: true, features: { rlig: true }});
+    text.split("").forEach((letter) => {
+      const path = this.font.getPath(
+        letter,
+        1,
+        this.font.ascender - this.font.descender,
+        5000,
+        { kerning: true, features: { rlig: true } }
+      );
       let bb = path.getBoundingBox();
       let vertices = this.parseShapeToGlyph(path.commands, isWinding);
       // Handling space cases
@@ -58,17 +60,6 @@ export class FontParser {
       }
       parseGlyphs.push({ bb, vertices });
     });
-
-    // paths.forEach((path) => {
-    //   let bb = path.getBoundingBox();
-    //   let vertices = this.parseShapeToGlyph(path.commands, isWinding);
-    //   // Handling space cases
-    //   if (vertices.length == 0) {
-    //     vertices = new Float32Array([0, 0, this.height, 0]);
-    //     bb.x2 = this.height;
-    //   }
-    //   parseGlyphs.push({ bb, vertices });
-    // });
     return parseGlyphs;
   }
 
