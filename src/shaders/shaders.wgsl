@@ -86,10 +86,23 @@ fn fill_sdf(pos: vec2<f32>) -> vec4<f32> {
         }
     }
     mindist = sqrt(mindist);
+        var modul: i32 = i32(mindist) % 40;
     if ((side > 0.0)) {
-        discard;
+        if (modul < 20) {
+            return vec4(0.86, 0.9, 0.2, 1.0);
+        }
+    return vec4(0.13, 0.7, 0.35, 1.0);
+        // discard;
     }
-    return vec4(mindist * uniforms.color.x / 300, uniforms.color.y, uniforms.color.z, 1.0);
+    
+    if (modul < 20) {
+        return vec4(0.86, 0.0, 0.43, 1.0);
+    }
+    return vec4(0.43, 0.7, 0.85, 1.0);
+    // if ((side > 0.0)) {
+    //     discard;
+    // }
+    // return vec4(mindist * uniforms.color.x / 300, uniforms.color.y, uniforms.color.z, 1.0);
 }
 
 fn fill_winding(pos: vec2<f32>) -> vec4<f32>{

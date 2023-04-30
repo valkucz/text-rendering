@@ -21,6 +21,7 @@ export class TextController {
   private sdfRadioElem: HTMLInputElement;
   private spacing: HTMLInputElement;
   private width: HTMLInputElement;
+  private size: HTMLInputElement;
 
   color: number[];
   bgColor: number[];
@@ -43,6 +44,7 @@ export class TextController {
     ) as HTMLInputElement;
     this.spacing = document.getElementById("text-spacing") as HTMLInputElement;
     this.width = document.getElementById("text-width") as HTMLInputElement;
+    this.size = document.getElementById("text-size") as HTMLInputElement;
     // TODO: remove defaults, use direct colors
     this.defaultColor = this.color = defaultColorHex;
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
@@ -67,15 +69,12 @@ export class TextController {
 
     this.bgcolorElem.addEventListener("input", () => {
       this.bgColor = hexToRgba(this.bgcolorElem.value);
-
       app.notify();
     });
 
     this.inputElem.addEventListener("input", () => {
       const text = this.inputElem.value;
-      if (text.length > 0) {
-        this.textBlock.text = text;
-      }
+      this.textBlock.text = text.length > 0 ? text : '';
       app.notify();
     });
 
@@ -102,6 +101,11 @@ export class TextController {
 
     this.width.addEventListener("input", () => {
       this.textBlock.width = parseFloat(this.width.value);
+      app.notify();
+    });
+
+    this.size.addEventListener("input", () => {
+      this.textBlock.size = parseFloat(this.size.value);
       app.notify();
     });
   }

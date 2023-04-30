@@ -16,6 +16,7 @@ export class TextBlock {
   private _glyphs: Glyph[];
   private _spacing: number;
   private _width: number;
+  private _size: number;
   private _isWinding: boolean;
   private _color: number[];
   fontParser: FontParser;
@@ -34,6 +35,7 @@ export class TextBlock {
     this._colorBuffer = new Float32Array(this._color);
     this._spacing = options?.spacing ?? 1.0;
     this._width = options?.width ?? 1.0;
+    this._size = options?.size ?? 1.0;
     this._isWinding = options?.isWinding ?? true;
     this._verticesSize = 0;
     this._transformsSize = 0;
@@ -112,7 +114,6 @@ export class TextBlock {
     let offsetX = 0;
     let prevWidth = 0;
     let offsetY = 0;
-    const totalHeight = this.fontParser.height;
     this._glyphs.forEach((glyph) => {
       // if (i > 0 && i % 25 == 0) {
       //   offsetY++;
@@ -124,7 +125,6 @@ export class TextBlock {
       offsetX = this.setModel(
         width,
         height,
-        totalHeight,
         offsetX,
         offsetY,
         glyph.boundingBox,
@@ -139,17 +139,16 @@ export class TextBlock {
   private setModel(
     width: number,
     height: number,
-    totalHeight: number,
     offsetX: number,
     offsetY: number,
     bb: vec4,
     model: mat4,
     prevWidth: number
   ) {
-    totalHeight *= 4;
+    const totalHeight = 4 * this.fontParser.height;
     mat4.identity(model);
-    const scaleFactor = height / totalHeight;
-    const scalingX = (width * this._width) / totalHeight;
+    const scaleFactor = height * this._size / totalHeight;
+    const scalingX = (width * this._width * this._size) / totalHeight;
 
     let deltaX = offsetX;
     if (width != prevWidth) {
@@ -158,12 +157,13 @@ export class TextBlock {
 
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [
-      scalingX + deltaX * this._spacing,
-      (0.76 - bb[3] / totalHeight) * scaleFactor,
+      scalingX + deltaX * this._spacing * this._size,
+      (0.76 - bb[3] / totalHeight) * scaleFactor * this._size,
       0,
     ]);
 
-    mat4.scale(model, model, [scalingX, scaleFactor, 1]);
+    mat4.scale(model, model, [scalingX * this._size, scaleFactor * this._size, this._size]);
+    
     // mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
     return deltaX;
@@ -195,6 +195,17 @@ export class TextBlock {
   get width(): number {
     return this._width;
   }
+
+  get size(): number {
+    return this._size;
+  }
+
+  set size(size: number) {
+    this._size = size * velocity;
+    console.log(this._size);
+    this.setMatrices();
+    this._transformsBuffer = this.createTransformsBuffer();
+  } 
 
   set width(width: number) {
     this._width = width * velocity;

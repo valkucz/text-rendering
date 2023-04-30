@@ -19,8 +19,6 @@ export class FontParser {
   }
 
   public get height(): number {
-    console.log(this.font.ascender, this.font.descender);
-    console.log(this.font.unitsPerEm);
     return this.font.ascender - this.font.descender;
   }
 
