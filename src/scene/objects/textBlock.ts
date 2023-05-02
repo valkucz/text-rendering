@@ -146,28 +146,28 @@ export class TextBlock {
     prevWidth: number
   ) {
     const totalHeight = 4 * this.fontParser.height;
-    mat4.identity(model);
-    const scaleFactor = height * this._size / totalHeight;
-    const scalingX = (width * this._width * this._size) / totalHeight;
-
+    const scaleFactor = height / totalHeight;
+    const scalingX = (width * this._width) / totalHeight;
+  
     let deltaX = offsetX;
-    if (width != prevWidth) {
-      deltaX += 0.5 * ((prevWidth - width) / totalHeight);
+    if (width !== prevWidth) {
+      deltaX += (prevWidth - width) / (2 * totalHeight);
     }
-
+  
+    mat4.identity(model);
     mat4.rotateY(model, model, -Math.PI / 2);
     mat4.translate(model, model, [
-      scalingX + deltaX * this._spacing * this._size,
-      (0.76 - bb[3] / totalHeight) * scaleFactor * this._size,
+      (scalingX + deltaX * this._spacing) * this._size,
+      (0.75 - bb[3] / totalHeight) * scaleFactor * this._size,
       0,
     ]);
-
     mat4.scale(model, model, [scalingX * this._size, scaleFactor * this._size, this._size]);
     
     // mat4.translate(model, model, [0, (-5 / scaleFactor) * offsetY, 0]);
     deltaX += scalingX;
     return deltaX;
   }
+  
 
   public set text(text: string) {
     this._text = text;

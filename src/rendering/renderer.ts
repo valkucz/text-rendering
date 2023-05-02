@@ -149,7 +149,7 @@ export class Renderer {
         topology: "triangle-list",
       },
       multisample: {
-        count: 1,
+        count: 4,
       },
       layout: pipelineLayout,
     });
@@ -304,14 +304,20 @@ export class Renderer {
     const glyphBindGroups = this.createGlyphBindGroups();
     const uniformBindGroup = this.createUniformBindGroup();
     const commandEncoder = this.device.createCommandEncoder();
-    const textureView = this.ctx.getCurrentTexture().createView();
 
-    // commandEncoder.writeTimestamp(querySet, 0);
-    // console.log('Renderer: ', this.color);
+    const renderTarget = this.device.createTexture({
+      size: [this.canvas.width, this.canvas.height],
+      sampleCount: 4,
+      format: this.format,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+    const renderTargetView = renderTarget.createView();
+
     const renderPass = commandEncoder.beginRenderPass({
       colorAttachments: [
         {
-          view: textureView,
+          view: renderTargetView,
+          resolveTarget: this.ctx.getCurrentTexture().createView(),
           clearValue: {
             r: this.canvasColor[0],
             g: this.canvasColor[1],
@@ -327,7 +333,7 @@ export class Renderer {
       uniformBindGroup,
       glyphBindGroups,
       commandEncoder,
-      renderPass
+      renderPass,
     };
   }
 
@@ -336,12 +342,8 @@ export class Renderer {
    * @param perFrameData - Data needed for rendering a frame.
    */
   render(perFrameData: PerFrameData) {
-    const {
-      uniformBindGroup,
-      glyphBindGroups,
-      commandEncoder,
-      renderPass
-    } = perFrameData;
+    const { uniformBindGroup, glyphBindGroups, commandEncoder, renderPass } =
+      perFrameData;
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, uniformBindGroup);
     glyphBindGroups.forEach((bindGroup) => {
@@ -351,7 +353,5 @@ export class Renderer {
     renderPass.end();
 
     this.device.queue.submit([commandEncoder.finish()]);
-
   }
-
 }
