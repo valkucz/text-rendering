@@ -1,7 +1,7 @@
-# Bezier curves
+# Text Rendering
 ## Installation
 ```sh
-cd bezier-curves
+cd text-rendering
 ```
 ```sh
 npm install
