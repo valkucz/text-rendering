@@ -30,8 +30,8 @@ export class SceneController {
         function: this.camera.rotateZ.bind(this.camera),
       },
       {
-        currentValue: 221,
-        defaultValue: 221,
+        currentValue: 230,
+        defaultValue: 230,
         input: document.getElementById(id + "-move-x") as HTMLInputElement,
         function: this.camera.moveX.bind(this.camera),
       },
@@ -64,7 +64,7 @@ export class SceneController {
       draggable.input.value = draggable.defaultValue.toString();
     });
     this.camera.scale(-5);
-    this.camera.moveX(-29);
+    this.camera.moveX(-20);
     this.camera.rotateY(15);
   }
 

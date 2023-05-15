@@ -1,7 +1,7 @@
 import { App } from "../app";
 import { hexToRgba, rgbaToHex } from "../math";
 
-const PREFIX = "./public/";
+const PREFIX = "";
 
 import { colors } from "./appController";
 import { TextBlock } from "../scene/objects/textBlock";

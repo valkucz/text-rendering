@@ -7,7 +7,7 @@ import { Camera } from "./scene/camera";
 import { colors } from "./controllers/appController";
 import { TextBlock } from "./scene/objects/textBlock";
 // FIXME: move to fontParser
-export const defaultUrl = "./public/Monofett.ttf";
+export const defaultUrl = "./Monofett.ttf";
 
 export class App {
   fontParser: FontParser;

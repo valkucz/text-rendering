@@ -85,13 +85,16 @@
                         <div class="control is-align-self-center select is-medium secondary-style">
                           <select id="text-font" class="secondary-style">
                             <option value="Monofett.ttf" class="secondary-style">Monofett</option>
-                            <option value="SpaceMono.ttf" class="secondary-style">Space Mono</option>
                             <option value="Blogger_Sans.otf" class="secondary-style">Blogger Sans</option>
                             <option value="MontserratAlternates-Medium.otf" class="secondary-style">MontserratAlternates
                               Medium</option>
-                            <option value="HomemadeApple-Regular.ttf" class="secondary-style">Homemade Apple</option>
                             <option value="RubikIso-Regular.ttf" class="secondary-style">RubikIso</option>
-                            <option value="Volkhov-Regular.ttf" class="secondary-style">Volkhov</option>
+                            <option value="RubikPixels-Regular.ttf" class="secondary-style">Rubik Pixels</option>
+                            <option value="PressStart2P-Regular.ttf" class="secondary-style">Press Start</option>
+                            <option value="Blinker-Regular.ttf" class="secondary-style">Blinker</option>
+                            <option value="VT323-Regular.ttf" class="secondary-style">VT323</option>
+                            <option value="BlackOpsOne-Regular.ttf" class="secondary-style">Black Ops One</option>
+                            <option value="BungeeInline-Regular.ttf" class="secondary-style">Bungee Inline</option>
                           </select>
                         </div>
                       </div>
@@ -220,13 +223,13 @@
       <div class="content">
         <h1 class="title section-title">About</h1>
         <p>
-          WebGPU<sup><a>[1]</a></sup> is a brand-new API that aims to optimize web-based graphics rendering.
+          WebGPU<sup><a href="https://www.w3.org/TR/webgpu/" target="_blank">[1]</a></sup> is a brand-new API that aims to optimize web-based graphics rendering.
           It was introduced in 2021 and is currently in the development phase.
           As an experimental feature on Chrome Canary, it offers developers the opportunity
           to explore its capabilities, including its potential for improving the efficiency and speed of graphics
           rendering.</p>
         <p>
-          This website was created with Vite<sup><a>[2]</a></sup> as a part of Bachelor's thesis on the topic <i>3D Text
+          This website was created with Vite<sup><a href="https://vitejs.dev/" target="_blank">[2]</a></sup> as a part of Bachelor's thesis on the topic <i>3D Text
             rendering in WebGPU</i>.
           Its purpose is to showcase graphics API built with WebGPU that enables rendering of fonts in a dynamic 3D
           space.
@@ -234,7 +237,7 @@
           rotating and scaling the text, as well as changing its color and background color.
           Since the canvas is representing a 3D space, the user can also move the camera around the text.
         </p>
-        <p>Graphics API is available as an open-source library [URL].</p>
+        <p>Graphics API is available as an open-source library.</p>
         <h3>How to Use API</h3>
         <h4>Initialization</h4>
         <pre class="secondary-style">
@@ -249,10 +252,18 @@
         const fontParser = new FontParser(device, "fonts/Roboto-Regular.ttf")
 
         /* Text block to render */
-        const textBlock = new TextBlock(device, "Hello World", fontParser)
+        const textBlock = new TextBlock(
+          device, "Hello World", fontParser,
+          options = {
+            color = [0.6, 0.5. 0.6, 1.0],
+            spacing = 2,
+            width = 2,
+            size = 4,
+            isWinding = false
+          });
 
         /* Renderer initialization */
-        const renderer = new Renderer(device, canvas, textBlock, projectionMatrix, viewMatrix, color?);
+        const renderer = new Renderer(device, canvas, textBlock, projectionMatrix, viewMatrix, color=[0.2, 0.0, 0.0, 1.0]);
 
         /* Rendering */
         const perFrameData = this.renderer.prepare();
