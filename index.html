@@ -240,6 +240,8 @@
         <p>Graphics API is available as an open-source library.</p>
         <h3>How to Use API</h3>
         <h4>Initialization</h4>
+
+
         <pre class="secondary-style">
         /* Canvas initialization */
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -247,32 +249,33 @@
         /* WebGPU initialization */
         const adapter: GPUAdapter = await navigator.gpu.requestAdapter() as GPUAdapter;
         const device: GPUDevice = await adapter.requestDevice() as GPUDevice;
-        
-        /* Font initialization */
-        const fontParser = new FontParser(device, "fonts/Roboto-Regular.ttf")
-
-        /* Text block to render */
-        const textBlock = new TextBlock(
-          device, "Hello World", fontParser,
-          options = {
-            color = [0.6, 0.5. 0.6, 1.0],
-            spacing = 2,
-            width = 2,
-            size = 4,
-            isWinding = false
-          });
-
-        /* Renderer initialization */
-        const renderer = new Renderer(device, canvas, textBlock, projectionMatrix, viewMatrix, color=[0.2, 0.0, 0.0, 1.0]);
-
-        /* Rendering */
-        const perFrameData = this.renderer.prepare();
-        this.renderer.render(perFrameData);
     </pre>
-        <!-- <h4>Options</h4>
+
+    <h4>Assets Setup</h4>
     <pre class="secondary-style">
-    /* Text block options */
-    </pre> -->
+      /* Font initialization */
+      const fontParser = new FontParser(device, "fonts/Roboto-Regular.ttf")
+
+      /* Text block to render */
+      const textBlock = new TextBlock(
+        device, "Hello World", fontParser,
+        options = {
+          color = [0.6, 0.5. 0.6, 1.0],
+          spacing = 2,
+          width = 2,
+          size = 4,
+          isWinding = false
+        });
+    </pre>
+    <h4>Rendering</h4>
+    <pre class="secondary-style">
+      /* Renderer initialization */
+      const renderer = new Renderer(device, canvas, textBlock, projectionMatrix, viewMatrix, color=[0.2, 0.0, 0.0, 1.0]);
+
+      /* Rendering */
+      const perFrameData = this.renderer.prepare();
+      this.renderer.render(perFrameData);
+    </pre>
       </div>
     </section>
   </div>
