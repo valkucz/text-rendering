@@ -202,7 +202,6 @@ export class TextBlock {
 
   set size(size: number) {
     this._size = size * velocity;
-    console.log(this._size);
     this.setMatrices();
     this._transformsBuffer = this.createTransformsBuffer();
   } 

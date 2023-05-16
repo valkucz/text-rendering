@@ -7,7 +7,6 @@ export class SceneController {
   resetBtn: HTMLButtonElement;
 
   constructor(id: string, camera: Camera) {
-    console.log("camera", camera);
     this.camera = camera;
 
     this.draggables = [
@@ -71,7 +70,6 @@ export class SceneController {
   addEventListener(app: App): void {
     this.draggables.forEach((draggable) => {
       draggable.input.addEventListener("input", () => {
-        console.log(parseInt(draggable.input.value) - draggable.currentValue);
         draggable.function(
           parseInt(draggable.input.value) - draggable.currentValue
         );

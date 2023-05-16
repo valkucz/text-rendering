@@ -47,30 +47,6 @@ export class Camera {
     this.setupView();
   }
 
-  // move(dir: MoveDirection) {
-  //     let vec = vec3.create();
-  //     switch (dir) {
-  //         case MoveDirection.Forward:
-  //             vec3.scale(vec, this.front, this.velocity);
-  //             vec3.add(this.eye, this.eye, vec);
-  //             break;
-  //         case MoveDirection.Backward:
-  //             vec3.scale(vec, this.front, this.velocity);
-  //             vec3.sub(this.eye, this.eye, vec);
-  //             break;
-  //         case MoveDirection.Left:
-  //             vec3.scale(vec, this.right, this.velocity);
-  //             vec3.sub(this.eye, this.eye, vec);
-  //             break;
-  //         case MoveDirection.Right:
-  //             vec3.scale(vec, this.right, this.velocity);
-  //             vec3.add(this.eye, this.eye, vec);
-  //             break;
-  //         default:
-  //             break;
-  //     }
-  // }
-
   setupView() {
     this.front[0] = cos(glm.toRadian(this.yaw)) * cos(glm.toRadian(this.pitch));
     this.front[1] = sin(glm.toRadian(this.pitch));

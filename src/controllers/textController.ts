@@ -1,7 +1,7 @@
 import { App } from "../app";
 import { hexToRgba, rgbaToHex } from "../math";
 
-const PREFIX = "";
+const PREFIX = "./fonts/";
 
 import { colors } from "./appController";
 import { TextBlock } from "../scene/objects/textBlock";
@@ -11,7 +11,6 @@ const defaultColorHex = colors["primary"];
 const defaultBgColorHex = colors["secondary"];
 
 const defaultText = "Text rendering";
-// FIXME: why is there problem with loading textController.ts
 export class TextController {
   private inputElem: HTMLInputElement;
   private colorElem: HTMLInputElement;
@@ -29,7 +28,6 @@ export class TextController {
 
   defaultColor: number[];
   defaultBgColor: number[];
-  // font parser has glyph or glyph has font parser, so no need to pass both
 
   constructor(textBlock: TextBlock) {
     this.inputElem = document.getElementById("text-input") as HTMLInputElement;
@@ -45,7 +43,6 @@ export class TextController {
     this.spacing = document.getElementById("text-spacing") as HTMLInputElement;
     this.width = document.getElementById("text-width") as HTMLInputElement;
     this.size = document.getElementById("text-size") as HTMLInputElement;
-    // TODO: remove defaults, use direct colors
     this.defaultColor = this.color = defaultColorHex;
     this.defaultBgColor = this.bgColor = defaultBgColorHex;
     this.textBlock = textBlock;

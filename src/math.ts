@@ -39,7 +39,6 @@ export function degToRad(deg: number): number {
 }
 
 export function hexToRgba(hex: string): number[] {
-  console.log(hex);
   // Convert hex color string to RGB color object
   const r = parseInt(hex.substring(1, 3), 16) / 255;
   const g = parseInt(hex.substring(3, 5), 16) / 255;

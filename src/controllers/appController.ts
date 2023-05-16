@@ -33,8 +33,12 @@ export class AppController {
     this.navbar = document.querySelector(".navbar") as HTMLElement;
     this.modeBtn = document.getElementById("mode-btn") as HTMLButtonElement;
     this.burgerBtn = document.getElementById("burger-btn") as HTMLButtonElement;
-    this.mobileMood = document.getElementById("mobile-mode") as HTMLAnchorElement;
-    this.mobileMenu = document.getElementById("mobile-menu-content") as HTMLElement;
+    this.mobileMood = document.getElementById(
+      "mobile-mode"
+    ) as HTMLAnchorElement;
+    this.mobileMenu = document.getElementById(
+      "mobile-menu-content"
+    ) as HTMLElement;
     // Init
     this.textController = textController;
     this.textController.setElemColors();
@@ -56,10 +60,9 @@ export class AppController {
     this.mobileMood.addEventListener("click", () => this.changeMode(app));
 
     this.burgerBtn.addEventListener("click", () => {
-      // this.burgerBtn.ariaExpanded = "true";
       this.burgerBtn.classList.toggle("is-active");
-      this.mobileMenu.style.display = this.mobileMenu.style.display === "block" ? "none" : "block";
-      // document.getElementById("navbar-menu").classList.toggle("is-active");
+      this.mobileMenu.style.display =
+        this.mobileMenu.style.display === "block" ? "none" : "block";
     });
   }
 

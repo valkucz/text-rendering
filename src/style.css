@@ -110,10 +110,8 @@ canvas {
 }
 
 .upper-controller {
-  /* overflow: auto; */
   overflow-x: scroll;
   overflow-y: hidden;
-  /* overflow-y: scroll; */
 }
 
 .upper-controller .input-color {
